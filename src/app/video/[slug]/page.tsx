@@ -104,12 +104,9 @@ export default async function VideoDetailPage({ params }: Props) {
     const suggestedVideos = recentVideos.filter(v => v.id !== video.id).slice(0, 10);
 
     return (
-        <div className="animate-fade-in" style={{
+        <div className="animate-fade-in video-detail-layout" style={{
             paddingTop: '1.5rem',
             paddingBottom: '2rem',
-            display: 'flex',
-            flexDirection: 'row',
-            gap: '2rem',
         }}>
             {/* JSON-LD */}
             <script
@@ -187,12 +184,7 @@ export default async function VideoDetailPage({ params }: Props) {
             </div>
 
             {/* Sidebar - Up Next */}
-            <div className="hidden lg:flex" style={{
-                width: '360px',
-                flexShrink: 0,
-                flexDirection: 'column',
-                gap: '0.75rem',
-            }}>
+            <div className="video-sidebar">
                 <h2 style={{ fontWeight: 700, fontSize: '1rem', marginBottom: '0.25rem' }}>Up Next</h2>
 
                 {suggestedVideos.length > 0 ? (

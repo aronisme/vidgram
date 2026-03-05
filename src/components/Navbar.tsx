@@ -2,13 +2,16 @@
 
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
-import { Video, BarChart3, Upload, Search, LogIn, LogOut, User as UserIcon } from "lucide-react";
+import Image from "next/image";
+import { BarChart3, Upload, Search, LogIn, LogOut, User as UserIcon, Menu, X } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 
 export default function Navbar() {
     const { user, dbUser, signInWithGoogle, signOut } = useAuth();
     const [showDropdown, setShowDropdown] = useState(false);
+    const [showMobileMenu, setShowMobileMenu] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
+    const mobileMenuRef = useRef<HTMLDivElement>(null);
 
     // Close dropdown on outside click
     useEffect(() => {
@@ -20,6 +23,29 @@ export default function Navbar() {
         document.addEventListener("mousedown", handleClickOutside);
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
+
+    // Close mobile menu on resize to desktop
+    useEffect(() => {
+        const handleResize = () => {
+            if (window.innerWidth >= 768) {
+                setShowMobileMenu(false);
+            }
+        };
+        window.addEventListener("resize", handleResize);
+        return () => window.removeEventListener("resize", handleResize);
+    }, []);
+
+    // Lock body scroll when mobile menu is open
+    useEffect(() => {
+        if (showMobileMenu) {
+            document.body.style.overflow = "hidden";
+        } else {
+            document.body.style.overflow = "";
+        }
+        return () => { document.body.style.overflow = ""; };
+    }, [showMobileMenu]);
+
+    const closeMobileMenu = () => setShowMobileMenu(false);
 
     return (
         <nav style={{
@@ -37,31 +63,29 @@ export default function Navbar() {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
+                position: 'relative',
             }}>
                 {/* Logo */}
                 <Link href="/" style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '0.625rem',
+                    gap: '0.5rem',
                     textDecoration: 'none',
                     color: 'var(--text-primary)',
                 }}>
-                    <div style={{
-                        background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-                        padding: '0.5rem',
-                        borderRadius: 'var(--radius-md)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        boxShadow: '0 2px 8px rgba(99, 102, 241, 0.3)',
-                    }}>
-                        <Video size={18} color="white" />
-                    </div>
+                    <Image
+                        src="/logo.png"
+                        alt="Vidgram Logo"
+                        width={36}
+                        height={36}
+                        style={{ borderRadius: '8px' }}
+                        priority
+                    />
                     <span style={{ fontSize: '1.25rem', fontWeight: 700, letterSpacing: '-0.02em' }}>Vidgram</span>
                 </Link>
 
-                {/* Nav Items */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
+                {/* Desktop Nav Items */}
+                <div className="desktop-only" style={{ alignItems: 'center', gap: '0.375rem' }}>
                     <Link href="/discovery" style={{
                         display: 'flex',
                         alignItems: 'center',
@@ -238,7 +262,89 @@ export default function Navbar() {
                         </button>
                     )}
                 </div>
+
+                {/* Mobile Hamburger Button */}
+                <button
+                    className="mobile-only hamburger-btn"
+                    onClick={() => setShowMobileMenu(!showMobileMenu)}
+                    aria-label="Toggle menu"
+                >
+                    {showMobileMenu ? <X size={20} /> : <Menu size={20} />}
+                </button>
+
+                {/* Mobile Menu Drawer */}
+                {showMobileMenu && (
+                    <div className="mobile-nav-drawer">
+                        <Link href="/discovery" className="mobile-nav-link" onClick={closeMobileMenu}>
+                            <Search size={18} />
+                            Discovery
+                        </Link>
+
+                        {user ? (
+                            <>
+                                <Link href="/dashboard" className="mobile-nav-link" onClick={closeMobileMenu}>
+                                    <BarChart3 size={18} />
+                                    Dashboard
+                                </Link>
+                                <Link href="/dashboard/upload" className="mobile-nav-link" onClick={closeMobileMenu}>
+                                    <Upload size={18} />
+                                    Upload Video
+                                </Link>
+
+                                <div className="mobile-nav-divider" />
+
+                                {/* User Info */}
+                                <div style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '0.75rem',
+                                    padding: '0.75rem 1rem',
+                                }}>
+                                    <img
+                                        src={dbUser?.photoURL || "https://api.dicebear.com/7.x/avataaars/svg?seed=fallback"}
+                                        alt="Avatar"
+                                        style={{
+                                            width: '36px',
+                                            height: '36px',
+                                            borderRadius: '50%',
+                                            objectFit: 'cover',
+                                            background: 'var(--bg-tertiary)',
+                                        }}
+                                    />
+                                    <span style={{ fontWeight: 600, fontSize: '0.9375rem' }}>{dbUser?.displayName || "User"}</span>
+                                </div>
+
+                                <Link href="/dashboard/profile" className="mobile-nav-link" onClick={closeMobileMenu}>
+                                    <UserIcon size={18} />
+                                    My Profile
+                                </Link>
+                                <button
+                                    onClick={() => { signOut(); closeMobileMenu(); }}
+                                    className="mobile-nav-link mobile-nav-link-danger"
+                                    style={{ border: 'none', background: 'transparent', cursor: 'pointer', width: '100%', textAlign: 'left' }}
+                                >
+                                    <LogOut size={18} />
+                                    Sign Out
+                                </button>
+                            </>
+                        ) : (
+                            <button
+                                onClick={() => { signInWithGoogle(); closeMobileMenu(); }}
+                                className="mobile-nav-link"
+                                style={{ border: 'none', background: 'transparent', cursor: 'pointer', width: '100%', textAlign: 'left' }}
+                            >
+                                <LogIn size={18} />
+                                Sign In with Google
+                            </button>
+                        )}
+                    </div>
+                )}
             </div>
+
+            {/* Mobile backdrop overlay */}
+            {showMobileMenu && (
+                <div className="mobile-nav-backdrop" onClick={closeMobileMenu} />
+            )}
         </nav>
     );
 }

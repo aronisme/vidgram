@@ -138,8 +138,8 @@ export default function DashboardPage() {
                         <thead>
                             <tr style={{ borderBottom: '1px solid var(--border)', color: 'var(--text-tertiary)', textAlign: 'left' }}>
                                 <th style={{ padding: '1rem', fontWeight: 600 }}>Video</th>
-                                <th style={{ padding: '1rem', fontWeight: 600 }}>Visibility</th>
-                                <th style={{ padding: '1rem', fontWeight: 600 }}>Date</th>
+                                <th className="hide-on-mobile" style={{ padding: '1rem', fontWeight: 600 }}>Visibility</th>
+                                <th className="hide-on-mobile" style={{ padding: '1rem', fontWeight: 600 }}>Date</th>
                                 <th style={{ padding: '1rem', fontWeight: 600, textAlign: 'right' }}>Views</th>
                                 <th style={{ padding: '1rem', fontWeight: 600, textAlign: 'right' }}>Likes</th>
                                 <th style={{ padding: '1rem', fontWeight: 600, textAlign: 'right' }}>Actions</th>
@@ -178,10 +178,10 @@ export default function DashboardPage() {
                                                 <span style={{ fontWeight: 600 }} className="line-clamp-2">{video.title}</span>
                                             </Link>
                                         </td>
-                                        <td>
+                                        <td className="hide-on-mobile">
                                             <span className="badge badge-success">Public</span>
                                         </td>
-                                        <td style={{ color: 'var(--text-secondary)' }}>
+                                        <td className="hide-on-mobile" style={{ color: 'var(--text-secondary)' }}>
                                             {new Date(video.createdAt?.toDate?.() || video.createdAt).toLocaleDateString()}
                                         </td>
                                         <td style={{ fontWeight: 600, textAlign: 'right' }}>{video.views.toLocaleString()}</td>
