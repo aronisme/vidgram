@@ -65,24 +65,59 @@ export default function VideoActions({
         }
     };
 
+    const copyToClipboard = async (text: string): Promise<boolean> => {
+        // Try modern Clipboard API first
+        if (navigator.clipboard && window.isSecureContext) {
+            try {
+                await navigator.clipboard.writeText(text);
+                return true;
+            } catch {
+                // Fall through to fallback
+            }
+        }
+        // Fallback: textarea + execCommand for non-HTTPS or older browsers
+        try {
+            const textarea = document.createElement("textarea");
+            textarea.value = text;
+            textarea.style.position = "fixed";
+            textarea.style.left = "-9999px";
+            textarea.style.top = "-9999px";
+            document.body.appendChild(textarea);
+            textarea.focus();
+            textarea.select();
+            const ok = document.execCommand("copy");
+            document.body.removeChild(textarea);
+            return ok;
+        } catch {
+            return false;
+        }
+    };
+
     const handleShare = async () => {
+        const pageUrl = window.location.href;
         const shareData = {
             title: videoTitle,
             text: "Lihat video keren ini di Vidgram!",
-            url: window.location.href,
+            url: pageUrl,
         };
         try {
             if (navigator.share) {
                 await navigator.share(shareData);
                 await videoService.incrementShares(videoId);
             } else {
-                navigator.clipboard.writeText(window.location.href);
-                addToast("Link disalin ke clipboard!", "success");
-                await videoService.incrementShares(videoId);
+                const copied = await copyToClipboard(pageUrl);
+                if (copied) {
+                    addToast("Link disalin ke clipboard!", "success");
+                    await videoService.incrementShares(videoId);
+                } else {
+                    addToast("Gagal menyalin link.", "error");
+                }
             }
-        } catch (err) {
+        } catch (err: any) {
+            // User cancelled the native share dialog — not an error
+            if (err?.name === "AbortError") return;
             console.error("Error sharing:", err);
-            addToast("Failed to share link.", "error");
+            addToast("Gagal membagikan link.", "error");
         }
     };
 

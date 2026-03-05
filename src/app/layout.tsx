@@ -10,11 +10,11 @@ const outfit = Outfit({ subsets: ["latin"], weight: ["300", "400", "500", "600",
 export const metadata: Metadata = {
   title: {
     template: "%s | Vidgram",
-    default: "Vidgram | The Modern Video Platform",
+    default: "Unleash Your Creativity with Vidgram",
   },
-  description: "Share, discover, and enjoy amazing videos with the world on Vidgram. Fast, secure, and built for creators.",
-  keywords: ["video sharing", "watch videos", "upload videos", "vidgram", "creators"],
-  authors: [{ name: "Vidgram Inc." }],
+  description: "The lightning-fast, beautiful video platform engineered for maximum discoverability and seamless streaming. Share, discover, and enjoy amazing videos.",
+  keywords: ["video sharing", "watch videos", "upload videos", "vidgram", "creators", "video platform", "streaming"],
+  authors: [{ name: "Vidgram" }],
   creator: "Vidgram",
   publisher: "Vidgram",
   robots: {
@@ -29,8 +29,8 @@ export const metadata: Metadata = {
     },
   },
   openGraph: {
-    title: "Vidgram | The Modern Video Platform",
-    description: "The fastest way to share and discover amazing videos.",
+    title: "Unleash Your Creativity with Vidgram",
+    description: "The lightning-fast, beautiful video platform engineered for maximum discoverability and seamless streaming.",
     url: "https://vidgram.web.id",
     siteName: "Vidgram",
     type: "website",
@@ -38,8 +38,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Vidgram | The Modern Video Platform",
-    description: "Share, discover, and enjoy amazing videos with the world on Vidgram.",
+    title: "Unleash Your Creativity with Vidgram",
+    description: "The lightning-fast, beautiful video platform engineered for maximum discoverability and seamless streaming.",
     creator: "@vidgram",
   },
   appleWebApp: {

@@ -4,7 +4,7 @@ export default function manifest(): MetadataRoute.Manifest {
     return {
         name: 'Vidgram',
         short_name: 'Vidgram',
-        description: 'The minimalist video sharing platform. Fast, secure, and SEO-friendly.',
+        description: 'The lightning-fast, beautiful video platform engineered for maximum discoverability and seamless streaming.',
         start_url: '/',
         display: 'standalone',
         background_color: '#000000',
