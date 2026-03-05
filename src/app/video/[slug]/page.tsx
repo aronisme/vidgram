@@ -1,7 +1,6 @@
 import { videoService } from "@/lib/videoService";
 import { Metadata } from "next";
-import { Eye, Calendar, Link2 } from "lucide-react";
-import Navbar from "@/components/Navbar";
+import { Eye, Calendar } from "lucide-react";
 import VideoPlayer from "@/components/VideoPlayer";
 import VideoActions from "@/components/VideoActions";
 import VideoComments from "@/components/VideoComments";
@@ -21,7 +20,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         };
     }
 
-    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://vidgram.vercel.app';
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://vidgram.web.id';
     const videoUrl = `${baseUrl}/video/${video.slug}`;
 
     return {
@@ -53,13 +52,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         },
     };
 }
+
 export default async function VideoDetailPage({ params }: Props) {
     const resolvedParams = await params;
 
-    // Fetch current video and recent videos in parallel
     const [video, recentVideos] = await Promise.all([
         videoService.getVideoBySlug(resolvedParams.slug),
-        videoService.getVideos(11) // Fetch 11 recent videos (to show 10 after filtering out current)
+        videoService.getVideos(11)
     ]);
 
     let uploaderProfile: any = null;
@@ -71,15 +70,13 @@ export default async function VideoDetailPage({ params }: Props) {
         notFound();
     }
 
-    // Increment views in the background
     if (video.id) {
         videoService.incrementViews(video.id).catch(console.error);
     }
 
-    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://vidgram.vercel.app';
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://vidgram.web.id';
     const createdAt = video.createdAt?.toDate?.() || new Date(video.createdAt);
 
-    // JSON-LD VideoObject Schema for Google Rich Snippets
     const jsonLd = {
         '@context': 'https://schema.org',
         '@type': 'VideoObject',
@@ -87,7 +84,7 @@ export default async function VideoDetailPage({ params }: Props) {
         description: video.description,
         thumbnailUrl: [video.thumbnailUrl],
         uploadDate: createdAt.toISOString(),
-        contentUrl: video.videoUrl, // Direct link to video
+        contentUrl: video.videoUrl,
         embedUrl: `${baseUrl}/video/${video.slug}`,
         interactionStatistic: {
             '@type': 'InteractionCounter',
@@ -104,33 +101,55 @@ export default async function VideoDetailPage({ params }: Props) {
         }
     };
 
-    // Filter out the current video from the recent videos list
     const suggestedVideos = recentVideos.filter(v => v.id !== video.id).slice(0, 10);
 
     return (
-        <div className="py-8 flex flex-col lg:flex-row gap-8">
-            {/* Inject JSON-LD Schema for SEO Indexing */}
+        <div className="animate-fade-in" style={{
+            paddingTop: '1.5rem',
+            paddingBottom: '2rem',
+            display: 'flex',
+            flexDirection: 'row',
+            gap: '2rem',
+        }}>
+            {/* JSON-LD */}
             <script
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
             />
 
             {/* Main Content */}
-            <div className="flex-1 flex flex-col gap-6">
+            <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                 <VideoPlayer src={video.videoUrl} poster={video.thumbnailUrl} />
 
-                <div className="flex flex-col gap-4">
-                    <h1 className="text-3xl font-bold">{video.title}</h1>
-                    <div className="flex items-center justify-between pb-6 border-b border-[var(--border)]">
-                        <div className="flex items-center gap-6 text-[var(--text-secondary)] text-sm font-medium">
-                            <div className="flex items-center gap-1.5">
-                                <Eye size={18} />
-                                <span>{video.views.toLocaleString()} views</span>
-                            </div>
-                            <div className="flex items-center gap-1.5">
-                                <Calendar size={18} />
-                                <span>{createdAt.toLocaleDateString()}</span>
-                            </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                    <h1 style={{
+                        fontSize: '1.5rem',
+                        fontWeight: 800,
+                        lineHeight: 1.25,
+                        letterSpacing: '-0.02em',
+                    }}>
+                        {video.title}
+                    </h1>
+
+                    {/* Stats Row */}
+                    <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '1rem',
+                        color: 'var(--text-tertiary)',
+                        fontSize: '0.8125rem',
+                        fontWeight: 500,
+                        paddingBottom: '1rem',
+                        borderBottom: '1px solid var(--border)',
+                    }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
+                            <Eye size={15} />
+                            <span>{video.views.toLocaleString()} views</span>
+                        </div>
+                        <span style={{ opacity: 0.4 }}>•</span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
+                            <Calendar size={15} />
+                            <span>{createdAt.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
                         </div>
                     </div>
 
@@ -145,9 +164,20 @@ export default async function VideoDetailPage({ params }: Props) {
                         initialSubscribers={uploaderProfile?.subscribersCount || 0}
                     />
 
-                    <div className="py-4 border-b border-[var(--border)]">
-                        <h3 className="font-bold mb-2">Description</h3>
-                        <p className="text-[var(--text-secondary)] leading-relaxed">
+                    {/* Description */}
+                    <div style={{
+                        padding: '1.25rem',
+                        background: 'var(--bg-secondary)',
+                        borderRadius: 'var(--radius-md)',
+                        border: '1px solid var(--border)',
+                    }}>
+                        <h3 style={{ fontWeight: 700, fontSize: '0.875rem', marginBottom: '0.5rem' }}>Description</h3>
+                        <p style={{
+                            color: 'var(--text-secondary)',
+                            lineHeight: 1.7,
+                            fontSize: '0.875rem',
+                            whiteSpace: 'pre-wrap',
+                        }}>
                             {video.description}
                         </p>
                     </div>
@@ -157,26 +187,68 @@ export default async function VideoDetailPage({ params }: Props) {
             </div>
 
             {/* Sidebar - Up Next */}
-            <div className="lg:w-80 flex flex-col gap-4">
-                <h2 className="font-bold text-lg">Up Next</h2>
+            <div className="hidden lg:flex" style={{
+                width: '360px',
+                flexShrink: 0,
+                flexDirection: 'column',
+                gap: '0.75rem',
+            }}>
+                <h2 style={{ fontWeight: 700, fontSize: '1rem', marginBottom: '0.25rem' }}>Up Next</h2>
+
                 {suggestedVideos.length > 0 ? (
                     suggestedVideos.map((suggestedVideo) => (
-                        <a href={`/video/${suggestedVideo.slug}`} key={suggestedVideo.id} className="flex gap-3 group cursor-pointer">
-                            <div className="w-32 aspect-video glass rounded-md overflow-hidden flex-shrink-0 relative">
-                                <img src={suggestedVideo.thumbnailUrl} alt={suggestedVideo.title} className="w-full h-full object-cover transition-transform group-hover:scale-110" />
+                        <a
+                            href={`/video/${suggestedVideo.slug}`}
+                            key={suggestedVideo.id}
+                            className="sidebar-link"
+                            style={{
+                                display: 'flex',
+                                gap: '0.75rem',
+                                textDecoration: 'none',
+                                color: 'var(--text-primary)',
+                                padding: '0.5rem',
+                                borderRadius: 'var(--radius-md)',
+                                transition: 'background 0.15s ease',
+                            }}
+                        >
+                            <div style={{
+                                width: '140px',
+                                aspectRatio: '16/9',
+                                borderRadius: 'var(--radius-sm)',
+                                overflow: 'hidden',
+                                flexShrink: 0,
+                                position: 'relative',
+                                background: '#000',
+                            }}>
+                                <img
+                                    src={suggestedVideo.thumbnailUrl}
+                                    alt={suggestedVideo.title}
+                                    style={{
+                                        width: '100%',
+                                        height: '100%',
+                                        objectFit: 'cover',
+                                        transition: 'transform 0.3s ease',
+                                    }}
+                                />
                             </div>
-                            <div className="flex flex-col gap-1">
-                                <h4 className="text-sm font-semibold line-clamp-2 leading-tight group-hover:text-[var(--accent)] transition-colors">
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', minWidth: 0 }}>
+                                <h4 className="line-clamp-2" style={{
+                                    fontSize: '0.8125rem',
+                                    fontWeight: 700,
+                                    lineHeight: 1.35,
+                                }}>
                                     {suggestedVideo.title}
                                 </h4>
-                                <p className="text-xs text-[var(--text-secondary)]">
+                                <p style={{ fontSize: '0.6875rem', color: 'var(--text-tertiary)', fontWeight: 500 }}>
                                     {suggestedVideo.views.toLocaleString()} views
                                 </p>
                             </div>
                         </a>
                     ))
                 ) : (
-                    <p className="text-sm text-[var(--text-secondary)]">Koleksi video lainnya belum tersedia.</p>
+                    <p style={{ fontSize: '0.8125rem', color: 'var(--text-tertiary)' }}>
+                        No suggested videos available.
+                    </p>
                 )}
             </div>
         </div>

@@ -141,6 +141,24 @@ export const videoService = {
     },
 
     // --- User related functions ---
+    async getUserStats(userId: string) {
+        const videoRef = collection(db, "videos");
+        const q = query(videoRef, where("uploaderId", "==", userId));
+        const querySnapshot = await getDocs(q);
+
+        let totalViews = 0;
+        let totalLikes = 0;
+        const totalVideos = querySnapshot.docs.length;
+
+        querySnapshot.docs.forEach(doc => {
+            const data = doc.data();
+            totalViews += (data.views || 0);
+            totalLikes += (data.likes || 0);
+        });
+
+        return { totalViews, totalLikes, totalVideos };
+    },
+
     async getUserProfile(userId: string) {
         const userRef = doc(db, "users", userId);
         const userSnap = await getDoc(userRef);

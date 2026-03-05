@@ -3,7 +3,6 @@
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { Loader2 } from "lucide-react";
 
 export default function DashboardLayout({
     children,
@@ -21,17 +20,17 @@ export default function DashboardLayout({
 
     if (loading || !user) {
         return (
-            <div className="flex justify-center py-20">
-                <div className="flex flex-col items-center gap-4">
-                    <Loader2 size={32} className="animate-spin text-[var(--accent)]" />
-                    <p className="text-[var(--text-secondary)]">Memeriksa autentikasi...</p>
+            <div style={{ display: 'flex', justifyContent: 'center', paddingTop: '5rem' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
+                    <div className="spinner"></div>
+                    <p style={{ color: 'var(--text-tertiary)', fontSize: '0.875rem' }}>Authenticating...</p>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="animate-in fade-in duration-500">
+        <div className="animate-fade-in">
             {children}
         </div>
     );

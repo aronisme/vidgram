@@ -20,10 +20,8 @@ export default function VideoPlayer({ src, poster }: VideoPlayerProps) {
     const [quality, setQuality] = useState(RESOLUTIONS[0].value);
     const [showSettings, setShowSettings] = useState(false);
 
-    // Build the Cloudinary transformed URL
     const getTransformedUrl = (originalUrl: string, transformation: string) => {
         if (transformation === "original" || !originalUrl.includes("upload/")) return originalUrl;
-        // Insert the transformation right after 'upload/'
         return originalUrl.replace("/upload/", `/upload/${transformation}/`);
     };
 
@@ -31,7 +29,6 @@ export default function VideoPlayer({ src, poster }: VideoPlayerProps) {
 
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
-            // Only trigger if not typing in an input or textarea
             if (e.code === "Space" && e.target === document.body) {
                 e.preventDefault();
                 if (videoRef.current) {
@@ -48,7 +45,6 @@ export default function VideoPlayer({ src, poster }: VideoPlayerProps) {
         return () => window.removeEventListener("keydown", handleKeyDown);
     }, []);
 
-    // When quality changes, keep the current time and autoplay
     const handleQualityChange = (val: string) => {
         if (!videoRef.current) return;
         const currentTime = videoRef.current.currentTime;
@@ -57,7 +53,6 @@ export default function VideoPlayer({ src, poster }: VideoPlayerProps) {
         setQuality(val);
         setShowSettings(false);
 
-        // Wait for the new source to load then restore time and state
         setTimeout(() => {
             if (videoRef.current) {
                 videoRef.current.currentTime = currentTime;
@@ -69,32 +64,91 @@ export default function VideoPlayer({ src, poster }: VideoPlayerProps) {
     };
 
     return (
-        <div className="relative aspect-video w-full bg-black rounded-[var(--radius-lg)] overflow-hidden group">
+        <div style={{
+            position: 'relative',
+            aspectRatio: '16/9',
+            width: '100%',
+            background: '#000',
+            borderRadius: 'var(--radius-lg)',
+            overflow: 'hidden',
+            boxShadow: 'var(--shadow-lg)',
+        }} className="group">
             <video
                 ref={videoRef}
                 src={currentSrc}
                 controls
-                className="w-full h-full"
+                style={{ width: '100%', height: '100%' }}
                 poster={poster}
             />
 
-            {/* Custom Quality Settings Overlay */}
-            <div className="absolute top-4 right-4 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+            {/* Quality Settings Overlay */}
+            <div style={{
+                position: 'absolute',
+                top: '1rem',
+                right: '1rem',
+                zIndex: 10,
+                opacity: 0,
+                transition: 'opacity 0.3s ease',
+            }} className="group-hover:!opacity-100">
                 <button
                     onClick={() => setShowSettings(!showSettings)}
-                    className="p-2 bg-black/50 hover:bg-black/80 rounded-full text-white backdrop-blur-sm transition-colors"
+                    style={{
+                        padding: '0.5rem',
+                        background: 'rgba(0,0,0,0.6)',
+                        backdropFilter: 'blur(8px)',
+                        border: '1px solid rgba(255,255,255,0.1)',
+                        borderRadius: 'var(--radius-md)',
+                        color: 'white',
+                        cursor: 'pointer',
+                        transition: 'background 0.2s ease',
+                        display: 'flex',
+                        alignItems: 'center',
+                    }}
                 >
-                    <Settings size={20} />
+                    <Settings size={18} />
                 </button>
 
                 {showSettings && (
-                    <div className="absolute right-0 mt-2 w-48 bg-black/80 backdrop-blur-md rounded-xl p-2 flex flex-col gap-1 border border-white/10 shadow-xl">
-                        <div className="text-xs text-white/50 px-3 py-2 font-semibold uppercase">Video Quality</div>
+                    <div className="animate-slide-down" style={{
+                        position: 'absolute',
+                        right: 0,
+                        marginTop: '0.5rem',
+                        width: '180px',
+                        background: 'rgba(0,0,0,0.85)',
+                        backdropFilter: 'blur(16px)',
+                        borderRadius: 'var(--radius-md)',
+                        padding: '0.375rem',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '0.125rem',
+                        border: '1px solid rgba(255,255,255,0.1)',
+                        boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
+                    }}>
+                        <div style={{
+                            fontSize: '0.6875rem',
+                            color: 'rgba(255,255,255,0.4)',
+                            padding: '0.375rem 0.625rem',
+                            fontWeight: 600,
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.05em',
+                        }}>Video Quality</div>
                         {RESOLUTIONS.map((res) => (
                             <button
                                 key={res.value}
                                 onClick={() => handleQualityChange(res.value)}
-                                className={`text-left text-sm px-3 py-2 rounded-lg transition-colors ${quality === res.value ? 'bg-[var(--accent)] text-white font-semibold' : 'text-gray-300 hover:bg-white/10'}`}
+                                style={{
+                                    textAlign: 'left',
+                                    fontSize: '0.8125rem',
+                                    padding: '0.5rem 0.625rem',
+                                    borderRadius: 'var(--radius-sm)',
+                                    transition: 'all 0.15s ease',
+                                    background: quality === res.value ? 'var(--accent)' : 'transparent',
+                                    color: quality === res.value ? 'white' : 'rgba(255,255,255,0.8)',
+                                    fontWeight: quality === res.value ? 600 : 400,
+                                    border: 'none',
+                                    cursor: 'pointer',
+                                    width: '100%',
+                                }}
                             >
                                 {res.label}
                             </button>
@@ -105,4 +159,3 @@ export default function VideoPlayer({ src, poster }: VideoPlayerProps) {
         </div>
     );
 }
-

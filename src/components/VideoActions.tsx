@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { ThumbsUp, Share2, Facebook, Twitter, User as UserIcon } from "lucide-react";
+import { ThumbsUp, Share2 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/context/ToastContext";
 import { videoService } from "@/lib/videoService";
@@ -31,8 +31,7 @@ export default function VideoActions({
     const { addToast } = useToast();
 
     const [likes, setLikes] = useState(initialLikes);
-    const [isLiked, setIsLiked] = useState(false); // In real app, fetch from user's 'liked_videos' subcollection
-
+    const [isLiked, setIsLiked] = useState(false);
     const [isSubscribed, setIsSubscribed] = useState(false);
     const [subscribers, setSubscribers] = useState(initialSubscribers);
     const [isSubscribing, setIsSubscribing] = useState(false);
@@ -45,8 +44,7 @@ export default function VideoActions({
 
     const handleLike = async () => {
         if (!user) return addToast("Silakan login untuk menyukai video.", "error");
-        if (isLiked) return; // Prevent double like for simple demo
-
+        if (isLiked) return;
         setIsLiked(true);
         setLikes(prev => prev + 1);
         await videoService.incrementLikes(videoId);
@@ -55,7 +53,6 @@ export default function VideoActions({
     const handleSubscribe = async () => {
         if (!user) return addToast("Silakan login untuk subscribe.", "error");
         if (user.uid === uploaderId) return addToast("Anda tidak bisa subscribe channel sendiri.", "error");
-
         setIsSubscribing(true);
         try {
             const newStatus = await videoService.toggleSubscribe(user.uid, uploaderId);
@@ -74,7 +71,6 @@ export default function VideoActions({
             text: "Lihat video keren ini di Vidgram!",
             url: window.location.href,
         };
-
         try {
             if (navigator.share) {
                 await navigator.share(shareData);
@@ -86,50 +82,116 @@ export default function VideoActions({
             }
         } catch (err) {
             console.error("Error sharing:", err);
-            addToast("Gagal membagikan link.", "error");
+            addToast("Failed to share link.", "error");
         }
     };
 
     return (
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-6 border-b border-[var(--border)] gap-6">
-            {/* Uploader Info */}
-            <div className="flex items-center gap-4">
-                <img
-                    src={uploaderAvatar || "https://api.dicebear.com/7.x/avataaars/svg?seed=fallback"}
-                    alt={uploaderName}
-                    className="w-12 h-12 rounded-full object-cover bg-white"
-                />
-                <div className="flex flex-col">
-                    <span className="font-bold">{uploaderName || "Unknown Creator"}</span>
-                    <span className="text-xs text-[var(--text-secondary)]">{subscribers.toLocaleString()} subscribers</span>
+        <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '1rem',
+            paddingBottom: '1.5rem',
+            borderBottom: '1px solid var(--border)',
+        }}>
+            {/* Uploader Row */}
+            <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                flexWrap: 'wrap',
+                gap: '1rem',
+            }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                    <img
+                        src={uploaderAvatar || "https://api.dicebear.com/7.x/avataaars/svg?seed=fallback"}
+                        alt={uploaderName}
+                        style={{
+                            width: '44px',
+                            height: '44px',
+                            borderRadius: '50%',
+                            objectFit: 'cover',
+                            background: 'var(--bg-tertiary)',
+                            border: '2px solid var(--border)',
+                        }}
+                    />
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                        <span style={{ fontWeight: 700, fontSize: '0.9375rem' }}>{uploaderName || "Unknown Creator"}</span>
+                        <span style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>
+                            {subscribers.toLocaleString()} subscribers
+                        </span>
+                    </div>
                 </div>
-                {user?.uid !== uploaderId && (
-                    <button
-                        onClick={handleSubscribe}
-                        disabled={isSubscribing}
-                        className={`ml-4 px-4 py-1.5 rounded-full text-sm font-semibold transition-colors disabled:opacity-50 ${isSubscribed ? 'glass text-[var(--text-secondary)]' : 'bg-white text-black dark:bg-black dark:text-white'}`}
-                    >
-                        {isSubscribed ? "Subscribed" : "Subscribe"}
-                    </button>
-                )}
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    {user?.uid !== uploaderId && (
+                        <button
+                            onClick={handleSubscribe}
+                            disabled={isSubscribing}
+                            className={isSubscribed ? "btn-secondary" : "btn-primary"}
+                            style={{
+                                padding: '0.5rem 1.25rem',
+                                fontSize: '0.8125rem',
+                            }}
+                        >
+                            {isSubscribed ? "Subscribed" : "Subscribe"}
+                        </button>
+                    )}
+                </div>
             </div>
 
-            {/* Actions */}
-            <div className="flex items-center gap-4 bg-[var(--bg-secondary)] p-1 rounded-full w-full sm:w-auto overflow-x-auto justify-start sm:justify-end">
+            {/* Actions Bar */}
+            <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.25rem',
+                background: 'var(--bg-secondary)',
+                padding: '0.25rem',
+                borderRadius: 'var(--radius-full)',
+                width: 'fit-content',
+            }}>
                 <button
                     onClick={handleLike}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-full transition-colors ${isLiked ? 'text-blue-500 bg-blue-50 dark:bg-blue-900/20' : 'hover:bg-black/5 dark:hover:bg-white/5'}`}
+                    style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.375rem',
+                        padding: '0.5rem 1rem',
+                        borderRadius: 'var(--radius-full)',
+                        border: 'none',
+                        cursor: 'pointer',
+                        fontSize: '0.8125rem',
+                        fontWeight: 600,
+                        transition: 'all 0.2s ease',
+                        background: isLiked ? 'var(--accent-light)' : 'transparent',
+                        color: isLiked ? 'var(--accent)' : 'var(--text-secondary)',
+                    }}
                 >
-                    <ThumbsUp size={18} className={isLiked ? "fill-current" : ""} />
-                    <span className="font-medium text-sm">{likes > 0 ? likes.toLocaleString() : "Like"}</span>
+                    <ThumbsUp size={16} className={isLiked ? "fill-current" : ""} />
+                    <span>{likes > 0 ? likes.toLocaleString() : "Like"}</span>
                 </button>
-                <div className="w-px h-6 bg-[var(--border)]"></div>
+
+                <div style={{ width: '1px', height: '1.5rem', background: 'var(--border)' }}></div>
+
                 <button
                     onClick={handleShare}
-                    className="flex items-center gap-2 px-4 py-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                    style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.375rem',
+                        padding: '0.5rem 1rem',
+                        borderRadius: 'var(--radius-full)',
+                        border: 'none',
+                        cursor: 'pointer',
+                        fontSize: '0.8125rem',
+                        fontWeight: 600,
+                        transition: 'all 0.2s ease',
+                        background: 'transparent',
+                        color: 'var(--text-secondary)',
+                    }}
                 >
-                    <Share2 size={18} />
-                    <span className="font-medium text-sm">Share</span>
+                    <Share2 size={16} />
+                    <span>Share</span>
                 </button>
             </div>
         </div>

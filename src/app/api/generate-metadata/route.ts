@@ -7,7 +7,7 @@ export async function POST(req: Request) {
 
     if (!apiKeysRaw) {
         return NextResponse.json(
-            { error: "API Key Groq (GROQ_API_KEYS) belum diatur di .env.local" },
+            { error: "Groq API Key (GROQ_API_KEYS) is not configured in .env.local" },
             { status: 500 }
         );
     }
@@ -94,17 +94,17 @@ Kembalikan HANYA format JSON valid tanpa tanda kutip markdown, dengan struktur p
                 break;
 
             } catch (error: any) {
-                console.warn(`Gagal memanggil API menggunakan Key ke-${i + 1}:`, error.message);
+                console.warn(`Failed calling API using key index ${i + 1}:`, error.message);
                 lastError = error;
-                // Jika gagal, loop akan lanjut ke iterasi berikutnya (key selanjutnya)
+                // If failed, loop continues to the next key
             }
         }
 
         // Jika setelah semua loop tidak ada result yang didapat, kembalikan Error terakhir
         if (!successfulResult) {
-            console.error("Semua API Key dalam antrean GAGAL.");
+            console.error("All API Keys in rotation FAILED.");
             return NextResponse.json(
-                { error: lastError?.message || "Seluruh rotasi API Key gagal. Terjadi bad request atau server Groq down." },
+                { error: lastError?.message || "All API Keys failed. Bad request or Groq server is down." },
                 { status: 500 }
             );
         }
@@ -113,7 +113,7 @@ Kembalikan HANYA format JSON valid tanpa tanda kutip markdown, dengan struktur p
     } catch (error: any) {
         console.error("Fatall Error:", error);
         return NextResponse.json(
-            { error: error.message || "Gagal meng-generate metadata." },
+            { error: error.message || "Failed to generate metadata." },
             { status: 500 }
         );
     }

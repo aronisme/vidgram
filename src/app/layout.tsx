@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Outfit } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import { AuthProvider } from "@/context/AuthContext";
 import { ToastProvider } from "@/context/ToastContext";
 
-const inter = Inter({ subsets: ["latin"], weight: ["400", "500", "600", "700"] });
+const outfit = Outfit({ subsets: ["latin"], weight: ["300", "400", "500", "600", "700", "800"] });
 
 export const metadata: Metadata = {
   title: {
@@ -30,8 +30,8 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: "Vidgram | The Modern Video Platform",
-    description: "The fastest way to share and discovery amazing videos.",
-    url: "https://vidgram.vercel.app",
+    description: "The fastest way to share and discover amazing videos.",
+    url: "https://vidgram.web.id",
     siteName: "Vidgram",
     type: "website",
     locale: "id_ID",
@@ -46,6 +46,16 @@ export const metadata: Metadata = {
     title: "Vidgram",
     statusBarStyle: "black-translucent",
   },
+  icons: {
+    icon: [
+      { url: '/favicon.ico' },
+      { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
+      { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/apple-touch-icon.png' },
+    ],
+  },
 };
 
 export default function RootLayout({
@@ -55,15 +65,17 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={inter.className}>
+      <body className={outfit.className}>
         <AuthProvider>
           <ToastProvider>
             <Navbar />
-            <main className="container min-h-screen">
+            <main className="container" style={{ minHeight: 'calc(100vh - var(--navbar-height) - 120px)', paddingTop: '1rem' }}>
               {children}
             </main>
-            <footer className="container py-8 text-center text-sm text-[var(--text-secondary)]">
-              <p>© {new Date().getFullYear()} Vidgram. Built for speed and SEO.</p>
+            <footer className="site-footer">
+              <div className="container">
+                <p style={{ fontWeight: 500 }}>© {new Date().getFullYear()} Vidgram. Crafted for creators.</p>
+              </div>
             </footer>
           </ToastProvider>
         </AuthProvider>

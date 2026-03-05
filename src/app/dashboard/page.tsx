@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { videoService, VideoMetadata } from "@/lib/videoService";
-import { BarChart3, Users, Play, TrendingUp, ArrowUpRight, Video as VideoIcon } from "lucide-react";
+import { Play, Users, TrendingUp, ArrowUpRight, Video as VideoIcon } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { useAuth } from "@/context/AuthContext";
@@ -10,45 +10,42 @@ import { useAuth } from "@/context/AuthContext";
 export default function DashboardPage() {
     const { user, dbUser } = useAuth();
     const [videos, setVideos] = useState<VideoMetadata[]>([]);
+    const [stats, setStats] = useState({ totalViews: 0, totalLikes: 0, totalVideos: 0 });
     const [isLoading, setIsLoading] = useState(true);
     const [isLoadingMore, setIsLoadingMore] = useState(false);
     const [hasMore, setHasMore] = useState(true);
-
-    // Constant for pagination limit
     const VIDEOS_PER_PAGE = 5;
 
     useEffect(() => {
         if (!user) return;
 
-        async function fetchVideos() {
+        async function fetchData() {
             try {
-                const userVideos = await videoService.getVideosByUser(user!.uid, VIDEOS_PER_PAGE);
+                const [userVideos, userStats] = await Promise.all([
+                    videoService.getVideosByUser(user!.uid, VIDEOS_PER_PAGE),
+                    videoService.getUserStats(user!.uid)
+                ]);
+
                 setVideos(userVideos);
-                if (userVideos.length < VIDEOS_PER_PAGE) {
-                    setHasMore(false);
-                }
+                setStats(userStats);
+
+                if (userVideos.length < VIDEOS_PER_PAGE) setHasMore(false);
             } catch (error) {
-                console.error("Failed to fetch user videos:", error);
+                console.error("Failed to fetch dashboard data:", error);
             } finally {
                 setIsLoading(false);
             }
         }
-
-        fetchVideos();
+        fetchData();
     }, [user]);
 
     const loadMore = async () => {
         if (!user || isLoadingMore || !hasMore || videos.length === 0) return;
         setIsLoadingMore(true);
-
         try {
             const lastVideo = videos[videos.length - 1];
             const newVideos = await videoService.getVideosByUser(user.uid, VIDEOS_PER_PAGE, lastVideo.createdAt);
-
-            if (newVideos.length < VIDEOS_PER_PAGE) {
-                setHasMore(false);
-            }
-
+            if (newVideos.length < VIDEOS_PER_PAGE) setHasMore(false);
             setVideos(prev => [...prev, ...newVideos]);
         } catch (error) {
             console.error("Failed to load more videos:", error);
@@ -57,117 +54,149 @@ export default function DashboardPage() {
         }
     };
 
-    const totalViews = videos.reduce((acc, video) => acc + video.views, 0);
-    const totalVideos = videos.length;
-    const avgViews = totalVideos > 0 ? (totalViews / totalVideos).toFixed(1) : 0;
-
     if (!user || isLoading) {
         return (
-            <div className="py-20 flex justify-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--accent)]"></div>
+            <div style={{ paddingTop: '5rem', display: 'flex', justifyContent: 'center' }}>
+                <div className="spinner"></div>
             </div>
         );
     }
 
     return (
-        <div className="py-8 flex flex-col gap-8">
-            <div className="flex flex-col gap-2">
-                <h1 className="text-3xl font-bold">Halo, {dbUser?.displayName}!</h1>
-                <p className="text-[var(--text-secondary)]">Monitor perkemban channel dan statistik videomu.</p>
+        <div className="animate-fade-in" style={{ paddingTop: '1.5rem', paddingBottom: '2rem', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+
+            {/* Greeting */}
+            <div>
+                <h1 style={{ fontSize: '1.75rem', fontWeight: 800, letterSpacing: '-0.03em' }}>
+                    Hello, {dbUser?.displayName}! 👋
+                </h1>
+                <p style={{ color: 'var(--text-secondary)', marginTop: '0.25rem', fontSize: '0.9375rem' }}>
+                    Monitor your channel growth and video statistics.
+                </p>
             </div>
 
-            {/* Stats Overview */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                <div className="glass p-6 rounded-[var(--radius-lg)] flex flex-col gap-4">
-                    <div className="flex items-center justify-between">
-                        <div className="bg-blue-100 dark:bg-blue-900/30 p-3 rounded-xl text-blue-600">
-                            <Play size={24} />
+            {/* Stats Grid */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem' }} className="stagger-children">
+                {[
+                    {
+                        label: "Total Video Views",
+                        value: stats.totalViews.toLocaleString(),
+                        icon: <Play size={20} />,
+                        gradient: 'linear-gradient(135deg, #3b82f6, #60a5fa)',
+                        shadow: 'rgba(59, 130, 246, 0.3)',
+                    },
+                    {
+                        label: "Total Videos",
+                        value: stats.totalVideos.toLocaleString(),
+                        icon: <VideoIcon size={20} />,
+                        gradient: 'linear-gradient(135deg, #8b5cf6, #a78bfa)',
+                        shadow: 'rgba(139, 92, 246, 0.3)',
+                    },
+                    {
+                        label: "Subscribers",
+                        value: (dbUser?.subscribersCount || 0).toLocaleString(),
+                        icon: <Users size={20} />,
+                        gradient: 'linear-gradient(135deg, #f59e0b, #fbbf24)',
+                        shadow: 'rgba(245, 158, 11, 0.3)',
+                    },
+                ].map((stat, i) => (
+                    <div key={i} className="stat-card">
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                            <div style={{
+                                background: stat.gradient,
+                                width: '42px',
+                                height: '42px',
+                                borderRadius: 'var(--radius-md)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                color: 'white',
+                                boxShadow: `0 4px 12px ${stat.shadow}`,
+                            }}>
+                                {stat.icon}
+                            </div>
                         </div>
-                        <span className="text-green-500 flex items-center text-sm font-bold bg-green-500/10 px-2 py-1 rounded-full">
-                            <ArrowUpRight size={14} /> +12%
-                        </span>
-                    </div>
-                    <div>
-                        <p className="text-[var(--text-secondary)] text-sm font-medium">Total Video Views</p>
-                        <h2 className="text-3xl font-bold">{totalViews.toLocaleString()}</h2>
-                    </div>
-                </div>
-
-                <div className="glass p-6 rounded-[var(--radius-lg)] flex flex-col gap-4">
-                    <div className="flex items-center justify-between">
-                        <div className="bg-purple-100 dark:bg-purple-900/30 p-3 rounded-xl text-purple-600">
-                            <VideoIcon size={24} />
+                        <div>
+                            <p style={{ color: 'var(--text-secondary)', fontSize: '0.8125rem', fontWeight: 500 }}>{stat.label}</p>
+                            <h2 style={{ fontSize: '1.75rem', fontWeight: 800, letterSpacing: '-0.02em' }}>{stat.value}</h2>
                         </div>
                     </div>
-                    <div>
-                        <p className="text-[var(--text-secondary)] text-sm font-medium">Total Videos</p>
-                        <h2 className="text-3xl font-bold">{totalVideos}</h2>
-                    </div>
-                </div>
-
-                <div className="glass p-6 rounded-[var(--radius-lg)] flex flex-col gap-4">
-                    <div className="flex items-center justify-between">
-                        <div className="bg-orange-100 dark:bg-orange-900/30 p-3 rounded-xl text-orange-600">
-                            <Users size={24} />
-                        </div>
-                    </div>
-                    <div>
-                        <p className="text-[var(--text-secondary)] text-sm font-medium">Subscribers</p>
-                        <h2 className="text-3xl font-bold">{dbUser?.subscribersCount || 0}</h2>
-                    </div>
-                </div>
+                ))}
             </div>
 
-            {/* Video Performance Table */}
-            <div className="glass rounded-[var(--radius-lg)] overflow-hidden">
-                <div className="p-6 border-b border-[var(--border)] flex items-center justify-between">
-                    <h2 className="text-xl font-bold">Video Performance</h2>
-                    <Link href="/dashboard/upload" className="text-sm font-semibold text-[var(--accent)] hover:underline">
+            {/* Content Table */}
+            <div className="card" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                    <h2 style={{ fontSize: '1.25rem', fontWeight: 700 }}>Your Content</h2>
+                    <Link href="/dashboard/upload" className="btn-primary" style={{ padding: '0.5rem 1rem', fontSize: '0.8125rem' }}>
                         Upload New
                     </Link>
                 </div>
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left">
+
+                <div style={{ overflowX: 'auto' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.875rem' }}>
                         <thead>
-                            <tr className="bg-[var(--bg-secondary)] text-[var(--text-secondary)] text-sm">
-                                <th className="px-6 py-4 font-semibold">Video</th>
-                                <th className="px-6 py-4 font-semibold">Status</th>
-                                <th className="px-6 py-4 font-semibold">Views</th>
-                                <th className="px-6 py-4 font-semibold">Upload Date</th>
+                            <tr style={{ borderBottom: '1px solid var(--border)', color: 'var(--text-tertiary)', textAlign: 'left' }}>
+                                <th style={{ padding: '1rem', fontWeight: 600 }}>Video</th>
+                                <th style={{ padding: '1rem', fontWeight: 600 }}>Visibility</th>
+                                <th style={{ padding: '1rem', fontWeight: 600 }}>Date</th>
+                                <th style={{ padding: '1rem', fontWeight: 600, textAlign: 'right' }}>Views</th>
+                                <th style={{ padding: '1rem', fontWeight: 600, textAlign: 'right' }}>Likes</th>
+                                <th style={{ padding: '1rem', fontWeight: 600, textAlign: 'right' }}>Actions</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-[var(--border)]">
-                            {videos.map((video) => (
-                                <tr key={video.id} className="hover:bg-[var(--bg-secondary)] transition-colors">
-                                    <td className="px-6 py-4">
-                                        <Link href={`/video/${video.slug}`} className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-                                            <div className="relative w-16 h-10 shrink-0 bg-black rounded overflow-hidden">
-                                                <Image
-                                                    src={video.thumbnailUrl}
-                                                    alt={video.title}
-                                                    fill
-                                                    sizes="64px"
-                                                    className="object-cover"
-                                                />
-                                            </div>
-                                            <span className="font-semibold line-clamp-2 hover:text-[var(--accent)] transition-colors">{video.title}</span>
-                                        </Link>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <span className="px-2 py-1 rounded-full bg-green-500/10 text-green-600 text-xs font-bold">
-                                            Public
-                                        </span>
-                                    </td>
-                                    <td className="px-6 py-4 font-medium">{video.views.toLocaleString()}</td>
-                                    <td className="px-6 py-4 text-sm text-[var(--text-secondary)]">
-                                        {new Date(video.createdAt?.toDate?.() || video.createdAt).toLocaleDateString()}
-                                    </td>
-                                </tr>
-                            ))}
-                            {videos.length === 0 && (
+                        <tbody>
+                            {videos.length > 0 ? (
+                                videos.map((video) => (
+                                    <tr key={video.id} style={{ borderBottom: '1px solid var(--border-light)' }}>
+                                        <td>
+                                            <Link href={`/video/${video.slug}`} style={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '0.75rem',
+                                                textDecoration: 'none',
+                                                color: 'var(--text-primary)',
+                                                padding: '1rem 0',
+                                            }}>
+                                                <div style={{
+                                                    position: 'relative',
+                                                    width: '80px',
+                                                    height: '50px',
+                                                    flexShrink: 0,
+                                                    background: '#000',
+                                                    borderRadius: 'var(--radius-sm)',
+                                                    overflow: 'hidden',
+                                                }}>
+                                                    <Image
+                                                        src={video.thumbnailUrl}
+                                                        alt={video.title}
+                                                        fill
+                                                        sizes="80px"
+                                                        style={{ objectFit: 'cover' }}
+                                                    />
+                                                </div>
+                                                <span style={{ fontWeight: 600 }} className="line-clamp-2">{video.title}</span>
+                                            </Link>
+                                        </td>
+                                        <td>
+                                            <span className="badge badge-success">Public</span>
+                                        </td>
+                                        <td style={{ color: 'var(--text-secondary)' }}>
+                                            {new Date(video.createdAt?.toDate?.() || video.createdAt).toLocaleDateString()}
+                                        </td>
+                                        <td style={{ fontWeight: 600, textAlign: 'right' }}>{video.views.toLocaleString()}</td>
+                                        <td style={{ fontWeight: 600, textAlign: 'right' }}>{video.likes.toLocaleString()}</td>
+                                        <td style={{ textAlign: 'right' }}>
+                                            <Link href={`/dashboard/edit-video/${video.id}`} className="btn-ghost" style={{ padding: '0.25rem 0.5rem', fontSize: '0.8125rem' }}>
+                                                Edit
+                                            </Link>
+                                        </td>
+                                    </tr>
+                                ))
+                            ) : (
                                 <tr>
-                                    <td colSpan={4} className="px-6 py-12 text-center text-[var(--text-secondary)]">
-                                        Belum ada video. Ayo upload video pertamamu sekarang!
+                                    <td colSpan={6} style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-tertiary)' }}>
+                                        You haven't uploaded any videos yet.
                                     </td>
                                 </tr>
                             )}
@@ -175,15 +204,21 @@ export default function DashboardPage() {
                     </table>
                 </div>
 
-                {/* Load More Button inside table wrapper */}
+                {videos.length === 0 && (
+                    <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-tertiary)' }}>
+                        <p>You haven't uploaded any videos yet.</p>
+                    </div>
+                )}
+
                 {hasMore && videos.length > 0 && (
-                    <div className="p-4 border-t border-[var(--border)] flex justify-center">
+                    <div style={{ padding: '1rem', display: 'flex', justifyContent: 'center' }}>
                         <button
                             onClick={loadMore}
                             disabled={isLoadingMore}
-                            className="text-sm font-semibold text-[var(--accent)] hover:opacity-80 disabled:opacity-50 px-6 py-2 border border-[var(--accent)] rounded-full transition-colors flex items-center gap-2"
+                            className="btn-secondary"
+                            style={{ padding: '0.5rem 1.5rem', fontSize: '0.875rem' }}
                         >
-                            {isLoadingMore ? "Memuat..." : "Tampilkan Lebih Banyak"}
+                            {isLoadingMore ? "Loading..." : "Load More"}
                         </button>
                     </div>
                 )}

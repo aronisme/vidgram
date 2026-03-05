@@ -61,23 +61,21 @@ export default function VideoComments({ videoId }: VideoCommentsProps) {
                 setNewComment("");
             }
 
-            addToast("Komentar berhasil ditambahkan!", "success");
-            await fetchComments(); // Refresh list
+            addToast("Comment added successfully!", "success");
+            await fetchComments();
         } catch (error: any) {
             console.error("Error adding comment:", error);
-            addToast("Gagal menambahkan komentar.", "error");
+            addToast("Failed to add comment.", "error");
         } finally {
             setIsSubmitting(false);
         }
     };
 
-    // Organize comments into threads
     const topLevelComments = comments.filter(c => !c.parentId);
     const replies = comments.filter(c => c.parentId);
 
     const getRepliesFor = (commentId: string) => {
         return replies.filter(r => r.parentId === commentId).sort((a, b) => {
-            // Sort replies chronological (oldest first)
             const dateA = a.createdAt?.seconds || 0;
             const dateB = b.createdAt?.seconds || 0;
             return dateA - dateB;
@@ -97,47 +95,87 @@ export default function VideoComments({ videoId }: VideoCommentsProps) {
     };
 
     return (
-        <div className="mt-8">
-            <h3 className="text-xl font-bold flex items-center gap-2 mb-6">
-                <MessageCircle size={24} />
-                {comments.length} Komentar
+        <div style={{ marginTop: '2rem' }}>
+            <h3 style={{
+                fontSize: '1.125rem',
+                fontWeight: 700,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                marginBottom: '1.5rem',
+            }}>
+                <MessageCircle size={20} />
+                {comments.length} Comments
             </h3>
 
             {/* Main Comment Input */}
-            <form onSubmit={(e) => handleAddComment(e, null)} className="flex gap-4 mb-10">
-                <div className="shrink-0">
+            <form onSubmit={(e) => handleAddComment(e, null)} style={{
+                display: 'flex',
+                gap: '0.75rem',
+                marginBottom: '2rem',
+            }}>
+                <div style={{ flexShrink: 0 }}>
                     {dbUser?.photoURL ? (
-                        <img src={dbUser.photoURL} alt="Avatar" className="w-10 h-10 rounded-full object-cover bg-white" />
+                        <img src={dbUser.photoURL} alt="Avatar" style={{
+                            width: '40px',
+                            height: '40px',
+                            borderRadius: '50%',
+                            objectFit: 'cover',
+                            background: 'var(--bg-tertiary)',
+                        }} />
                     ) : (
-                        <div className="w-10 h-10 rounded-full bg-[var(--bg-secondary)] flex items-center justify-center text-[var(--accent)]">
-                            <UserIcon size={20} />
+                        <div style={{
+                            width: '40px',
+                            height: '40px',
+                            borderRadius: '50%',
+                            background: 'var(--bg-secondary)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            color: 'var(--accent)',
+                        }}>
+                            <UserIcon size={18} />
                         </div>
                     )}
                 </div>
-                <div className="flex-1 flex flex-col gap-2">
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                     <input
                         type="text"
-                        placeholder={user ? "Tambahkan komentar..." : "Login untuk berkomentar..."}
+                        placeholder={user ? "Add a comment..." : "Sign in to comment..."}
                         value={newComment}
                         onChange={(e) => setNewComment(e.target.value)}
                         disabled={!user || isSubmitting}
-                        className="glass bg-transparent p-3 rounded-[var(--radius-md)] outline-none border-b-2 border-transparent focus:border-[var(--accent)] transition-colors w-full"
+                        style={{
+                            width: '100%',
+                            padding: '0.75rem 0',
+                            background: 'transparent',
+                            border: 'none',
+                            borderBottom: '2px solid var(--border)',
+                            outline: 'none',
+                            color: 'var(--text-primary)',
+                            fontSize: '0.9375rem',
+                            transition: 'border-color 0.2s ease',
+                        }}
+                        onFocus={(e) => e.target.style.borderBottomColor = 'var(--accent)'}
+                        onBlur={(e) => e.target.style.borderBottomColor = 'var(--border)'}
                     />
                     {newComment.trim() && (
-                        <div className="flex justify-end gap-2">
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
                             <button
                                 type="button"
                                 onClick={() => setNewComment("")}
-                                className="px-4 py-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition-colors text-sm font-medium"
+                                className="btn-ghost"
+                                style={{ fontSize: '0.8125rem' }}
                             >
-                                Batal
+                                Cancel
                             </button>
                             <button
                                 type="submit"
                                 disabled={isSubmitting}
-                                className="bg-[var(--accent)] text-white px-4 py-2 rounded-full hover:opacity-90 transition-opacity text-sm font-medium flex items-center gap-2 disabled:opacity-50"
+                                className="btn-primary"
+                                style={{ padding: '0.375rem 1rem', fontSize: '0.8125rem' }}
                             >
-                                <Send size={16} /> Comment
+                                <Send size={14} /> Comment
                             </button>
                         </div>
                     )}
@@ -145,60 +183,77 @@ export default function VideoComments({ videoId }: VideoCommentsProps) {
             </form>
 
             {/* Comment List */}
-            <div className="flex flex-col gap-6">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
                 {topLevelComments.map(comment => (
-                    <div key={comment.id!} className="flex gap-4">
+                    <div key={comment.id!} style={{ display: 'flex', gap: '0.75rem' }} className="animate-fade-in">
                         <img
                             src={comment.userAvatar || "https://api.dicebear.com/7.x/avataaars/svg?seed=fallback"}
                             alt={comment.userName}
-                            className="w-10 h-10 rounded-full object-cover shrink-0 bg-white"
+                            style={{
+                                width: '40px',
+                                height: '40px',
+                                borderRadius: '50%',
+                                objectFit: 'cover',
+                                flexShrink: 0,
+                                background: 'var(--bg-tertiary)',
+                            }}
                         />
-                        <div className="flex-1 flex flex-col gap-1">
-                            <div className="flex items-baseline gap-2">
-                                <span className="font-bold text-sm">{comment.userName}</span>
-                                <span className="text-xs text-[var(--text-secondary)]">{formatDate(comment.createdAt)}</span>
+                        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                            <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }}>
+                                <span style={{ fontWeight: 700, fontSize: '0.8125rem' }}>{comment.userName}</span>
+                                <span style={{ fontSize: '0.6875rem', color: 'var(--text-tertiary)' }}>{formatDate(comment.createdAt)}</span>
                             </div>
-                            <p className="text-sm pb-1">{comment.text}</p>
+                            <p style={{ fontSize: '0.875rem', lineHeight: 1.5 }}>{comment.text}</p>
 
-                            <div className="flex items-center gap-4">
-                                <button
-                                    onClick={() => setReplyingTo(replyingTo === comment.id ? null : comment.id!)}
-                                    className="flex items-center gap-1 text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors py-1"
-                                >
-                                    <Reply size={14} /> Balas
-                                </button>
-                            </div>
+                            <button
+                                onClick={() => setReplyingTo(replyingTo === comment.id ? null : comment.id!)}
+                                className="btn-ghost"
+                                style={{
+                                    padding: '0.25rem 0.5rem',
+                                    fontSize: '0.75rem',
+                                    width: 'fit-content',
+                                    marginTop: '0.125rem',
+                                }}
+                            >
+                                <Reply size={13} /> Reply
+                            </button>
 
-                            {/* Reply Input Box */}
+                            {/* Reply Input */}
                             {replyingTo === comment.id && (
-                                <form onSubmit={(e) => handleAddComment(e, comment.id!)} className="flex gap-3 mt-3 mb-2">
+                                <form onSubmit={(e) => handleAddComment(e, comment.id!)} style={{
+                                    display: 'flex',
+                                    gap: '0.5rem',
+                                    marginTop: '0.5rem',
+                                    alignItems: 'flex-start',
+                                }}>
                                     <img
                                         src={dbUser?.photoURL || "https://api.dicebear.com/7.x/avataaars/svg?seed=fallback"}
                                         alt="Avatar"
-                                        className="w-6 h-6 rounded-full object-cover shrink-0"
+                                        style={{ width: '28px', height: '28px', borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }}
                                     />
-                                    <div className="flex-1 flex flex-col gap-2">
+                                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.375rem' }}>
                                         <input
                                             type="text"
                                             placeholder="Tulis balasan..."
                                             value={replyText}
                                             onChange={(e) => setReplyText(e.target.value)}
                                             autoFocus
-                                            className="glass bg-transparent px-3 py-1.5 text-sm rounded-[var(--radius-md)] outline-none focus:border-[var(--accent)] transition-colors w-full"
+                                            style={{
+                                                width: '100%',
+                                                padding: '0.5rem 0',
+                                                background: 'transparent',
+                                                border: 'none',
+                                                borderBottom: '1.5px solid var(--accent)',
+                                                outline: 'none',
+                                                color: 'var(--text-primary)',
+                                                fontSize: '0.8125rem',
+                                            }}
                                         />
-                                        <div className="flex justify-end gap-2">
-                                            <button
-                                                type="button"
-                                                onClick={() => setReplyingTo(null)}
-                                                className="px-3 py-1 rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition-colors text-xs font-medium"
-                                            >
-                                                Batal
+                                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.375rem' }}>
+                                            <button type="button" onClick={() => setReplyingTo(null)} className="btn-ghost" style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem' }}>
+                                                Cancel
                                             </button>
-                                            <button
-                                                type="submit"
-                                                disabled={isSubmitting || !replyText.trim()}
-                                                className="bg-[var(--accent)] text-white px-3 py-1 rounded-full hover:opacity-90 transition-opacity text-xs font-medium disabled:opacity-50"
-                                            >
+                                            <button type="submit" disabled={isSubmitting || !replyText.trim()} className="btn-primary" style={{ padding: '0.25rem 0.75rem', fontSize: '0.75rem' }}>
                                                 Reply
                                             </button>
                                         </div>
@@ -207,20 +262,34 @@ export default function VideoComments({ videoId }: VideoCommentsProps) {
                             )}
 
                             {/* Nested Replies */}
-                            <div className="flex flex-col gap-4 mt-3 pl-2 sm:pl-4 border-l-2 border-[var(--border)]">
+                            <div style={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                gap: '0.875rem',
+                                marginTop: '0.75rem',
+                                paddingLeft: '0.75rem',
+                                borderLeft: '2px solid var(--accent-light)',
+                            }}>
                                 {getRepliesFor(comment.id!).map(reply => (
-                                    <div key={reply.id!} className="flex gap-3">
+                                    <div key={reply.id!} style={{ display: 'flex', gap: '0.5rem' }}>
                                         <img
                                             src={reply.userAvatar || "https://api.dicebear.com/7.x/avataaars/svg?seed=fallback"}
                                             alt={reply.userName}
-                                            className="w-8 h-8 rounded-full object-cover shrink-0 bg-white"
+                                            style={{
+                                                width: '28px',
+                                                height: '28px',
+                                                borderRadius: '50%',
+                                                objectFit: 'cover',
+                                                flexShrink: 0,
+                                                background: 'var(--bg-tertiary)',
+                                            }}
                                         />
-                                        <div className="flex-1 flex flex-col">
-                                            <div className="flex items-baseline gap-2">
-                                                <span className="font-bold text-[13px]">{reply.userName}</span>
-                                                <span className="text-[11px] text-[var(--text-secondary)]">{formatDate(reply.createdAt)}</span>
+                                        <div style={{ flex: 1 }}>
+                                            <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.375rem' }}>
+                                                <span style={{ fontWeight: 700, fontSize: '0.8125rem' }}>{reply.userName}</span>
+                                                <span style={{ fontSize: '0.625rem', color: 'var(--text-tertiary)' }}>{formatDate(reply.createdAt)}</span>
                                             </div>
-                                            <p className="text-[13px]">{reply.text}</p>
+                                            <p style={{ fontSize: '0.8125rem', lineHeight: 1.5 }}>{reply.text}</p>
                                         </div>
                                     </div>
                                 ))}
@@ -231,8 +300,14 @@ export default function VideoComments({ videoId }: VideoCommentsProps) {
             </div>
 
             {comments.length === 0 && (
-                <div className="text-center py-8 border-t border-[var(--border)] text-[var(--text-secondary)]">
-                    <p>Belum ada komentar. Jadilah yang pertama!</p>
+                <div style={{
+                    textAlign: 'center',
+                    padding: '2.5rem 1rem',
+                    color: 'var(--text-tertiary)',
+                    fontSize: '0.9375rem',
+                }}>
+                    <MessageCircle size={36} style={{ opacity: 0.3, marginBottom: '0.75rem' }} />
+                    <p>No comments yet. Be the first to comment!</p>
                 </div>
             )}
         </div>

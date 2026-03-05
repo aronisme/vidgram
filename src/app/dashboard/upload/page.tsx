@@ -33,7 +33,6 @@ export default function UploadPage() {
     const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
     const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
 
-    // Async thumbnail generator
     const generateThumbnail = (file: File): Promise<string | null> => {
         return new Promise((resolve) => {
             const objectUrl = URL.createObjectURL(file);
@@ -43,7 +42,7 @@ export default function UploadPage() {
             videoElement.crossOrigin = "anonymous";
 
             videoElement.onloadeddata = () => {
-                videoElement.currentTime = 1; // seek to 1 second
+                videoElement.currentTime = 1;
             };
 
             videoElement.onseeked = () => {
@@ -77,14 +76,13 @@ export default function UploadPage() {
                 return false;
             }
             if (f.size > 5 * 1024 * 1024) {
-                addToast(`File ${f.name} lebih dari 5MB. Maksimal ukuran adalah 5MB untuk menghemat bandwidth. Dilewati.`, "error");
+                addToast(`File ${f.name} lebih dari 5MB. Dilewati.`, "error");
                 return false;
             }
             return true;
         });
 
         if (validFiles.length > 0) {
-            // Read thumbnails and create initial items
             const newItems: UploadItem[] = await Promise.all(
                 validFiles.map(async (file) => {
                     const thumb = await generateThumbnail(file);
@@ -105,7 +103,6 @@ export default function UploadPage() {
             setItems(prev => [...prev, ...newItems]);
         }
 
-        // reset input
         if (fileInputRef.current) fileInputRef.current.value = "";
     };
 
@@ -119,7 +116,7 @@ export default function UploadPage() {
 
     const generateAIForItem = async (item: UploadItem) => {
         if (!item.localThumbnail) {
-            addToast(`Video ${item.file.name} belum memiliki thumbnail.`, "info");
+            addToast(`Video ${item.file.name} doesn't have a thumbnail.`, "info");
             return;
         }
 
@@ -137,7 +134,7 @@ export default function UploadPage() {
             });
 
             const data = await res.json();
-            if (!res.ok) throw new Error(data.error || "Gagal menghubungi AI.");
+            if (!res.ok) throw new Error(data.error || "Failed to contact AI.");
 
             updateItem(item.id, {
                 title: data.title || item.title,
@@ -148,15 +145,13 @@ export default function UploadPage() {
         } catch (error: any) {
             console.error("AI Error:", error);
             updateItem(item.id, { status: 'error', errorMessage: error.message });
-            addToast(`AI gagal untuk ${item.file.name}: ${error.message}`, "error");
+            addToast(`AI failed for ${item.file.name}: ${error.message}`, "error");
         }
     };
 
     const handleGenerateAllAI = async () => {
         setIsGeneratingAll(true);
         const pendingItems = items.filter(item => item.status === 'pending');
-
-        // We do it sequentially
         for (const item of pendingItems) {
             await generateAIForItem(item);
         }
@@ -202,7 +197,7 @@ export default function UploadPage() {
             updateItem(item.id, { status: 'success' });
         } catch (error: any) {
             console.error(error);
-            updateItem(item.id, { status: 'error', errorMessage: error.message || 'Upload gagal.' });
+            updateItem(item.id, { status: 'error', errorMessage: error.message || 'Upload failed.' });
         }
     };
 
@@ -212,7 +207,7 @@ export default function UploadPage() {
             return;
         }
         if (!user) {
-            addToast("Anda harus login untuk mengupload video.", "error");
+            addToast("You must be signed in to upload videos.", "error");
             return;
         }
 
@@ -223,22 +218,13 @@ export default function UploadPage() {
         }
 
         setIsUploadingAll(true);
-
-        // Upload sequentially to avoid network overwhelming
         for (const item of itemsToUpload) {
             await uploadSingleItem(item);
         }
-
         setIsUploadingAll(false);
         addToast("Proses upload selesai.", "info");
-
-        // Timeout check if all are success
-        setTimeout(() => {
-            // React state closure issue inside timeout, but we rely on rendering "allSuccess" 
-        }, 1000);
     };
 
-    // Derived state
     const allSuccess = items.length > 0 && items.every(i => i.status === 'success');
 
     if (allSuccess) {
@@ -248,144 +234,247 @@ export default function UploadPage() {
     }
 
     return (
-        <div className="max-w-5xl mx-auto py-12 px-4">
-            <div className="flex flex-col gap-2 mb-8">
-                <h1 className="text-3xl font-bold">Upload Video Batch</h1>
-                <p className="text-[var(--text-secondary)]">Pilih banyak video sekaligus, isi data otomatis dengan AI, lalu upload!</p>
+        <div className="animate-fade-in" style={{ maxWidth: '960px', margin: '0 auto', paddingTop: '2rem', paddingBottom: '2rem' }}>
+            <div style={{ marginBottom: '2rem' }}>
+                <h1 style={{ fontSize: '1.75rem', fontWeight: 800, letterSpacing: '-0.03em' }}>Upload Video</h1>
+                <p style={{ color: 'var(--text-secondary)', marginTop: '0.25rem', fontSize: '0.9375rem' }}>
+                    Select multiple videos, auto-fill data using AI, and upload!
+                </p>
             </div>
 
-            <div className="flex flex-col gap-6">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                 {allSuccess ? (
-                    <div className="glass p-12 rounded-[var(--radius-lg)] text-center flex flex-col items-center gap-4">
-                        <div className="bg-green-100 text-green-600 p-4 rounded-full">
-                            <CheckCircle size={48} />
+                    <div className="card" style={{
+                        padding: '3rem',
+                        textAlign: 'center',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        gap: '1rem',
+                    }}>
+                        <div style={{
+                            background: 'rgba(16, 185, 129, 0.1)',
+                            color: 'var(--success)',
+                            padding: '1rem',
+                            borderRadius: '50%',
+                        }}>
+                            <CheckCircle size={40} />
                         </div>
-                        <h2 className="text-2xl font-bold">Semua Video Berhasil Diupload!</h2>
-                        <p className="text-[var(--text-secondary)]">Mengalihkan ke Dashboard dalam beberapa detik...</p>
+                        <h2 style={{ fontSize: '1.375rem', fontWeight: 700 }}>Semua Video Berhasil Diupload!</h2>
+                        <p style={{ color: 'var(--text-secondary)' }}>Mengalihkan ke Dashboard dalam beberapa detik...</p>
                     </div>
                 ) : (
                     <>
-                        {/* File Selection Dropzone */}
+                        {/* Dropzone */}
                         <div
                             onClick={() => fileInputRef.current?.click()}
-                            className="border-2 border-dashed border-[var(--border)] rounded-[var(--radius-lg)] p-8 text-center flex flex-col items-center gap-4 hover:border-[var(--accent)] transition-colors cursor-pointer bg-[var(--bg-secondary)]"
+                            className="dropzone"
+                            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}
                         >
                             <input
                                 type="file"
                                 accept="video/*"
                                 multiple
-                                className="hidden"
+                                style={{ display: 'none' }}
                                 ref={fileInputRef}
                                 onChange={handleFileChange}
                             />
-                            <div className="bg-[var(--accent)]/10 p-4 rounded-full">
-                                <Plus size={32} className="text-[var(--accent)]" />
+                            <div style={{
+                                background: 'var(--accent-light)',
+                                padding: '1rem',
+                                borderRadius: '50%',
+                            }}>
+                                <Plus size={28} style={{ color: 'var(--accent)' }} />
                             </div>
-                            <div className="flex flex-col gap-1 items-center">
-                                <p className="font-semibold text-lg">Tambah Video</p>
-                                <p className="text-sm text-[var(--text-secondary)]">Pilih beberapa file sekaligus (MP4, MOV, dll)</p>
+                            <div style={{ textAlign: 'center' }}>
+                                <p style={{ fontWeight: 700, fontSize: '1.0625rem' }}>Tambah Video</p>
+                                <p style={{ fontSize: '0.8125rem', color: 'var(--text-tertiary)', marginTop: '0.25rem' }}>
+                                    Select multiple files (MP4, MOV, etc) — max 5MB
+                                </p>
                             </div>
                         </div>
 
                         {items.length > 0 && (
-                            <div className="flex flex-col gap-6 mt-8">
-                                {/* Global Actions */}
-                                <div className="glass p-4 rounded-xl flex flex-col md:flex-row items-center justify-between gap-4 sticky top-4 z-50 shadow-lg border border-[var(--border)] bg-[var(--bg-primary)]/90 backdrop-blur-md">
-                                    <div className="flex items-center gap-4 font-bold text-lg">
-                                        <FileVideo />
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', marginTop: '1rem' }}>
+
+                                {/* Sticky Action Bar */}
+                                <div className="glass-strong" style={{
+                                    padding: '0.875rem 1.25rem',
+                                    borderRadius: 'var(--radius-lg)',
+                                    display: 'flex',
+                                    flexWrap: 'wrap',
+                                    alignItems: 'center',
+                                    justifyContent: 'space-between',
+                                    gap: '0.75rem',
+                                    position: 'sticky',
+                                    top: 'calc(var(--navbar-height) + 0.5rem)',
+                                    zIndex: 40,
+                                    boxShadow: 'var(--shadow-md)',
+                                    border: '1px solid var(--border)',
+                                }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 700, fontSize: '0.9375rem' }}>
+                                        <FileVideo size={18} />
                                         {items.length} Video Terpilih
                                     </div>
-                                    <div className="flex flex-wrap items-center gap-2">
+                                    <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '0.5rem' }}>
                                         <select
-                                            className="bg-[var(--bg-primary)] border border-[var(--border)] px-3 py-2 rounded-lg outline-none text-sm"
+                                            className="input-field"
+                                            style={{ padding: '0.375rem 0.625rem', fontSize: '0.8125rem', width: 'auto', borderRadius: 'var(--radius-sm)' }}
                                             value={globalLanguage}
                                             onChange={(e) => {
                                                 setGlobalLanguage(e.target.value);
                                                 setItems(items.map(i => ({ ...i, language: e.target.value })));
                                             }}
-                                            title="Ubah bahasa semua video"
                                         >
                                             <option value="Indonesia">Bahasa Indonesia</option>
                                             <option value="English">English</option>
-                                            <option value="Japanese">日本語 (Japanese)</option>
-                                            <option value="Korean">한국어 (Korean)</option>
-                                            <option value="Spanish">Español (Spanish)</option>
+                                            <option value="Japanese">日本語</option>
+                                            <option value="Korean">한국어</option>
+                                            <option value="Spanish">Español</option>
                                         </select>
 
                                         <button
                                             onClick={handleGenerateAllAI}
                                             disabled={isGeneratingAll || isUploadingAll}
-                                            className="flex items-center gap-2 bg-gradient-to-r from-indigo-500 to-purple-500 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-50"
+                                            className="btn-secondary"
+                                            style={{ padding: '0.375rem 0.875rem', fontSize: '0.8125rem' }}
                                         >
-                                            {isGeneratingAll ? <Loader2 size={16} className="animate-spin" /> : <Sparkles size={16} />}
-                                            Autofill Semua AI
+                                            {isGeneratingAll ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
+                                            Autofill AI
                                         </button>
 
                                         <button
                                             onClick={handleUploadAll}
                                             disabled={isUploadingAll || isGeneratingAll}
-                                            className="btn-primary flex items-center gap-2 px-6 py-2 rounded-lg text-sm font-semibold whitespace-nowrap"
+                                            className="btn-primary"
+                                            style={{ padding: '0.375rem 0.875rem', fontSize: '0.8125rem' }}
                                         >
-                                            {isUploadingAll ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />}
+                                            {isUploadingAll ? <Loader2 size={14} className="animate-spin" /> : <Upload size={14} />}
                                             Upload Semua
                                         </button>
                                     </div>
                                 </div>
 
                                 {/* Items List */}
-                                <div className="grid grid-cols-1 gap-6">
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }} className="stagger-children">
                                     {items.map((item) => (
-                                        <div key={item.id} className={`glass p-4 rounded-xl flex flex-col md:flex-row gap-6 relative transition-opacity ${item.status === 'success' ? 'opacity-50 pointer-events-none' : ''}`}>
+                                        <div key={item.id} className="card" style={{
+                                            padding: '1.25rem',
+                                            display: 'flex',
+                                            flexDirection: 'row',
+                                            gap: '1.25rem',
+                                            opacity: item.status === 'success' ? 0.5 : 1,
+                                            pointerEvents: item.status === 'success' ? 'none' : 'auto',
+                                            position: 'relative',
+                                        }}>
 
-                                            {/* Left: Thumbnail & Info */}
-                                            <div className="w-full md:w-56 shrink-0 flex flex-col gap-2 relative group">
-                                                <div className="w-full aspect-video bg-black rounded-lg overflow-hidden relative">
+                                            {/* Thumbnail */}
+                                            <div style={{ width: '200px', flexShrink: 0, position: 'relative' }} className="group">
+                                                <div style={{
+                                                    width: '100%',
+                                                    aspectRatio: '16/9',
+                                                    background: '#000',
+                                                    borderRadius: 'var(--radius-md)',
+                                                    overflow: 'hidden',
+                                                    position: 'relative',
+                                                }}>
                                                     {item.localThumbnail ? (
-                                                        <img src={item.localThumbnail} alt="Preview" className="w-full h-full object-cover" />
+                                                        <img src={item.localThumbnail} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                                     ) : (
-                                                        <div className="absolute inset-0 flex flex-col items-center justify-center text-white/50">
-                                                            <Loader2 size={24} className="animate-spin mb-1" />
-                                                            <span className="text-xs">Processing...</span>
+                                                        <div style={{
+                                                            position: 'absolute',
+                                                            inset: 0,
+                                                            display: 'flex',
+                                                            flexDirection: 'column',
+                                                            alignItems: 'center',
+                                                            justifyContent: 'center',
+                                                            color: 'rgba(255,255,255,0.5)',
+                                                        }}>
+                                                            <Loader2 size={20} className="animate-spin" />
+                                                            <span style={{ fontSize: '0.6875rem', marginTop: '0.25rem' }}>Processing...</span>
                                                         </div>
                                                     )}
 
-                                                    {/* Status Overlays */}
                                                     {item.status === 'uploading' && (
-                                                        <div className="absolute inset-0 bg-blue-500/50 flex flex-col items-center justify-center text-white backdrop-blur-sm">
-                                                            <Loader2 size={32} className="animate-spin mb-2" />
-                                                            <span className="font-bold">Uploading</span>
+                                                        <div style={{
+                                                            position: 'absolute',
+                                                            inset: 0,
+                                                            background: 'rgba(99, 102, 241, 0.6)',
+                                                            backdropFilter: 'blur(4px)',
+                                                            display: 'flex',
+                                                            flexDirection: 'column',
+                                                            alignItems: 'center',
+                                                            justifyContent: 'center',
+                                                            color: 'white',
+                                                        }}>
+                                                            <Loader2 size={24} className="animate-spin" />
+                                                            <span style={{ fontWeight: 700, fontSize: '0.75rem', marginTop: '0.25rem' }}>Uploading</span>
                                                         </div>
                                                     )}
                                                     {item.status === 'success' && (
-                                                        <div className="absolute inset-0 bg-green-500/50 flex flex-col items-center justify-center text-white backdrop-blur-sm">
-                                                            <CheckCircle size={32} className="mb-2" />
-                                                            <span className="font-bold">Sukses</span>
+                                                        <div style={{
+                                                            position: 'absolute',
+                                                            inset: 0,
+                                                            background: 'rgba(16, 185, 129, 0.6)',
+                                                            backdropFilter: 'blur(4px)',
+                                                            display: 'flex',
+                                                            flexDirection: 'column',
+                                                            alignItems: 'center',
+                                                            justifyContent: 'center',
+                                                            color: 'white',
+                                                        }}>
+                                                            <CheckCircle size={24} />
+                                                            <span style={{ fontWeight: 700, fontSize: '0.75rem', marginTop: '0.25rem' }}>Success</span>
                                                         </div>
                                                     )}
                                                 </div>
-                                                <div className="text-xs text-[var(--text-secondary)] flex justify-between">
-                                                    <span className="truncate max-w-[150px]" title={item.file.name}>{item.file.name}</span>
+
+                                                <div style={{
+                                                    display: 'flex',
+                                                    justifyContent: 'space-between',
+                                                    fontSize: '0.6875rem',
+                                                    color: 'var(--text-tertiary)',
+                                                    marginTop: '0.375rem',
+                                                }}>
+                                                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '130px' }}>{item.file.name}</span>
                                                     <span>{(item.file.size / (1024 * 1024)).toFixed(1)} MB</span>
                                                 </div>
 
                                                 {item.status !== 'uploading' && item.status !== 'success' && (
                                                     <button
                                                         onClick={() => removeItem(item.id)}
-                                                        className="absolute -top-2 -left-2 bg-red-500 text-white rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
-                                                        title="Hapus Video"
+                                                        style={{
+                                                            position: 'absolute',
+                                                            top: '-6px',
+                                                            left: '-6px',
+                                                            background: 'var(--error)',
+                                                            color: 'white',
+                                                            borderRadius: '50%',
+                                                            width: '24px',
+                                                            height: '24px',
+                                                            border: 'none',
+                                                            cursor: 'pointer',
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            justifyContent: 'center',
+                                                            opacity: 0,
+                                                            transition: 'opacity 0.2s ease',
+                                                        }}
+                                                        className="group-hover:!opacity-100"
                                                     >
                                                         <X size={14} />
                                                     </button>
                                                 )}
                                             </div>
 
-                                            {/* Right: Form */}
-                                            <div className="flex-1 flex flex-col gap-3">
-                                                <div className="flex items-center justify-between">
-                                                    <label className="font-semibold text-sm">Judul Video</label>
-                                                    <div className="flex items-center gap-2">
+                                            {/* Form */}
+                                            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                                    <label style={{ fontWeight: 600, fontSize: '0.8125rem' }}>Judul Video</label>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
                                                         <select
-                                                            className="bg-transparent border border-[var(--border)] px-2 py-1 rounded text-xs outline-none"
+                                                            className="input-field"
+                                                            style={{ padding: '0.25rem 0.375rem', fontSize: '0.75rem', width: 'auto', borderRadius: 'var(--radius-sm)' }}
                                                             value={item.language}
                                                             onChange={(e) => updateItem(item.id, { language: e.target.value })}
                                                             disabled={item.status === 'uploading' || item.status === 'generating'}
@@ -399,10 +488,11 @@ export default function UploadPage() {
                                                         <button
                                                             onClick={() => generateAIForItem(item)}
                                                             disabled={item.status === 'generating' || item.status === 'uploading'}
-                                                            className="flex items-center gap-1 text-[var(--accent)] hover:opacity-80 text-xs font-semibold px-2 py-1 border border-[var(--accent)] rounded"
+                                                            className="btn-ghost"
+                                                            style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem' }}
                                                         >
                                                             {item.status === 'generating' ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
-                                                            Autofill AI
+                                                            AI
                                                         </button>
                                                     </div>
                                                 </div>
@@ -410,23 +500,25 @@ export default function UploadPage() {
                                                     type="text"
                                                     disabled={item.status === 'uploading' || item.status === 'success' || item.status === 'generating'}
                                                     placeholder="Contoh: Tutorial Masak Keren"
-                                                    className="bg-transparent border-b border-[var(--border)] p-2 outline-none focus:border-[var(--accent)] w-full transition-colors text-sm"
+                                                    className="input-field"
+                                                    style={{ fontSize: '0.875rem' }}
                                                     value={item.title}
                                                     onChange={(e) => updateItem(item.id, { title: e.target.value })}
                                                 />
 
-                                                <label className="font-semibold text-sm mt-1">Deskripsi</label>
+                                                <label style={{ fontWeight: 600, fontSize: '0.8125rem' }}>Deskripsi</label>
                                                 <textarea
                                                     disabled={item.status === 'uploading' || item.status === 'success' || item.status === 'generating'}
                                                     placeholder="Jelaskan tentang video ini..."
                                                     rows={3}
-                                                    className="bg-transparent border border-[var(--border)] p-2 rounded-md outline-none focus:border-[var(--accent)] w-full transition-colors text-sm resize-none"
+                                                    className="input-field"
+                                                    style={{ fontSize: '0.875rem', resize: 'none' }}
                                                     value={item.description}
                                                     onChange={(e) => updateItem(item.id, { description: e.target.value })}
                                                 />
 
                                                 {item.status === 'error' && (
-                                                    <p className="text-red-500 text-xs font-semibold mt-1">{item.errorMessage}</p>
+                                                    <p style={{ color: 'var(--error)', fontSize: '0.75rem', fontWeight: 600 }}>{item.errorMessage}</p>
                                                 )}
                                             </div>
                                         </div>

@@ -1,46 +1,125 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Play, Eye, Calendar } from "lucide-react";
+import { Play, Eye, Clock } from "lucide-react";
 import { VideoMetadata } from "@/lib/videoService";
 
 export default function VideoCard({ video }: { video: VideoMetadata }) {
+    const createdDate = (() => {
+        try {
+            const d = video.createdAt?.toDate?.() || new Date(video.createdAt);
+            const now = new Date();
+            const diff = now.getTime() - d.getTime();
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            if (days === 0) return "Hari ini";
+            if (days === 1) return "Kemarin";
+            if (days < 7) return `${days} hari lalu`;
+            if (days < 30) return `${Math.floor(days / 7)} minggu lalu`;
+            return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+        } catch {
+            return "Baru saja";
+        }
+    })();
+
     return (
-        <article className="group glass overflow-hidden rounded-[var(--radius-md)] flex flex-col transition-all hover:scale-[1.02]">
-            <Link href={`/video/${video.slug}`} className="relative aspect-video overflow-hidden">
+        <article className="card animate-fade-in" style={{
+            overflow: 'hidden',
+            display: 'flex',
+            flexDirection: 'column',
+        }}>
+            {/* Thumbnail */}
+            <Link href={`/video/${video.slug}`} style={{
+                position: 'relative',
+                aspectRatio: '16/9',
+                overflow: 'hidden',
+                display: 'block',
+            }}>
                 <Image
                     src={video.thumbnailUrl}
                     alt={video.title}
                     fill
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                    className="object-cover transition-transform group-hover:scale-110"
+                    style={{
+                        objectFit: 'cover',
+                        transition: 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                    }}
+                    className="group-hover:scale-105"
                     priority={false}
                 />
-                <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                    <div className="bg-white/90 p-3 rounded-full text-[var(--accent)]">
-                        <Play size={24} fill="currentColor" />
+                {/* Play Overlay */}
+                <div style={{
+                    position: 'absolute',
+                    inset: 0,
+                    background: 'linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 60%)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    opacity: 0,
+                    transition: 'opacity 0.3s ease',
+                }} className="group-hover:!opacity-100">
+                    <div style={{
+                        background: 'rgba(255,255,255,0.95)',
+                        padding: '0.75rem',
+                        borderRadius: '50%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        boxShadow: '0 4px 16px rgba(0,0,0,0.2)',
+                    }}>
+                        <Play size={22} fill="var(--accent)" color="var(--accent)" />
                     </div>
                 </div>
             </Link>
 
-            <div className="p-4 flex flex-col gap-2">
-                <h3 className="font-bold text-lg leading-tight group-hover:text-[var(--accent)] transition-colors">
-                    <Link href={`/video/${video.slug}`}>
+            {/* Content */}
+            <div style={{
+                padding: '1rem 1.125rem',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '0.5rem',
+                flex: 1,
+            }}>
+                <h3 style={{
+                    fontWeight: 700,
+                    fontSize: '0.9375rem',
+                    lineHeight: 1.35,
+                    letterSpacing: '-0.01em',
+                }}>
+                    <Link href={`/video/${video.slug}`} style={{
+                        color: 'var(--text-primary)',
+                        textDecoration: 'none',
+                        transition: 'color 0.2s ease',
+                    }} className="line-clamp-2 hover:text-[var(--accent)]">
                         {video.title}
                     </Link>
                 </h3>
 
-                <p className="text-[var(--text-secondary)] text-sm line-clamp-2">
+                <p className="line-clamp-2" style={{
+                    color: 'var(--text-secondary)',
+                    fontSize: '0.8125rem',
+                    lineHeight: 1.5,
+                }}>
                     {video.description}
                 </p>
 
-                <div className="mt-4 flex items-center justify-between text-xs font-medium text-[var(--text-secondary)]">
-                    <div className="flex items-center gap-1.5">
-                        <Eye size={14} />
-                        <span>{video.views} views</span>
+                {/* Footer */}
+                <div style={{
+                    marginTop: 'auto',
+                    paddingTop: '0.625rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.75rem',
+                    fontSize: '0.75rem',
+                    color: 'var(--text-tertiary)',
+                    fontWeight: 500,
+                }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                        <Eye size={13} />
+                        <span>{video.views.toLocaleString()}</span>
                     </div>
-                    <div className="flex items-center gap-1.5">
-                        <Calendar size={14} />
-                        <span>{new Date(video.createdAt?.toDate?.() || video.createdAt).toLocaleDateString()}</span>
+                    <span style={{ opacity: 0.4 }}>•</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                        <Clock size={13} />
+                        <span>{createdDate}</span>
                     </div>
                 </div>
             </div>
