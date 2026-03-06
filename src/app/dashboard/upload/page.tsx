@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { Upload, FileVideo, CheckCircle, Loader2, X, Sparkles, Plus } from "lucide-react";
+import { Upload, FileVideo, CheckCircle, Loader2, X, Sparkles, Plus, Link as LinkIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { videoService } from "@/lib/videoService";
 import { useAuth } from "@/context/AuthContext";
@@ -235,11 +235,21 @@ export default function UploadPage() {
 
     return (
         <div className="animate-fade-in" style={{ maxWidth: '960px', margin: '0 auto', paddingTop: '2rem', paddingBottom: '2rem' }}>
-            <div style={{ marginBottom: '2rem' }}>
-                <h1 style={{ fontSize: '1.75rem', fontWeight: 800, letterSpacing: '-0.03em' }}>Upload Video</h1>
-                <p style={{ color: 'var(--text-secondary)', marginTop: '0.25rem', fontSize: '0.9375rem' }}>
-                    Select multiple videos, auto-fill data using AI, and upload!
-                </p>
+            <div style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                    <h1 style={{ fontSize: '1.75rem', fontWeight: 800, letterSpacing: '-0.03em' }}>Upload Video</h1>
+                    <p style={{ color: 'var(--text-secondary)', marginTop: '0.25rem', fontSize: '0.9375rem' }}>
+                        Select multiple videos, auto-fill data using AI, and upload!
+                    </p>
+                </div>
+                <button
+                    onClick={() => router.push("/dashboard/upload-link")}
+                    className="btn-secondary"
+                    style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+                >
+                    <LinkIcon size={18} />
+                    Upload by Link
+                </button>
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
