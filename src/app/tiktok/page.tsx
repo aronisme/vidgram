@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Download, Link as LinkIcon, Trash2, History, AlertCircle, CheckCircle2, Loader2, Music, User, Share2, Play } from 'lucide-react';
+import { Download, Link as LinkIcon, Trash2, History, AlertCircle, CheckCircle2, Loader2, Music, User, Share2, Play, Sparkles } from 'lucide-react';
 import { useToast } from '@/context/ToastContext';
 
 interface TikTokData {
