@@ -4,6 +4,7 @@ import "./globals.css";
 import Navbar from "@/components/Navbar";
 import { AuthProvider } from "@/context/AuthContext";
 import { ToastProvider } from "@/context/ToastContext";
+import Link from "next/link";
 
 const outfit = Outfit({ subsets: ["latin"], weight: ["300", "400", "500", "600", "700", "800"] });
 
@@ -17,6 +18,7 @@ export const metadata: Metadata = {
   authors: [{ name: "Vidgram" }],
   creator: "Vidgram",
   publisher: "Vidgram",
+  metadataBase: new URL('https://vidgram.web.id'),
   robots: {
     index: true,
     follow: true,
@@ -27,24 +29,6 @@ export const metadata: Metadata = {
       'max-image-preview': 'large',
       'max-snippet': -1,
     },
-  },
-  openGraph: {
-    title: "Unleash Your Creativity with Vidgram",
-    description: "The lightning-fast, beautiful video platform engineered for maximum discoverability and seamless streaming.",
-    url: "https://vidgram.web.id",
-    siteName: "Vidgram",
-    type: "website",
-    locale: "id_ID",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Unleash Your Creativity with Vidgram",
-    description: "The lightning-fast, beautiful video platform engineered for maximum discoverability and seamless streaming.",
-    creator: "@vidgram",
-  },
-  appleWebApp: {
-    title: "Vidgram",
-    statusBarStyle: "black-translucent",
   },
   icons: {
     icon: [
