@@ -1,4 +1,4 @@
-import { videoService } from "@/lib/videoService";
+import { serverVideoService } from "@/lib/serverVideoService";
 import { Metadata } from "next";
 import { Eye, Calendar } from "lucide-react";
 import VideoPlayer from "@/components/VideoPlayer";
@@ -6,13 +6,16 @@ import VideoActions from "@/components/VideoActions";
 import VideoComments from "@/components/VideoComments";
 import { notFound } from "next/navigation";
 
+// Force dynamic rendering — data is always fresh from Firestore
+export const dynamic = 'force-dynamic';
+
 interface Props {
     params: Promise<{ slug: string }>;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const resolvedParams = await params;
-    const video = await videoService.getVideoBySlug(resolvedParams.slug);
+    const video = await serverVideoService.getVideoBySlug(resolvedParams.slug);
 
     if (!video) {
         return {
@@ -57,13 +60,13 @@ export default async function VideoDetailPage({ params }: Props) {
     const resolvedParams = await params;
 
     const [video, recentVideos] = await Promise.all([
-        videoService.getVideoBySlug(resolvedParams.slug),
-        videoService.getVideos(11)
+        serverVideoService.getVideoBySlug(resolvedParams.slug),
+        serverVideoService.getVideos(11)
     ]);
 
     let uploaderProfile: any = null;
     if (video?.uploaderId) {
-        uploaderProfile = await videoService.getUserProfile(video.uploaderId);
+        uploaderProfile = await serverVideoService.getUserProfile(video.uploaderId);
     }
 
     if (!video) {
@@ -71,11 +74,11 @@ export default async function VideoDetailPage({ params }: Props) {
     }
 
     if (video.id) {
-        videoService.incrementViews(video.id).catch(console.error);
+        serverVideoService.incrementViews(video.id).catch(console.error);
     }
 
     const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://vidgram.web.id';
-    const createdAt = video.createdAt?.toDate?.() || new Date(video.createdAt);
+    const createdAt = new Date(video.createdAt);
 
     const jsonLd = {
         '@context': 'https://schema.org',

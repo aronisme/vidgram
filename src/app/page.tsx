@@ -1,10 +1,13 @@
-import { videoService } from "@/lib/videoService";
+import { serverVideoService } from "@/lib/serverVideoService";
 import VideoCard from "@/components/VideoCard";
 import { ArrowRight, Zap, Shield, Globe } from "lucide-react";
 import Link from "next/link";
 
+// Force dynamic rendering — data is always fresh from Firestore
+export const dynamic = 'force-dynamic';
+
 export default async function Home() {
-  const videos = await videoService.getVideos(6);
+  const videos = await serverVideoService.getVideos(6);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '4rem', paddingBottom: '2rem' }}>

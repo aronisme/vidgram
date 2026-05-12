@@ -13,8 +13,18 @@ const nextConfig: NextConfig = {
         hostname: 'via.placeholder.com',
         port: '',
       },
+      {
+        protocol: 'https',
+        hostname: 'lh3.googleusercontent.com',
+        port: '',
+      },
     ],
   },
+  // Vercel handles trailing slashes automatically
+  // Enable compression for better performance
+  compress: true,
+  // Powered by header is unnecessary — Vercel adds its own
+  poweredByHeader: false,
 };
 
 export default nextConfig;
