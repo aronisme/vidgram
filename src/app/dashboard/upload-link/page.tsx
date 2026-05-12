@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { CheckCircle, Loader2, Link as LinkIcon, Upload } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { videoService } from "@/lib/videoService";
