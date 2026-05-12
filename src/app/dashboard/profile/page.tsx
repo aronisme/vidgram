@@ -8,7 +8,7 @@ import { doc, updateDoc } from "firebase/firestore";
 import { LogOut, Loader2, Save } from "lucide-react";
 
 export default function ProfilePage() {
-    const { user, dbUser, signOut } = useAuth();
+    const { user, dbUser, loading, signOut } = useAuth();
     const { addToast } = useToast();
     const [isSaving, setIsSaving] = useState(false);
 
@@ -16,6 +16,12 @@ export default function ProfilePage() {
         displayName: "",
         bio: "",
     });
+
+    useEffect(() => {
+        if (!loading && !user) {
+            window.location.href = "/";
+        }
+    }, [user, loading]);
 
     useEffect(() => {
         if (dbUser) {
@@ -43,6 +49,14 @@ export default function ProfilePage() {
             setIsSaving(false);
         }
     };
+
+    if (loading) {
+        return (
+            <div style={{ display: 'flex', justifyContent: 'center', paddingTop: '5rem' }}>
+                <div className="spinner"></div>
+            </div>
+        );
+    }
 
     if (!user || !dbUser) return null;
 

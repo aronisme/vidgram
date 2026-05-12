@@ -8,9 +8,15 @@ import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/context/ToastContext";
 
 export default function UploadLinkPage() {
-    const { user } = useAuth();
+    const { user, loading } = useAuth();
     const { addToast } = useToast();
     const router = useRouter();
+
+    useEffect(() => {
+        if (!loading && !user) {
+            router.push("/");
+        }
+    }, [user, loading, router]);
 
     const [videoUrl, setVideoUrl] = useState("");
     const [title, setTitle] = useState("");
@@ -57,6 +63,16 @@ export default function UploadLinkPage() {
             setIsUploading(false);
         }
     };
+
+    if (loading) {
+        return (
+            <div style={{ display: 'flex', justifyContent: 'center', paddingTop: '5rem' }}>
+                <div className="spinner"></div>
+            </div>
+        );
+    }
+
+    if (!user) return null;
 
     return (
         <div className="animate-fade-in" style={{ maxWidth: '600px', margin: '0 auto', paddingTop: '2rem', paddingBottom: '2rem' }}>

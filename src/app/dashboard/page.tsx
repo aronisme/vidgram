@@ -8,7 +8,7 @@ import Image from "next/image";
 import { useAuth } from "@/context/AuthContext";
 
 export default function DashboardPage() {
-    const { user, dbUser } = useAuth();
+    const { user, dbUser, loading } = useAuth();
     const [videos, setVideos] = useState<VideoMetadata[]>([]);
     const [stats, setStats] = useState({ totalViews: 0, totalLikes: 0, totalVideos: 0 });
     const [isLoading, setIsLoading] = useState(true);
@@ -17,6 +17,12 @@ export default function DashboardPage() {
     const VIDEOS_PER_PAGE = 5;
 
     useEffect(() => {
+        if (!loading && !user) {
+            // If not logged in after auth check, redirect
+            window.location.href = "/";
+            return;
+        }
+
         if (!user) return;
 
         async function fetchData() {
@@ -37,7 +43,7 @@ export default function DashboardPage() {
             }
         }
         fetchData();
-    }, [user]);
+    }, [user, loading]);
 
     const loadMore = async () => {
         if (!user || isLoadingMore || !hasMore || videos.length === 0) return;
@@ -54,13 +60,15 @@ export default function DashboardPage() {
         }
     };
 
-    if (!user || isLoading) {
+    if (loading || (user && isLoading)) {
         return (
             <div style={{ paddingTop: '5rem', display: 'flex', justifyContent: 'center' }}>
                 <div className="spinner"></div>
             </div>
         );
     }
+
+    if (!user) return null;
 
     return (
         <div className="animate-fade-in" style={{ paddingTop: '1.5rem', paddingBottom: '2rem', display: 'flex', flexDirection: 'column', gap: '2rem' }}>

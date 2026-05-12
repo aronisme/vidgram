@@ -66,8 +66,8 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={outfit.className}>
-        <AuthProvider>
-          <ToastProvider>
+        <ToastProvider>
+          <AuthProvider>
             <Navbar />
             <main className="container" style={{ minHeight: 'calc(100vh - var(--navbar-height) - 120px)', paddingTop: '1rem' }}>
               {children}
@@ -77,8 +77,8 @@ export default function RootLayout({
                 <p style={{ fontWeight: 500 }}>© {new Date().getFullYear()} Vidgram. Crafted for creators.</p>
               </div>
             </footer>
-          </ToastProvider>
-        </AuthProvider>
+          </AuthProvider>
+        </ToastProvider>
       </body>
     </html>
   );

@@ -19,9 +19,15 @@ interface UploadItem {
 }
 
 export default function UploadPage() {
-    const { user } = useAuth();
+    const { user, loading } = useAuth();
     const { addToast } = useToast();
     const router = useRouter();
+
+    useEffect(() => {
+        if (!loading && !user) {
+            router.push("/");
+        }
+    }, [user, loading, router]);
 
     const [items, setItems] = useState<UploadItem[]>([]);
     const [globalLanguage, setGlobalLanguage] = useState("Indonesia");
@@ -232,6 +238,16 @@ export default function UploadPage() {
             router.push("/dashboard");
         }, 3000);
     }
+
+    if (loading) {
+        return (
+            <div style={{ display: 'flex', justifyContent: 'center', paddingTop: '5rem' }}>
+                <div className="spinner"></div>
+            </div>
+        );
+    }
+
+    if (!user) return null;
 
     return (
         <div className="animate-fade-in" style={{ maxWidth: '960px', margin: '0 auto', paddingTop: '2rem', paddingBottom: '2rem' }}>
