@@ -251,10 +251,10 @@ export default function NativeUpscalerPage() {
                 </div>
             )}
 
-            {(state === 'preview' || state === 'processing' || state === 'complete') && (
+            {(state === 'loading' || state === 'preview' || state === 'processing' || state === 'complete') && (
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: '2rem' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                        <div className="card" style={{ padding: '1rem', background: '#000', borderRadius: 'var(--radius-lg)', overflow: 'hidden' }}>
+                        <div className="card" style={{ padding: '1rem', background: '#000', borderRadius: 'var(--radius-lg)', overflow: 'hidden', display: state === 'loading' ? 'none' : 'block' }}>
                             <div style={{ display: 'flex', gap: '1px', background: '#333' }}>
                                 <div style={{ flex: 1, position: 'relative' }}>
                                     <div style={{ position: 'absolute', top: 10, left: 10, background: 'rgba(0,0,0,0.6)', color: 'white', padding: '2px 8px', borderRadius: 4, fontSize: 12, zIndex: 10 }}>Original</div>
@@ -293,7 +293,7 @@ export default function NativeUpscalerPage() {
                         )}
                     </div>
 
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                    <div style={{ display: state === 'loading' ? 'none' : 'flex', flexDirection: 'column', gap: '1rem' }}>
                         <div className="card" style={{ padding: '1.5rem' }}>
                             <h3 style={{ fontWeight: 700, marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Settings size={18} /> Pengaturan</h3>
                             
