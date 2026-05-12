@@ -105,6 +105,25 @@ export default function Navbar() {
                         Discovery
                     </Link>
 
+                    <Link href="/upscaler" style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.375rem',
+                        textDecoration: 'none',
+                        fontSize: '0.875rem',
+                        padding: '0.5rem 1rem',
+                        borderRadius: '9999px',
+                        fontWeight: 500,
+                        color: 'var(--text-secondary)',
+                        transition: 'all 0.2s ease',
+                    }}
+                        onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--accent-light)'; e.currentTarget.style.color = 'var(--accent)'; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--text-secondary)'; }}
+                    >
+                        <Sparkles size={16} />
+                        Upscaler
+                    </Link>
+
                     {user ? (
                         <>
                             <Link href="/dashboard" style={{
@@ -124,25 +143,6 @@ export default function Navbar() {
                             >
                                 <BarChart3 size={16} />
                                 Dashboard
-                            </Link>
-
-                            <Link href="/dashboard/upscaler" style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '0.375rem',
-                                textDecoration: 'none',
-                                fontSize: '0.875rem',
-                                padding: '0.5rem 1rem',
-                                borderRadius: '9999px',
-                                fontWeight: 500,
-                                color: 'var(--text-secondary)',
-                                transition: 'all 0.2s ease',
-                            }}
-                                onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--accent-light)'; e.currentTarget.style.color = 'var(--accent)'; }}
-                                onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--text-secondary)'; }}
-                            >
-                                <Sparkles size={16} />
-                                Upscaler
                             </Link>
 
                             <Link href="/dashboard/upload" style={{
@@ -298,16 +298,16 @@ export default function Navbar() {
                             <Search size={18} />
                             Discovery
                         </Link>
+                        <Link href="/upscaler" className="mobile-nav-link" onClick={closeMobileMenu}>
+                            <Sparkles size={18} />
+                            Upscaler
+                        </Link>
 
                         {user ? (
                             <>
                                 <Link href="/dashboard" className="mobile-nav-link" onClick={closeMobileMenu}>
                                     <BarChart3 size={18} />
                                     Dashboard
-                                </Link>
-                                <Link href="/dashboard/upscaler" className="mobile-nav-link" onClick={closeMobileMenu}>
-                                    <Sparkles size={18} />
-                                    Upscaler
                                 </Link>
                                 <Link href="/dashboard/upload" className="mobile-nav-link" onClick={closeMobileMenu}>
                                     <Upload size={18} />

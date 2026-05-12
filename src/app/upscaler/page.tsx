@@ -9,7 +9,6 @@ import { useToast } from "@/context/ToastContext";
 type ProcessingState = 'init' | 'loading' | 'preview' | 'processing' | 'complete' | 'error';
 
 export default function NativeUpscalerPage() {
-    const { user, loading: authLoading } = useAuth();
     const router = useRouter();
     const { addToast } = useToast();
 
@@ -31,11 +30,7 @@ export default function NativeUpscalerPage() {
     const fileRef = useRef<File | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    useEffect(() => {
-        if (!authLoading && !user) {
-            router.push("/");
-        }
-    }, [user, authLoading, router]);
+
 
     useEffect(() => {
         // Initialize worker
@@ -222,8 +217,7 @@ export default function NativeUpscalerPage() {
         setTimeout(() => updateNetwork(), 100);
     };
 
-    if (authLoading) return <div style={{ display: 'flex', justifyContent: 'center', paddingTop: '5rem' }}><div className="spinner"></div></div>;
-    if (!user) return null;
+
 
     return (
         <div className="animate-fade-in" style={{ maxWidth: '1000px', margin: '0 auto', paddingTop: '2rem', paddingBottom: '3rem' }}>
