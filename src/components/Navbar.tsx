@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { BarChart3, Upload, Search, LogIn, LogOut, User as UserIcon, Menu, X } from "lucide-react";
+import { BarChart3, Upload, Search, LogIn, LogOut, User as UserIcon, Menu, X, Sparkles } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 
 export default function Navbar() {
@@ -124,6 +124,25 @@ export default function Navbar() {
                             >
                                 <BarChart3 size={16} />
                                 Dashboard
+                            </Link>
+
+                            <Link href="/dashboard/upscaler" style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.375rem',
+                                textDecoration: 'none',
+                                fontSize: '0.875rem',
+                                padding: '0.5rem 1rem',
+                                borderRadius: '9999px',
+                                fontWeight: 500,
+                                color: 'var(--text-secondary)',
+                                transition: 'all 0.2s ease',
+                            }}
+                                onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--accent-light)'; e.currentTarget.style.color = 'var(--accent)'; }}
+                                onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--text-secondary)'; }}
+                            >
+                                <Sparkles size={16} />
+                                Upscaler
                             </Link>
 
                             <Link href="/dashboard/upload" style={{
@@ -285,6 +304,10 @@ export default function Navbar() {
                                 <Link href="/dashboard" className="mobile-nav-link" onClick={closeMobileMenu}>
                                     <BarChart3 size={18} />
                                     Dashboard
+                                </Link>
+                                <Link href="/dashboard/upscaler" className="mobile-nav-link" onClick={closeMobileMenu}>
+                                    <Sparkles size={18} />
+                                    Upscaler
                                 </Link>
                                 <Link href="/dashboard/upload" className="mobile-nav-link" onClick={closeMobileMenu}>
                                     <Upload size={18} />
