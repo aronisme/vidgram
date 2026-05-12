@@ -39,9 +39,11 @@ export default function TikTokDownloader() {
   const [downloading, setDownloading] = useState(false);
   const [result, setResult] = useState<TikTokData | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
   const [history, setHistory] = useState<HistoryItem[]>([]);
 
   useEffect(() => {
+    setMounted(true);
     const savedHistory = localStorage.getItem('tiktok_download_history');
     if (savedHistory) {
       try {
@@ -263,23 +265,23 @@ export default function TikTokDownloader() {
                   <div style={{ marginBottom: '2rem' }}>
                     <h2 style={{ fontSize: '1.75rem', fontWeight: 800, marginBottom: '1rem', lineHeight: 1.2, letterSpacing: '-0.02em' }}>{result.title || 'TikTok Video'}</h2>
                     <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-                      <div className="badge badge-success"><Play size={12} /> {result.statistics.play_count.toLocaleString()} Views</div>
-                      <div className="badge badge-accent"><Download size={12} /> {result.statistics.download_count.toLocaleString()} Saves</div>
+                      <div className="badge badge-success"><Play size={12} /> {result.statistics?.play_count?.toLocaleString() || '0'} Views</div>
+                      <div className="badge badge-accent"><Download size={12} /> {result.statistics?.download_count?.toLocaleString() || '0'} Saves</div>
                     </div>
                   </div>
                   
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', marginBottom: '2.5rem' }}>
                     <div className="stat-card" style={{ padding: '1rem', textAlign: 'center' }}>
                       <p style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', textTransform: 'uppercase', fontWeight: 700, marginBottom: '0.25rem' }}>Likes</p>
-                      <p style={{ fontSize: '1.25rem', fontWeight: 800 }}>{result.statistics.digg_count.toLocaleString()}</p>
+                      <p style={{ fontSize: '1.25rem', fontWeight: 800 }}>{result.statistics?.digg_count?.toLocaleString() || '0'}</p>
                     </div>
                     <div className="stat-card" style={{ padding: '1rem', textAlign: 'center' }}>
                       <p style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', textTransform: 'uppercase', fontWeight: 700, marginBottom: '0.25rem' }}>Shares</p>
-                      <p style={{ fontSize: '1.25rem', fontWeight: 800 }}>{result.statistics.share_count.toLocaleString()}</p>
+                      <p style={{ fontSize: '1.25rem', fontWeight: 800 }}>{result.statistics?.share_count?.toLocaleString() || '0'}</p>
                     </div>
                     <div className="stat-card" style={{ padding: '1rem', textAlign: 'center' }}>
                       <p style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', textTransform: 'uppercase', fontWeight: 700, marginBottom: '0.25rem' }}>Comments</p>
-                      <p style={{ fontSize: '1.25rem', fontWeight: 800 }}>{result.statistics.comment_count.toLocaleString()}</p>
+                      <p style={{ fontSize: '1.25rem', fontWeight: 800 }}>{result.statistics?.comment_count?.toLocaleString() || '0'}</p>
                     </div>
                   </div>
 
@@ -336,14 +338,18 @@ export default function TikTokDownloader() {
               <h3 style={{ fontSize: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.625rem', fontWeight: 700 }}>
                 <History size={20} className="text-[var(--accent)]" /> History
               </h3>
-              {history.length > 0 && (
+              {mounted && history.length > 0 && (
                 <button onClick={clearHistory} style={{ background: 'transparent', border: 'none', color: 'var(--error)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.8125rem', fontWeight: 700 }}>
                   <Trash2 size={16} /> Clear
                 </button>
               )}
             </div>
 
-            {history.length === 0 ? (
+            {!mounted ? (
+               <div style={{ textAlign: 'center', padding: '3rem 0', color: 'var(--text-tertiary)' }}>
+                <Loader2 className="spinner" style={{ width: '24px', height: '24px', margin: '0 auto' }} />
+              </div>
+            ) : history.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '3rem 0', color: 'var(--text-tertiary)' }}>
                 <p style={{ fontSize: '1rem' }}>No downloads yet.</p>
               </div>
