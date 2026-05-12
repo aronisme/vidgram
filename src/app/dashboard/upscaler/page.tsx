@@ -28,7 +28,8 @@ export default function NativeUpscalerPage() {
     const originalCanvasRef = useRef<HTMLCanvasElement>(null);
     const upscaledCanvasRef = useRef<HTMLCanvasElement>(null);
     const workerRef = useRef<Worker | null>(null);
-    const fileHandleRef = useRef<any>(null); // FileSystemFileHandle
+    const fileRef = useRef<File | null>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
         if (!authLoading && !user) {
@@ -82,16 +83,18 @@ export default function NativeUpscalerPage() {
         }
     };
 
-    const handleFileSelect = async () => {
+    const handleFileSelectClick = () => {
+        if (fileInputRef.current) {
+            fileInputRef.current.click();
+        }
+    };
+
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         try {
-            // @ts-ignore
-            const [fileHandle] = await window.showOpenFilePicker({
-                types: [{ description: 'Video Files', accept: { 'video/mp4': ['.mp4'] } }],
-                multiple: false
-            });
-            fileHandleRef.current = fileHandle;
-            const file = await fileHandle.getFile();
-            
+            const file = e.target.files?.[0];
+            if (!file) return;
+
+            fileRef.current = file;
             setState('loading');
             
             const arrayBuffer = await file.arrayBuffer();
@@ -103,10 +106,8 @@ export default function NativeUpscalerPage() {
                     setupPreview(videoRef.current!, file.name);
                 };
             }
-        } catch (e: any) {
-            if (e.name !== 'AbortError') {
-                addToast("Gagal membuka file: " + e.message, "error");
-            }
+        } catch (error: any) {
+            addToast("Gagal membuka file: " + error.message, "error");
         }
     };
 
@@ -192,14 +193,14 @@ export default function NativeUpscalerPage() {
     };
 
     const startProcessing = async () => {
-        if (!workerRef.current || !fileHandleRef.current || !videoRef.current) return;
+        if (!workerRef.current || !fileRef.current || !videoRef.current) return;
         setState('processing');
         setProgress(0);
         
         try {
             workerRef.current.postMessage({
                 cmd: 'process',
-                inputHandle: fileHandleRef.current,
+                file: fileRef.current,
                 outputHandle: null, // will use memory buffer
                 width: videoRef.current.videoWidth,
                 height: videoRef.current.videoHeight,
@@ -236,7 +237,7 @@ export default function NativeUpscalerPage() {
             </div>
 
             {state === 'init' && (
-                <div className="card" style={{ padding: '4rem', textAlign: 'center', cursor: 'pointer', border: '2px dashed var(--border)' }} onClick={handleFileSelect}>
+                <div className="card" style={{ padding: '4rem', textAlign: 'center', cursor: 'pointer', border: '2px dashed var(--border)' }} onClick={handleFileSelectClick}>
                     <Upload size={48} style={{ margin: '0 auto', color: 'var(--accent)' }} />
                     <h3 style={{ marginTop: '1.5rem', fontSize: '1.25rem', fontWeight: 700 }}>Pilih Video (.mp4)</h3>
                     <p style={{ color: 'var(--text-secondary)', marginTop: '0.5rem' }}>Video akan diproses secara lokal 100% tanpa upload.</p>
@@ -339,7 +340,14 @@ export default function NativeUpscalerPage() {
                 </div>
             )}
 
-            {/* Hidden video element for preview sourcing */}
+            {/* Hidden inputs for functionality */}
+            <input 
+                type="file" 
+                accept="video/mp4" 
+                ref={fileInputRef} 
+                onChange={handleFileChange} 
+                style={{ display: 'none' }} 
+            />
             <video ref={videoRef} style={{ display: 'none' }} muted playsInline />
         </div>
     );

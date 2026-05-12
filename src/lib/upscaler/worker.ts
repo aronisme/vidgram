@@ -638,8 +638,7 @@ self.onmessage = async function (event: MessageEvent<WorkerRequestMessage>) {
 
       case 'process':
         if (event.data.cmd === 'process') {
-          // Get Blob from FileSystemFileHandle
-          const file = await event.data.inputHandle.getFile();
+          const file = event.data.file;
           await initRecording(
             file,
             event.data.outputHandle,

@@ -15,7 +15,7 @@ export type WorkerRequestMessage =
   | { cmd: 'network'; data: NetworkData }
   | {
     cmd: 'process';
-    inputHandle: FileSystemFileHandle;
+    file: File;
     outputHandle?: FileSystemFileHandle;
     useAV1?: boolean;
     networkSize?: 'small' | 'medium' | 'large';
