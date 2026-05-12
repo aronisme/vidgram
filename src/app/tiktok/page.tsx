@@ -234,7 +234,7 @@ export default function TikTokDownloader() {
 
           {result && (
             <div className="card animate-slide-up" style={{ overflow: 'hidden', border: '1px solid var(--border)' }}>
-              <div style={{ display: 'flex', flexDirection: 'column', lg: { flexDirection: 'row' } }}>
+              <div className="responsive-card-content">
                 {/* Preview Section */}
                 <div style={{ position: 'relative', width: '100%', maxWidth: '100%', aspectRatio: '9/16', backgroundColor: '#000', overflow: 'hidden', flexShrink: 0 }}>
                   <img

@@ -625,6 +625,17 @@ select {
   }
 }
 
+.responsive-card-content {
+  display: flex;
+  flex-direction: column;
+}
+
+@media (min-width: 1024px) {
+  .responsive-card-content {
+    flex-direction: row;
+  }
+}
+
 .video-sidebar {
   display: flex;
   flex-direction: column;
