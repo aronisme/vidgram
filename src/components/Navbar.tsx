@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { BarChart3, Upload, Search, LogIn, LogOut, User as UserIcon, Menu, X, Sparkles } from "lucide-react";
+import { BarChart3, Upload, Search, LogIn, LogOut, User as UserIcon, Menu, X, Sparkles, Download } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 
 export default function Navbar() {
@@ -103,6 +103,25 @@ export default function Navbar() {
                     >
                         <Search size={16} />
                         Discovery
+                    </Link>
+
+                    <Link href="/tiktok" style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.375rem',
+                        textDecoration: 'none',
+                        fontSize: '0.875rem',
+                        padding: '0.5rem 1rem',
+                        borderRadius: '9999px',
+                        fontWeight: 500,
+                        color: 'var(--text-secondary)',
+                        transition: 'all 0.2s ease',
+                    }}
+                        onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--accent-light)'; e.currentTarget.style.color = 'var(--accent)'; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--text-secondary)'; }}
+                    >
+                        <Download size={16} />
+                        TikTok
                     </Link>
 
                     <Link href="/upscaler" style={{
@@ -297,6 +316,10 @@ export default function Navbar() {
                         <Link href="/discovery" className="mobile-nav-link" onClick={closeMobileMenu}>
                             <Search size={18} />
                             Discovery
+                        </Link>
+                        <Link href="/tiktok" className="mobile-nav-link" onClick={closeMobileMenu}>
+                            <Download size={18} />
+                            TikTok Downloader
                         </Link>
                         <Link href="/upscaler" className="mobile-nav-link" onClick={closeMobileMenu}>
                             <Sparkles size={18} />
