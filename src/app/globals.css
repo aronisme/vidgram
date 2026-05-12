@@ -636,6 +636,17 @@ select {
   }
 }
 
+.preview-container {
+  position: relative;
+  width: 100%;
+}
+
+@media (min-width: 1024px) {
+  .preview-container {
+    width: 380px;
+  }
+}
+
 .video-sidebar {
   display: flex;
   flex-direction: column;
