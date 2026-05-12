@@ -121,7 +121,7 @@ export default function Navbar() {
                         onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--text-secondary)'; }}
                     >
                         <Download size={16} />
-                        TikTok
+                        TikTok Pro
                     </Link>
 
                     <Link href="/upscaler" style={{

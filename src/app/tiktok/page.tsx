@@ -121,8 +121,8 @@ export default function TikTokDownloader() {
           <div className="badge badge-accent" style={{ marginBottom: '1.5rem' }}>
             <Sparkles size={14} /> AI Powered
           </div>
-          <h1 style={{ fontSize: 'clamp(2.5rem, 5vw, 4rem)', fontWeight: 800, marginBottom: '1rem', letterSpacing: '-0.04em', lineHeight: 1.1 }}>
-            TikTok <span style={{ color: 'var(--accent)' }}>Pro Downloader</span>
+            <h1 style={{ fontSize: 'clamp(2.5rem, 5vw, 4rem)', fontWeight: 800, marginBottom: '1rem', letterSpacing: '-0.04em', lineHeight: 1.1 }}>
+            TikTok <span style={{ color: 'var(--accent)' }}>Downloader Pro</span>
           </h1>
           <p style={{ color: 'var(--text-secondary)', fontSize: '1.25rem', maxWidth: '600px', margin: '0 auto 2.5rem', fontWeight: 500 }}>
             Save TikTok videos without watermarks instantly.
