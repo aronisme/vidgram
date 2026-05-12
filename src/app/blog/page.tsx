@@ -65,23 +65,7 @@ export default function BlogPage() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><User size={14} /> {post.author}</div>
               </div>
             </div>
-            <Link href={`/blog/${post.slug}`} style={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'center', 
-              gap: '0.5rem', 
-              padding: '1.25rem', 
-              background: 'var(--bg-tertiary)', 
-              color: 'var(--text-primary)', 
-              textDecoration: 'none',
-              fontWeight: 600,
-              borderBottomLeftRadius: 'var(--radius-xl)',
-              borderBottomRightRadius: 'var(--radius-xl)',
-              transition: 'background 0.2s ease'
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.background = 'var(--border)'}
-            onMouseLeave={(e) => e.currentTarget.style.background = 'var(--bg-tertiary)'}
-            >
+            <Link href={`/blog/${post.slug}`} className="blog-card-link">
               Read Article <ArrowRight size={16} />
             </Link>
           </article>

@@ -466,6 +466,25 @@ select {
   margin-bottom: 0.5rem;
 }
 
+.blog-card-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1.25rem;
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  text-decoration: none;
+  font-weight: 600;
+  border-bottom-left-radius: var(--radius-xl);
+  border-bottom-right-radius: var(--radius-xl);
+  transition: background 0.2s ease;
+}
+
+.blog-card-link:hover {
+  background: var(--border);
+}
+
 .stagger-children>*:nth-child(4) {
   animation-delay: 180ms;
 }
