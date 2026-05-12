@@ -9,10 +9,13 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@webgpu/types": "^0.1.70",
+    "@websr/websr": "^0.0.16",
     "cloudinary-build-url": "^0.2.4",
     "firebase": "^12.10.0",
     "groq-sdk": "^0.37.0",
     "lucide-react": "^0.576.0",
+    "mediabunny": "^1.44.2",
     "next": "16.1.6",
     "react": "19.2.3",
     "react-dom": "19.2.3"
