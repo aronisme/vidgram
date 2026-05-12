@@ -109,6 +109,7 @@ export default function RootLayout({
                       <li><Link href="/about" className="footer-link">About Us</Link></li>
                       <li><Link href="/blog" className="footer-link">Blog & Guides</Link></li>
                       <li><Link href="/help" className="footer-link">Help Center</Link></li>
+                      <li><Link href="/contact" className="footer-link">Contact Us</Link></li>
                     </ul>
                   </div>
 
