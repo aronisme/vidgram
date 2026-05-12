@@ -1,6 +1,6 @@
 import { serverVideoService } from "@/lib/serverVideoService";
 import VideoCard from "@/components/VideoCard";
-import { ArrowRight, Zap, Shield, Globe } from "lucide-react";
+import { ArrowRight, Zap, Shield, Globe, Sparkles } from "lucide-react";
 import Link from "next/link";
 
 // Force dynamic rendering — data is always fresh from Firestore
@@ -55,6 +55,22 @@ export default async function Home() {
         </p>
 
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', justifyContent: 'center', marginTop: '0.5rem' }}>
+          <Link href="/upscaler" style={{
+            background: 'rgba(99, 102, 241, 0.1)',
+            color: 'var(--accent)',
+            padding: '0.75rem 2rem',
+            borderRadius: '9999px',
+            fontWeight: 700,
+            fontSize: '0.9375rem',
+            border: '1.5px solid var(--accent)',
+            textDecoration: 'none',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            transition: 'all 0.25s ease',
+          }}>
+            <Sparkles size={18} /> AI Video Upscaler
+          </Link>
           <Link href="/dashboard/upload" style={{
             background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
             color: 'white',
@@ -131,9 +147,16 @@ export default async function Home() {
       {/* Features Section */}
       <section style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
         gap: '1.5rem',
       }} className="stagger-children">
+        <div className="card" style={{ padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <div style={{ background: 'var(--gradient-primary)', width: '48px', height: '48px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', boxShadow: '0 4px 12px rgba(99, 102, 241, 0.3)' }}>
+            <Sparkles size={24} />
+          </div>
+          <h3 style={{ fontSize: '1.25rem', fontWeight: 700 }}>AI Upscaling</h3>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.9375rem' }}>Enhance your videos to 1080p and 4K quality using WebGPU power directly in your browser.</p>
+        </div>
         <div className="card" style={{ padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <div style={{ background: 'var(--gradient-primary)', width: '48px', height: '48px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', boxShadow: '0 4px 12px rgba(99, 102, 241, 0.3)' }}>
             <Zap size={24} />
