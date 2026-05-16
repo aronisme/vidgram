@@ -144,6 +144,74 @@ export default async function Home() {
         )}
       </section>
 
+      {/* Dark Ai Section */}
+      <section className="animate-slide-up" style={{
+        background: 'var(--bg-secondary)',
+        borderRadius: 'var(--radius-xl)',
+        padding: '3rem 2rem',
+        border: '1px solid var(--border)',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '2rem',
+        alignItems: 'center',
+        textAlign: 'center'
+      }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+          <h2 style={{ fontSize: '1.75rem', fontWeight: 800 }}>Tanya Dark Ai</h2>
+          <p style={{ color: 'var(--text-secondary)', maxWidth: '500px' }}>
+            Butuh ide konten atau bantuan teknis? Asisten cerdas kami siap membantu Anda 24/7.
+          </p>
+        </div>
+
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+          gap: '1rem',
+          width: '100%',
+          maxWidth: '800px'
+        }}>
+          <Link href="/dark-ai?q=Bantu saya buat skrip video viral" className="card" style={{
+            padding: '1.5rem',
+            textDecoration: 'none',
+            textAlign: 'left',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '1rem',
+            background: 'var(--bg-primary)'
+          }}>
+            <div style={{ background: 'var(--accent-light)', color: 'var(--accent)', padding: '0.75rem', borderRadius: '12px' }}>
+              <Zap size={20} />
+            </div>
+            <div>
+              <h4 style={{ color: 'var(--text-primary)', fontWeight: 700, fontSize: '1rem' }}>Skrip Video Viral</h4>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>Buat konsep konten dalam hitungan detik.</p>
+            </div>
+          </Link>
+
+          <Link href="/dark-ai?q=Optimasi judul dan deskripsi video saya" className="card" style={{
+            padding: '1.5rem',
+            textDecoration: 'none',
+            textAlign: 'left',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '1rem',
+            background: 'var(--bg-primary)'
+          }}>
+            <div style={{ background: 'var(--accent-light)', color: 'var(--accent)', padding: '0.75rem', borderRadius: '12px' }}>
+              <Globe size={20} />
+            </div>
+            <div>
+              <h4 style={{ color: 'var(--text-primary)', fontWeight: 700, fontSize: '1rem' }}>Optimasi SEO</h4>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>Judul & deskripsi yang menarik penonton.</p>
+            </div>
+          </Link>
+        </div>
+
+        <Link href="/dark-ai" className="btn-primary">
+          Coba Dark Ai Sekarang <ArrowRight size={18} />
+        </Link>
+      </section>
+
       {/* Features Section */}
       <section style={{
         display: 'grid',

@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { BarChart3, Upload, Search, LogIn, LogOut, User as UserIcon, Menu, X, Sparkles, Download } from "lucide-react";
+import { BarChart3, Upload, Search, LogIn, LogOut, User as UserIcon, Menu, X, Sparkles, Download, Bot } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 
 export default function Navbar() {
@@ -141,6 +141,25 @@ export default function Navbar() {
                     >
                         <Sparkles size={16} />
                         Upscaler
+                    </Link>
+
+                    <Link href="/dark-ai" style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.375rem',
+                        textDecoration: 'none',
+                        fontSize: '0.875rem',
+                        padding: '0.5rem 1rem',
+                        borderRadius: '9999px',
+                        fontWeight: 500,
+                        color: 'var(--text-secondary)',
+                        transition: 'all 0.2s ease',
+                    }}
+                        onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--accent-light)'; e.currentTarget.style.color = 'var(--accent)'; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--text-secondary)'; }}
+                    >
+                        <Bot size={16} />
+                        Dark Ai
                     </Link>
 
                     {user ? (
@@ -324,6 +343,10 @@ export default function Navbar() {
                         <Link href="/upscaler" className="mobile-nav-link" onClick={closeMobileMenu}>
                             <Sparkles size={18} />
                             Upscaler
+                        </Link>
+                        <Link href="/dark-ai" className="mobile-nav-link" onClick={closeMobileMenu}>
+                            <Bot size={18} />
+                            Dark Ai
                         </Link>
 
                         {user ? (
