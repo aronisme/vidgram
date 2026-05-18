@@ -820,3 +820,52 @@ select {
     border-radius: var(--radius-lg) !important;
   }
 }
+
+/* ── Premium Downloader Custom Styles ── */
+.btn-instagram {
+  background: linear-gradient(135deg, rgba(238, 42, 123, 0.1) 0%, rgba(98, 40, 215, 0.1) 100%);
+  color: #ee2a7b;
+  border: 1.5px solid rgba(238, 42, 123, 0.4);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-instagram:hover {
+  background: linear-gradient(135deg, #f9ce34 10%, #ee2a7b 50%, #6228d7 100%) !important;
+  color: white !important;
+  border-color: transparent !important;
+  box-shadow: 0 4px 15px rgba(238, 42, 123, 0.4) !important;
+}
+
+.btn-tiktok {
+  background: linear-gradient(135deg, rgba(0, 242, 234, 0.1) 0%, rgba(255, 0, 127, 0.1) 100%);
+  color: #00c3bc;
+  border: 1.5px solid rgba(0, 242, 234, 0.4);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-tiktok:hover {
+  background: linear-gradient(135deg, #00f2ea, #ff007f) !important;
+  color: white !important;
+  border-color: transparent !important;
+  box-shadow: 0 4px 15px rgba(0, 242, 234, 0.4) !important;
+}
+
+.card-instagram {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.card-instagram:hover {
+  border-color: #ee2a7b !important;
+  box-shadow: 0 8px 30px rgba(238, 42, 123, 0.15) !important;
+  transform: translateY(-4px) !important;
+}
+
+.card-tiktok {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.card-tiktok:hover {
+  border-color: #00f2ea !important;
+  box-shadow: 0 8px 30px rgba(0, 242, 234, 0.15) !important;
+  transform: translateY(-4px) !important;
+}

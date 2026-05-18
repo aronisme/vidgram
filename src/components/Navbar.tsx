@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { BarChart3, Upload, Search, LogIn, LogOut, User as UserIcon, Menu, X, Sparkles, Download, Bot } from "lucide-react";
+import { BarChart3, Upload, Search, LogIn, LogOut, User as UserIcon, Menu, X, Sparkles, Download, Bot, Instagram } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 
 export default function Navbar() {
@@ -122,6 +122,25 @@ export default function Navbar() {
                     >
                         <Download size={16} />
                         TikTok Pro
+                    </Link>
+
+                    <Link href="/instagram" style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.375rem',
+                        textDecoration: 'none',
+                        fontSize: '0.875rem',
+                        padding: '0.5rem 1rem',
+                        borderRadius: '9999px',
+                        fontWeight: 500,
+                        color: 'var(--text-secondary)',
+                        transition: 'all 0.2s ease',
+                    }}
+                        onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--accent-light)'; e.currentTarget.style.color = 'var(--accent)'; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--text-secondary)'; }}
+                    >
+                        <Instagram size={16} />
+                        Instagram Pro
                     </Link>
 
                     <Link href="/upscaler" style={{
@@ -339,6 +358,10 @@ export default function Navbar() {
                         <Link href="/tiktok" className="mobile-nav-link" onClick={closeMobileMenu}>
                             <Download size={18} />
                             TikTok Downloader
+                        </Link>
+                        <Link href="/instagram" className="mobile-nav-link" onClick={closeMobileMenu}>
+                            <Instagram size={18} />
+                            Instagram Downloader
                         </Link>
                         <Link href="/upscaler" className="mobile-nav-link" onClick={closeMobileMenu}>
                             <Sparkles size={18} />

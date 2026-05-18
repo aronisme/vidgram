@@ -14,6 +14,7 @@
     "cloudinary-build-url": "^0.2.4",
     "firebase": "^12.10.0",
     "groq-sdk": "^0.37.0",
+    "instagram-url-direct": "^2.0.7",
     "lucide-react": "^0.576.0",
     "mediabunny": "^1.44.2",
     "next": "16.1.6",
