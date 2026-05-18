@@ -262,32 +262,59 @@ export default function UploadPage() {
     //            IMAGE LOGIC
     // ==========================================
 
-    const fileToBase64 = (file: File): Promise<string> => {
+    const compressImageToBase64 = (file: File): Promise<string> => {
         return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = () => resolve(reader.result as string);
-            reader.onerror = error => reject(error);
+            const objectUrl = URL.createObjectURL(file);
+            const img = new window.Image();
+            img.onload = () => {
+                const canvas = document.createElement("canvas");
+                const maxSize = 640;
+                let width = img.width;
+                let height = img.height;
+                
+                if (width > height) {
+                    if (width > maxSize) {
+                        height *= maxSize / width;
+                        width = maxSize;
+                    }
+                } else {
+                    if (height > maxSize) {
+                        width *= maxSize / height;
+                        height = maxSize;
+                    }
+                }
+                
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext("2d");
+                if (ctx) {
+                    ctx.drawImage(img, 0, 0, width, height);
+                    resolve(canvas.toDataURL("image/jpeg", 0.7)); // compress kualitas 70%
+                } else {
+                    resolve("");
+                }
+                URL.revokeObjectURL(objectUrl);
+            };
+            img.onerror = reject;
+            img.src = objectUrl;
         });
     };
 
-    const generateAIForImagePost = async () => {
-        if (imageFiles.length === 0) {
-            addToast("Pilih setidaknya 1 gambar terlebih dahulu.", "info");
-            return;
-        }
+    const generateAIForSpecificImage = async (id: string) => {
+        const targetImg = imageFiles.find(i => i.id === id);
+        if (!targetImg) return;
 
         setIsGeneratingImageAI(true);
         try {
-            const firstFile = imageFiles[0].file;
-            const base64Img = await fileToBase64(firstFile);
+            // Kompresi sebelum diubah ke base64 agar payload tidak membengkak
+            const base64Img = await compressImageToBase64(targetImg.file);
 
             const res = await fetch("/api/generate-metadata", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     imageBase64: base64Img,
-                    filename: firstFile.name,
+                    filename: targetImg.file.name,
                     language: imageLanguage
                 })
             });
@@ -297,7 +324,7 @@ export default function UploadPage() {
 
             setImageTitle(data.title || imageTitle);
             setImageDescription(data.description || imageDescription);
-            addToast(`AI berhasil menganalisis gambar pertama!`, "success");
+            addToast(`AI berhasil menganalisis gambar!`, "success");
         } catch (error: any) {
             console.error("AI Error:", error);
             addToast(`AI failed: ${error.message}`, "error");
@@ -722,6 +749,19 @@ export default function UploadPage() {
                                     {imageFiles.map((img) => (
                                         <div key={img.id} style={{ position: 'relative', aspectRatio: '1', borderRadius: 'var(--radius-md)', overflow: 'hidden', border: '1px solid var(--border)' }} className="group">
                                             <img src={img.preview} alt="preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                            
+                                            {/* AI Autofill Button */}
+                                            <button
+                                                onClick={(e) => { e.preventDefault(); generateAIForSpecificImage(img.id); }}
+                                                disabled={isGeneratingImageAI}
+                                                style={{ position: 'absolute', top: '0.25rem', left: '0.25rem', background: 'rgba(99,102,241,0.9)', color: 'white', borderRadius: '4px', padding: '0.25rem 0.5rem', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.6875rem', fontWeight: 600, opacity: 0, transition: 'opacity 0.2s', backdropFilter: 'blur(4px)' }}
+                                                className="group-hover:!opacity-100 hover:!bg-indigo-600"
+                                                title="Gunakan gambar ini untuk referensi AI"
+                                            >
+                                                {isGeneratingImageAI ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />} AI
+                                            </button>
+
+                                            {/* Delete Button */}
                                             <button
                                                 onClick={() => removeImageFile(img.id)}
                                                 style={{ position: 'absolute', top: '0.25rem', right: '0.25rem', background: 'rgba(0,0,0,0.6)', color: 'white', borderRadius: '50%', padding: '0.25rem', border: 'none', cursor: 'pointer', display: 'flex', opacity: 0, transition: 'opacity 0.2s' }}
@@ -763,6 +803,7 @@ export default function UploadPage() {
                                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
                                         <label style={{ fontWeight: 600, fontSize: '0.9375rem', display: 'block' }}>Judul Postingan</label>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                            <span style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>Bahasa AI:</span>
                                             <select
                                                 className="input-field"
                                                 style={{ padding: '0.25rem 0.5rem', fontSize: '0.8125rem', width: 'auto', borderRadius: 'var(--radius-sm)' }}
@@ -776,15 +817,6 @@ export default function UploadPage() {
                                                 <option value="Korean">KR</option>
                                                 <option value="Spanish">ES</option>
                                             </select>
-                                            <button
-                                                onClick={generateAIForImagePost}
-                                                disabled={isGeneratingImageAI || isUploadingImagePost || imageFiles.length === 0}
-                                                className="btn-ghost"
-                                                style={{ padding: '0.25rem 0.5rem', fontSize: '0.8125rem', display: 'flex', alignItems: 'center', gap: '0.375rem' }}
-                                            >
-                                                {isGeneratingImageAI ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
-                                                AI Autofill
-                                            </button>
                                         </div>
                                     </div>
                                     <input
