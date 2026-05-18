@@ -56,14 +56,14 @@ export default function ImageGallery({ images }: { images: { url: string; cloudi
                         <button 
                             onClick={handlePrev} 
                             style={navBtnStyle('left')}
-                            className="opacity-0 group-hover:opacity-100 transition-opacity"
+                            className="hover:bg-white/20 transition-all"
                         >
                             <ChevronLeft size={24} />
                         </button>
                         <button 
                             onClick={handleNext} 
                             style={navBtnStyle('right')}
-                            className="opacity-0 group-hover:opacity-100 transition-opacity"
+                            className="hover:bg-white/20 transition-all"
                         >
                             <ChevronRight size={24} />
                         </button>

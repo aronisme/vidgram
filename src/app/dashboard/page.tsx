@@ -178,98 +178,75 @@ export default function DashboardPage() {
                 ))}
             </div>
 
-            {/* Content Table */}
-            <div className="card" style={{ display: 'flex', flexDirection: 'column' }}>
-                <div style={{ padding: '1.5rem', borderBottom: '1px solid var(--border)' }}>
+            {/* Content Grid */}
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+                <div style={{ padding: '0 0 1.5rem 0', borderBottom: '1px solid var(--border)', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                     <h2 style={{ fontSize: '1.25rem', fontWeight: 700 }}>Semua Postingan Anda</h2>
                 </div>
 
-                <div style={{ overflowX: 'auto' }}>
-                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.875rem' }}>
-                        <thead>
-                            <tr style={{ borderBottom: '1px solid var(--border)', color: 'var(--text-tertiary)', textAlign: 'left', background: 'var(--bg-secondary)' }}>
-                                <th style={{ padding: '1rem 1.5rem', fontWeight: 600 }}>Konten</th>
-                                <th style={{ padding: '1rem', fontWeight: 600 }}>Tipe</th>
-                                <th className="hide-on-mobile" style={{ padding: '1rem', fontWeight: 600 }}>Privasi</th>
-                                <th style={{ padding: '1rem', fontWeight: 600, textAlign: 'right' }}>Performa</th>
-                                <th style={{ padding: '1rem 1.5rem', fontWeight: 600, textAlign: 'right' }}>Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {posts.length > 0 ? (
-                                posts.map((post) => {
-                                    const isImg = post.type === 'image';
-                                    const previewUrl = isImg ? post.images[0]?.url : post.thumbnailUrl;
-                                    const postLink = isImg ? `/image/${post.slug}` : `/video/${post.slug}`;
-                                    const date = new Date(post.createdAt?.toDate?.() || post.createdAt).toLocaleDateString('id-ID', {day: 'numeric', month: 'short', year: 'numeric'});
+                {posts.length > 0 ? (
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.25rem' }}>
+                        {posts.map((post) => {
+                            const isImg = post.type === 'image';
+                            const previewUrl = isImg ? post.images[0]?.url : post.thumbnailUrl;
+                            const postLink = isImg ? `/image/${post.slug}` : `/video/${post.slug}`;
+                            const date = new Date(post.createdAt?.toDate?.() || post.createdAt).toLocaleDateString('id-ID', {day: 'numeric', month: 'short', year: 'numeric'});
 
-                                    return (
-                                        <tr key={post.id} style={{ borderBottom: '1px solid var(--border-light)' }}>
-                                            <td style={{ padding: '1rem 1.5rem' }}>
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                                    <div style={{
-                                                        position: 'relative', width: '90px', aspectRatio: isImg ? '1' : '16/9', flexShrink: 0,
-                                                        background: 'var(--bg-secondary)', borderRadius: 'var(--radius-sm)', overflow: 'hidden'
-                                                    }}>
-                                                        <Image src={previewUrl} alt={post.title} fill sizes="90px" style={{ objectFit: 'cover' }} />
-                                                    </div>
-                                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', maxWidth: '300px' }}>
-                                                        <Link href={postLink} style={{ fontWeight: 700, color: 'var(--text-primary)', textDecoration: 'none' }} className="hover:text-[var(--accent)] line-clamp-2">
-                                                            {post.title}
-                                                        </Link>
-                                                        <span style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>{date}</span>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td style={{ padding: '1rem' }}>
-                                                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.375rem', background: 'var(--bg-secondary)', padding: '0.25rem 0.625rem', borderRadius: '1rem', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)' }}>
-                                                    {isImg ? <ImageIcon size={14} /> : <VideoIcon size={14} />}
-                                                    {isImg ? "Album" : "Video"}
-                                                </div>
-                                            </td>
-                                            <td className="hide-on-mobile" style={{ padding: '1rem' }}>
-                                                {isImg ? (
-                                                    post.isPrivate ? (
-                                                        <span className="badge" style={{ background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444' }}><Lock size={12} style={{marginRight: '4px'}}/> Private</span>
-                                                    ) : (
-                                                        <span className="badge badge-success"><Globe size={12} style={{marginRight: '4px'}}/> Public</span>
-                                                    )
+                            return (
+                                <div key={post.id} className="card" style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', padding: 0 }}>
+                                    <Link href={postLink} style={{ position: 'relative', width: '100%', aspectRatio: isImg ? '1' : '16/9', background: 'var(--bg-secondary)', display: 'block' }}>
+                                        <Image src={previewUrl} alt={post.title} fill sizes="(max-width: 768px) 100vw, 300px" style={{ objectFit: 'cover' }} />
+                                        
+                                        {/* Type Badge */}
+                                        <div style={{ position: 'absolute', top: '0.5rem', right: '0.5rem', background: 'rgba(0,0,0,0.6)', color: 'white', padding: '0.25rem 0.5rem', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.25rem', backdropFilter: 'blur(4px)' }}>
+                                            {isImg ? <ImageIcon size={12} /> : <VideoIcon size={12} />}
+                                            {isImg ? "Album" : "Video"}
+                                        </div>
+                                    </Link>
+                                    
+                                    <div style={{ padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.75rem', flex: 1 }}>
+                                        <Link href={postLink} style={{ fontWeight: 700, color: 'var(--text-primary)', textDecoration: 'none', fontSize: '1rem', lineHeight: 1.4 }} className="hover:text-[var(--accent)] line-clamp-2">
+                                            {post.title}
+                                        </Link>
+                                        
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>
+                                            <span>{date}</span>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}><Play size={12} /> {post.views?.toLocaleString() || 0}</span>
+                                            </div>
+                                        </div>
+
+                                        <div style={{ marginTop: 'auto', paddingTop: '1rem', borderTop: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                            {isImg ? (
+                                                post.isPrivate ? (
+                                                    <span className="badge" style={{ background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444' }}><Lock size={12} style={{marginRight: '4px'}}/> Private</span>
                                                 ) : (
                                                     <span className="badge badge-success"><Globe size={12} style={{marginRight: '4px'}}/> Public</span>
-                                                )}
-                                            </td>
-                                            <td style={{ padding: '1rem', textAlign: 'right' }}>
-                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', alignItems: 'flex-end' }}>
-                                                    <span style={{ fontWeight: 600, fontSize: '0.875rem' }}>{post.views?.toLocaleString() || 0} views</span>
-                                                    <span style={{ color: 'var(--text-tertiary)', fontSize: '0.75rem' }}>{post.likes?.toLocaleString() || 0} likes</span>
-                                                </div>
-                                            </td>
-                                            <td style={{ padding: '1rem 1.5rem', textAlign: 'right' }}>
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'flex-end' }}>
-                                                    <button onClick={() => handleEditClick(post)} className="btn-secondary" style={{ padding: '0.375rem 0.75rem', borderRadius: 'var(--radius-sm)', gap: '0.375rem', fontSize: '0.8125rem' }}>
-                                                        <Edit size={14} /> Edit
-                                                    </button>
-                                                    <button onClick={() => handleDelete(post)} className="btn-secondary" style={{ padding: '0.375rem', borderRadius: 'var(--radius-sm)', color: '#ef4444', borderColor: 'transparent', background: 'rgba(239, 68, 68, 0.1)' }}>
-                                                        <Trash2 size={16} />
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    );
-                                })
-                            ) : (
-                                <tr>
-                                    <td colSpan={5} style={{ textAlign: 'center', padding: '4rem 1rem', color: 'var(--text-tertiary)' }}>
-                                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
-                                            <Images size={40} style={{ opacity: 0.5 }} />
-                                            <p>Anda belum mengunggah apa pun. Mari mulai berkarya!</p>
+                                                )
+                                            ) : (
+                                                <span className="badge badge-success"><Globe size={12} style={{marginRight: '4px'}}/> Public</span>
+                                            )}
+
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                <button onClick={() => handleEditClick(post)} className="btn-secondary" style={{ padding: '0.375rem', borderRadius: 'var(--radius-sm)' }}>
+                                                    <Edit size={14} />
+                                                </button>
+                                                <button onClick={() => handleDelete(post)} className="btn-secondary" style={{ padding: '0.375rem', borderRadius: 'var(--radius-sm)', color: '#ef4444', borderColor: 'transparent', background: 'rgba(239, 68, 68, 0.1)' }}>
+                                                    <Trash2 size={14} />
+                                                </button>
+                                            </div>
                                         </div>
-                                    </td>
-                                </tr>
-                            )}
-                        </tbody>
-                    </table>
-                </div>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                ) : (
+                    <div className="card" style={{ padding: '4rem 1rem', textAlign: 'center', color: 'var(--text-tertiary)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
+                        <Images size={40} style={{ opacity: 0.5 }} />
+                        <p>Anda belum mengunggah apa pun. Mari mulai berkarya!</p>
+                    </div>
+                )}
             </div>
 
             {/* ============================== */}
