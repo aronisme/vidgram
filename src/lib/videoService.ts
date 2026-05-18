@@ -140,6 +140,16 @@ export const videoService = {
         });
     },
 
+    async updateVideo(id: string, data: Partial<Omit<VideoMetadata, "id" | "uploaderId" | "createdAt">>) {
+        const videoRef = doc(db, "videos", id);
+        return await updateDoc(videoRef, data);
+    },
+
+    async deleteVideo(id: string) {
+        const videoRef = doc(db, "videos", id);
+        return await import("firebase/firestore").then(m => m.deleteDoc(videoRef));
+    },
+
     // --- User related functions ---
     async getUserStats(userId: string) {
         const videoRef = collection(db, "videos");

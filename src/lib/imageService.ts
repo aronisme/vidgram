@@ -90,5 +90,15 @@ export const imageService = {
     async incrementShares(id: string) {
         const imageDoc = doc(db, "image_posts", id);
         return await updateDoc(imageDoc, { shares: increment(1) });
+    },
+
+    async updateImagePost(id: string, data: Partial<Omit<ImagePostMetadata, "id" | "uploaderId" | "createdAt">>) {
+        const imageRef = doc(db, "image_posts", id);
+        return await updateDoc(imageRef, data);
+    },
+
+    async deleteImagePost(id: string) {
+        const imageRef = doc(db, "image_posts", id);
+        return await import("firebase/firestore").then(m => m.deleteDoc(imageRef));
     }
 };
