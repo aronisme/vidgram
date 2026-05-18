@@ -1,5 +1,7 @@
 import { serverVideoService } from "@/lib/serverVideoService";
+import { serverImageService } from "@/lib/serverImageService";
 import VideoCard from "@/components/VideoCard";
+import ImagePostCard from "@/components/ImagePostCard";
 import { ArrowRight, Zap, Shield, Globe, Sparkles, Instagram, Download, Video, ShieldCheck, Star, Upload, Check } from "lucide-react";
 import Link from "next/link";
 
@@ -7,7 +9,16 @@ import Link from "next/link";
 export const dynamic = 'force-dynamic';
 
 export default async function Home() {
-  const videos = await serverVideoService.getVideos(6);
+  const [videos, imagePosts] = await Promise.all([
+    serverVideoService.getVideos(8),
+    serverImageService.getPublicImagePosts(8)
+  ]);
+
+  const allPosts = [...videos, ...imagePosts].sort((a, b) => {
+    const timeA = new Date(a.createdAt).getTime();
+    const timeB = new Date(b.createdAt).getTime();
+    return timeB - timeA;
+  }).slice(0, 10);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '4rem', paddingBottom: '2rem' }}>
@@ -152,11 +163,15 @@ export default async function Home() {
           </Link>
         </div>
 
-        {videos.length > 0 ? (
+        {allPosts.length > 0 ? (
           <div className="video-grid stagger-children">
-            {videos.map((video) => (
-              <VideoCard key={video.id} video={video} />
-            ))}
+            {allPosts.map((post) => {
+              if ('images' in post) {
+                return <ImagePostCard key={`img-${post.id}`} post={post as any} />;
+              } else {
+                return <VideoCard key={`vid-${post.id}`} video={post as any} />;
+              }
+            })}
           </div>
         ) : (
           <div style={{
@@ -167,7 +182,7 @@ export default async function Home() {
             border: '1px solid var(--border)',
             color: 'var(--text-secondary)',
           }}>
-            <p>No videos found yet. Be the first to upload!</p>
+            <p>No posts found yet. Be the first to upload!</p>
           </div>
         )}
       </section>
