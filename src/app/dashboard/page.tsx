@@ -16,6 +16,13 @@ export default function DashboardPage() {
     const [stats, setStats] = useState({ totalViews: 0, totalLikes: 0, totalVideos: 0, totalImages: 0 });
     const [isLoading, setIsLoading] = useState(true);
 
+    const POSTS_PER_PAGE = 10;
+    const [hasMoreVideos, setHasMoreVideos] = useState(true);
+    const [hasMoreImages, setHasMoreImages] = useState(true);
+    const [lastVideoDate, setLastVideoDate] = useState<any>(null);
+    const [lastImageDate, setLastImageDate] = useState<any>(null);
+    const [isFetchingMore, setIsFetchingMore] = useState(false);
+
     // Edit State
     const [editingPost, setEditingPost] = useState<any>(null);
     const [editTitle, setEditTitle] = useState("");
@@ -34,11 +41,17 @@ export default function DashboardPage() {
         async function fetchData() {
             try {
                 const [userVideos, userImages, userStats] = await Promise.all([
-                    videoService.getVideosByUser(user!.uid, 50),
+                    videoService.getVideosByUser(user!.uid, POSTS_PER_PAGE),
                     // Mengambil gambar, kita bypass includePrivate agar dapat semua foto milik uploader
-                    imageService.getImagePostsByUser(user!.uid, 50, null, true), 
+                    imageService.getImagePostsByUser(user!.uid, POSTS_PER_PAGE, null, true), 
                     videoService.getUserStats(user!.uid)
                 ]);
+
+                if (userVideos.length < POSTS_PER_PAGE) setHasMoreVideos(false);
+                if (userImages.length < POSTS_PER_PAGE) setHasMoreImages(false);
+
+                if (userVideos.length > 0) setLastVideoDate(userVideos[userVideos.length - 1].createdAt);
+                if (userImages.length > 0) setLastImageDate(userImages[userImages.length - 1].createdAt);
 
                 // Kalkulasi manual untuk statistik gambar
                 let imgViews = 0, imgLikes = 0;
@@ -72,6 +85,46 @@ export default function DashboardPage() {
         }
         fetchData();
     }, [user, loading]);
+
+    const loadMore = async () => {
+        if (!user || isFetchingMore || (!hasMoreVideos && !hasMoreImages)) return;
+        setIsFetchingMore(true);
+        try {
+            const promises = [];
+            
+            if (hasMoreVideos) promises.push(videoService.getVideosByUser(user.uid, POSTS_PER_PAGE, lastVideoDate));
+            else promises.push(Promise.resolve([]));
+
+            if (hasMoreImages) promises.push(imageService.getImagePostsByUser(user.uid, POSTS_PER_PAGE, lastImageDate, true));
+            else promises.push(Promise.resolve([]));
+
+            const [newVideos, newImages] = await Promise.all(promises);
+
+            if (newVideos.length < POSTS_PER_PAGE) setHasMoreVideos(false);
+            if (newImages.length < POSTS_PER_PAGE) setHasMoreImages(false);
+
+            if (newVideos.length > 0) setLastVideoDate(newVideos[newVideos.length - 1].createdAt);
+            if (newImages.length > 0) setLastImageDate(newImages[newImages.length - 1].createdAt);
+
+            const all = [
+                ...newVideos.map(v => ({ ...v, type: 'video' })),
+                ...newImages.map(i => ({ ...i, type: 'image' }))
+            ];
+            
+            setPosts(prev => {
+                return [...prev, ...all].sort((a, b) => {
+                    const timeA = a.createdAt?.toDate?.()?.getTime() || new Date(a.createdAt).getTime();
+                    const timeB = b.createdAt?.toDate?.()?.getTime() || new Date(b.createdAt).getTime();
+                    return timeB - timeA;
+                });
+            });
+        } catch (error) {
+            console.error("Failed to load more posts:", error);
+            addToast("Gagal memuat postingan lama", "error");
+        } finally {
+            setIsFetchingMore(false);
+        }
+    };
 
     const handleDelete = async (post: any) => {
         if (!confirm(`Yakin ingin menghapus ${post.title}? Tindakan ini tidak bisa dibatalkan.`)) return;
@@ -245,6 +298,19 @@ export default function DashboardPage() {
                     <div className="card" style={{ padding: '4rem 1rem', textAlign: 'center', color: 'var(--text-tertiary)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
                         <Images size={40} style={{ opacity: 0.5 }} />
                         <p>Anda belum mengunggah apa pun. Mari mulai berkarya!</p>
+                    </div>
+                )}
+
+                {(hasMoreVideos || hasMoreImages) && posts.length > 0 && (
+                    <div style={{ padding: '2rem', display: 'flex', justifyContent: 'center' }}>
+                        <button
+                            onClick={loadMore}
+                            disabled={isFetchingMore}
+                            className="btn-secondary"
+                            style={{ padding: '0.625rem 2rem', fontSize: '0.9375rem', borderRadius: 'var(--radius-full)' }}
+                        >
+                            {isFetchingMore ? "Memuat..." : "Muat Lebih Banyak"}
+                        </button>
                     </div>
                 )}
             </div>
