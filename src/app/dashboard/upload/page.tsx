@@ -342,8 +342,8 @@ export default function UploadPage() {
                 addToast(`File ${f.name} bukan gambar. Dilewati.`, "error");
                 return false;
             }
-            if (f.size > 50 * 1024 * 1024) {
-                addToast(`File ${f.name} lebih dari 50MB. Dilewati.`, "error");
+            if (f.size > 60 * 1024 * 1024) {
+                addToast(`File ${f.name} lebih dari 60MB. Dilewati.`, "error");
                 return false;
             }
             return true;
