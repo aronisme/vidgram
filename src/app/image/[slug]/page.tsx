@@ -5,6 +5,7 @@ import { Eye, Calendar, Images } from "lucide-react";
 import ImageGallery from "@/components/ImageGallery";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import PrivateGuard from "./PrivateGuard";
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic';
@@ -20,6 +21,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     if (!post) {
         return {
             title: "Image Not Found | Vidgram",
+        };
+    }
+
+    if (post.isPrivate) {
+        return {
+            title: "Private Content | Vidgram",
+            description: "Konten ini bersifat private dan hanya dapat dilihat oleh pemiliknya.",
+            robots: { index: false, follow: false }
         };
     }
 
@@ -80,7 +89,7 @@ export default async function ImagePostDetailPage({ params }: Props) {
     const createdAt = new Date(post.createdAt);
     const suggestedPosts = recentPosts.filter(p => p.id !== post.id).slice(0, 10);
 
-    return (
+    const content = (
         <div className="animate-fade-in video-detail-layout" style={{
             paddingTop: '1.5rem',
             paddingBottom: '2rem',
@@ -210,4 +219,10 @@ export default async function ImagePostDetailPage({ params }: Props) {
             </div>
         </div>
     );
+
+    if (post.isPrivate) {
+        return <PrivateGuard uploaderId={post.uploaderId}>{content}</PrivateGuard>;
+    }
+
+    return content;
 }
