@@ -27,6 +27,11 @@ service cloud.firestore {
       allow delete: if request.auth.uid == "uJhx9rqu8QXrhBELW56nclJNRyk2";
     }
 
+    match /image_posts/{document=**} {
+      allow read, create, update;
+      allow delete: if request.auth.uid == "uJhx9rqu8QXrhBELW56nclJNRyk2";
+    }
+
     match /users/{userId} {
       allow read: if true;
       allow create, update: if request.auth != null;
