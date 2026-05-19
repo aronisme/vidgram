@@ -142,7 +142,7 @@ export default function NativeUpscalerPage() {
                 setState('preview');
                 
                 // Initialize default network
-                updateNetwork(bitmap);
+                updateNetwork();
             } catch (err) {
                 console.error("Preview setup error:", err);
                 addToast("Gagal menyiapkan preview.", "error");
@@ -150,10 +150,10 @@ export default function NativeUpscalerPage() {
         }, 500);
     };
 
-    const updateNetwork = async (bitmap?: ImageBitmap) => {
+    const updateNetwork = async () => {
         if (!workerRef.current || !videoRef.current) return;
         try {
-            const bmp = bitmap || await createImageBitmap(videoRef.current);
+            const bmp = await createImageBitmap(videoRef.current);
             const networks: any = { 'small': "anime4k/cnn-2x-s", 'medium': "anime4k/cnn-2x-m", 'large': "anime4k/cnn-2x-l" };
             
             const weightMap: any = {
@@ -183,7 +183,7 @@ export default function NativeUpscalerPage() {
                     bitmap: bmp,
                     weights: weights
                 }
-            });
+            }, [bmp]);
         } catch (e) {
             console.error("Network switch error:", e);
         }
@@ -293,9 +293,14 @@ export default function NativeUpscalerPage() {
                             <div className="card" style={{ padding: '2rem', textAlign: 'center', background: 'rgba(16, 185, 129, 0.1)' }}>
                                 <CheckCircle size={40} style={{ margin: '0 auto', color: 'var(--success)' }} />
                                 <h3 style={{ marginTop: '1rem', fontSize: '1.25rem', fontWeight: 700, color: 'var(--success)' }}>Selesai!</h3>
-                                <a href={downloadUrl} download={downloadName} className="btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', marginTop: '1.5rem', textDecoration: 'none' }}>
-                                    <Download size={18} /> Simpan Video
-                                </a>
+                                <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', marginTop: '1.5rem', flexWrap: 'wrap' }}>
+                                    <a href={downloadUrl} download={downloadName} className="btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none' }}>
+                                        <Download size={18} /> Simpan Video
+                                    </a>
+                                    <button onClick={() => { setState('init'); if(fileInputRef.current) fileInputRef.current.value = ''; }} className="btn-secondary" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+                                        <Upload size={18} /> Upscale Video Lain
+                                    </button>
+                                </div>
                             </div>
                         )}
                     </div>
