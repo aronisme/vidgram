@@ -21,7 +21,8 @@ export default function NativeUpscalerPage() {
 
     const [networkSize, setNetworkSize] = useState<'small'|'medium'|'large'>('large');
     const [contentStyle, setContentStyle] = useState<'rl'|'an'|'3d'>('rl');
-    const [keepAudio, setKeepAudio] = useState(true);
+    const [targetQuality, setTargetQuality] = useState<'2k'|'4k'>('2k');
+    const [removeAudio, setRemoveAudio] = useState(false);
 
     const videoRef = useRef<HTMLVideoElement>(null);
     const originalCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -111,7 +112,8 @@ export default function NativeUpscalerPage() {
         
         const outputWidth = video.videoWidth * 2;
         const outputHeight = video.videoHeight * 2;
-        setDownloadName(originalFilename.split(".")[0] + `_${outputWidth}x${outputHeight}-upscaled.mp4`);
+        const qualityLabel = targetQuality.toUpperCase();
+        setDownloadName(originalFilename.split(".")[0] + `_${qualityLabel}-upscaled.mp4`);
 
         upscaledCanvasRef.current.width = outputWidth;
         upscaledCanvasRef.current.height = outputHeight;
@@ -199,7 +201,8 @@ export default function NativeUpscalerPage() {
                 outputHandle: null, // will use memory buffer
                 width: videoRef.current.videoWidth,
                 height: videoRef.current.videoHeight,
-                keepAudio
+                targetQuality,
+                keepAudio: !removeAudio
             });
         } catch (e: any) {
             setState('error');
@@ -215,6 +218,14 @@ export default function NativeUpscalerPage() {
     const handleStyleChange = (style: 'rl'|'an'|'3d') => {
         setContentStyle(style);
         setTimeout(() => updateNetwork(), 100);
+    };
+
+    const handleQualityChange = (quality: '2k'|'4k') => {
+        setTargetQuality(quality);
+        if (fileRef.current) {
+            const qualityLabel = quality.toUpperCase();
+            setDownloadName(fileRef.current.name.split(".")[0] + `_${qualityLabel}-upscaled.mp4`);
+        }
     };
 
 
@@ -255,7 +266,7 @@ export default function NativeUpscalerPage() {
                                     <canvas ref={originalCanvasRef} style={{ width: '100%', height: 'auto', display: 'block' }} />
                                 </div>
                                 <div style={{ flex: 1, position: 'relative' }}>
-                                    <div style={{ position: 'absolute', top: 10, right: 10, background: 'rgba(99,102,241,0.8)', color: 'white', padding: '2px 8px', borderRadius: 4, fontSize: 12, zIndex: 10 }}>AI Upscaled (2x)</div>
+                                    <div style={{ position: 'absolute', top: 10, right: 10, background: 'rgba(99,102,241,0.8)', color: 'white', padding: '2px 8px', borderRadius: 4, fontSize: 12, zIndex: 10 }}>AI Upscaled ({targetQuality.toUpperCase()})</div>
                                     <canvas ref={upscaledCanvasRef} style={{ width: '100%', height: 'auto', display: 'block' }} />
                                 </div>
                             </div>
@@ -309,9 +320,17 @@ export default function NativeUpscalerPage() {
                                 </select>
                             </div>
 
+                            <div style={{ marginBottom: '1.5rem' }}>
+                                <label style={{ fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.5rem', display: 'block' }}>Target Resolusi</label>
+                                <select className="input-field" value={targetQuality} onChange={(e) => handleQualityChange(e.target.value as any)} disabled={state !== 'preview'} style={{ width: '100%' }}>
+                                    <option value="2k">2K (2560×1440)</option>
+                                    <option value="4k">4K (3840×2160)</option>
+                                </select>
+                            </div>
+
                             <div style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                <input type="checkbox" id="keepAudio" checked={keepAudio} onChange={(e) => setKeepAudio(e.target.checked)} disabled={state !== 'preview'} />
-                                <label htmlFor="keepAudio" style={{ fontSize: '0.875rem' }}>Pertahankan Audio Asli</label>
+                                <input type="checkbox" id="removeAudio" checked={removeAudio} onChange={(e) => setRemoveAudio(e.target.checked)} disabled={state !== 'preview'} />
+                                <label htmlFor="removeAudio" style={{ fontSize: '0.875rem' }}>Hapus Audio</label>
                             </div>
 
                             {state === 'preview' && (

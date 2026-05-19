@@ -20,6 +20,7 @@ export type WorkerRequestMessage =
     useAV1?: boolean;
     networkSize?: 'small' | 'medium' | 'large';
     contentType?: 'rl' | 'an' | '3d';
+    targetQuality?: '2k' | '4k';
     width?: number;
     height?: number;
     keepAudio?: boolean;

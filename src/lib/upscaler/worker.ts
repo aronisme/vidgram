@@ -46,50 +46,67 @@ let hardwareProfile: HardwareProfile | null = null;
 const weights = require('./weights/cnn-2x-l-rl.json');
 
 /**
- * Calculate final output dimensions with minimum 1080p enforcement
- * Returns dimensions for: input (adjusted), AI output (2x), and final output
+ * Align a dimension to WebGPU requirement (divisible by 8)
  */
-function calculateFinalDimensions(inputWidth: number, inputHeight: number) {
+function alignTo8(val: number): number {
+  return Math.ceil(val / 8) * 8;
+}
+
+/**
+ * Calculate final output dimensions based on target quality (2K or 4K)
+ * Uses multi-pass AI upscaling strategy when needed
+ * Returns dimensions for: input (adjusted), per-pass AI outputs, and final output
+ */
+function calculateFinalDimensions(inputWidth: number, inputHeight: number, target: '2k' | '4k' = '2k') {
   const AI_SCALE = 2;
-  const MIN_WIDTH = 1920;
-  const MIN_HEIGHT = 1080;
+  const TARGET_DIMS = {
+    '2k': { width: 2560, height: 1440 },
+    '4k': { width: 3840, height: 2160 },
+  };
+
+  const t = TARGET_DIMS[target];
 
   // Adjust to WebGPU alignment (divisible by 8)
-  // Use ceiling to avoid losing pixels
   const adjustedInput = {
-    width: Math.ceil(inputWidth / 8) * 8,
-    height: Math.ceil(inputHeight / 8) * 8
+    width: alignTo8(inputWidth),
+    height: alignTo8(inputHeight)
   };
 
-  // After AI upscaling (2x)
+  // Determine orientation and calculate passes needed
+  const isLandscape = inputWidth >= inputHeight;
+  const primaryInputDim = isLandscape ? adjustedInput.width : adjustedInput.height;
+  const targetPrimaryDim = isLandscape ? t.width : t.height;
+
+  // Calculate how many 2x AI passes are needed to reach or exceed target
+  // Minimum 1 pass always
+  const passesNeeded = Math.max(1,
+    Math.ceil(Math.log2(targetPrimaryDim / primaryInputDim))
+  );
+
+  // Total AI scale = 2^passes
+  const totalAIScale = Math.pow(AI_SCALE, passesNeeded);
+
+  // Output after all AI passes
   const aiOutput = {
-    width: adjustedInput.width * AI_SCALE,
-    height: adjustedInput.height * AI_SCALE
+    width: adjustedInput.width * totalAIScale,
+    height: adjustedInput.height * totalAIScale
   };
 
-  // Enforce minimum dimensions while preserving aspect ratio
-  let finalWidth = aiOutput.width;
-  let finalHeight = aiOutput.height;
+  // Scale to fit within target bounding box while preserving aspect ratio
+  const scaleToFit = Math.min(
+    t.width / aiOutput.width,
+    t.height / aiOutput.height
+  );
 
-  // Calculate scale needed to meet minimums (if any)
-  const scaleForWidth = finalWidth < MIN_WIDTH ? MIN_WIDTH / finalWidth : 1;
-  const scaleForHeight = finalHeight < MIN_HEIGHT ? MIN_HEIGHT / finalHeight : 1;
-  const requiredScale = Math.max(scaleForWidth, scaleForHeight);
-
-  // Apply proportional scaling if needed
-  if (requiredScale > 1) {
-    finalWidth = Math.round(finalWidth * requiredScale);
-    finalHeight = Math.round(finalHeight * requiredScale);
-  }
+  let finalWidth = Math.round(aiOutput.width * scaleToFit);
+  let finalHeight = Math.round(aiOutput.height * scaleToFit);
 
   // Ensure final dimensions are even (required for video encoding)
   if (finalWidth % 2 !== 0) finalWidth++;
   if (finalHeight % 2 !== 0) finalHeight++;
 
-  // Calculate scale factor for reference
-  const scaleX = finalWidth / aiOutput.width;
-  const scaleY = finalHeight / aiOutput.height;
-  const additionalScale = Math.max(scaleX, scaleY);
+  // Calculate additional scale factor for reference
+  const additionalScale = finalWidth / aiOutput.width;
 
   return {
     input: adjustedInput,
@@ -98,7 +115,9 @@ function calculateFinalDimensions(inputWidth: number, inputHeight: number) {
       width: finalWidth,
       height: finalHeight
     },
-    additionalScale: additionalScale
+    passesNeeded: passesNeeded,
+    totalAIScale: totalAIScale,
+    additionalScale: Math.abs(additionalScale)
   };
 }
 
@@ -133,12 +152,12 @@ async function init(config: InitData): Promise<void> {
     gpu = await WebSR.initWebGPU();
   }
 
-  // Calculate all dimensions (input, AI output, final with 1080p minimum)
+  // Calculate all dimensions (input, AI output, final with target quality)
   const dims = calculateFinalDimensions(config.resolution.width, config.resolution.height);
 
   console.log(`Input: ${config.resolution.width}x${config.resolution.height}`);
   console.log(`Adjusted Input: ${dims.input.width}x${dims.input.height}`);
-  console.log(`AI Output (2x): ${dims.aiOutput.width}x${dims.aiOutput.height}`);
+  console.log(`AI Output (${dims.totalAIScale}x after ${dims.passesNeeded} pass): ${dims.aiOutput.width}x${dims.aiOutput.height}`);
   console.log(`Final Output: ${dims.final.width}x${dims.final.height} (scale: ${dims.additionalScale.toFixed(2)}x)`);
 
   resolution = dims.input;
@@ -154,7 +173,10 @@ async function init(config: InitData): Promise<void> {
 
   // Create INTERNAL canvas for WebSR processing (not connected to UI)
   // This prevents laggy preview updates during video processing
-  internalAICanvas = new OffscreenCanvas(dims.aiOutput.width, dims.aiOutput.height);
+  // For preview, always use single 2x pass dimensions
+  const previewAIWidth = dims.input.width * 2;
+  const previewAIHeight = dims.input.height * 2;
+  internalAICanvas = new OffscreenCanvas(previewAIWidth, previewAIHeight);
 
   websr = new WebSR({
     network_name: "anime4k/cnn-2x-l",
@@ -168,9 +190,9 @@ async function init(config: InitData): Promise<void> {
   upscaled_canvas = config.upscaled;
   original_canvas = config.original;
 
-  // Resize upscaled_canvas to AI output (2x) - for initial preview only
-  upscaled_canvas.width = dims.aiOutput.width;
-  upscaled_canvas.height = dims.aiOutput.height;
+  // Resize upscaled_canvas to AI output (2x preview) - for initial preview only
+  upscaled_canvas.width = previewAIWidth;
+  upscaled_canvas.height = previewAIHeight;
 
   // Resize original_canvas to FINAL output (min 1080p)
   original_canvas.width = dims.final.width;
@@ -297,7 +319,8 @@ async function initRecording(
   outputHandle: any | null,
   width: number,
   height: number,
-  keepAudio: boolean = true
+  keepAudio: boolean = true,
+  targetQuality: '2k' | '4k' = '2k'
 ): Promise<void> {
 
   // Network weights mapping for bulk processing
@@ -366,24 +389,53 @@ async function initRecording(
   }
 
   // Use the SAME dimension calculation as preview/init for consistency
-  const dims = calculateFinalDimensions(trackWidth, trackHeight);
+  const dims = calculateFinalDimensions(trackWidth, trackHeight, targetQuality);
 
-  console.log(`Processing dimensions:`);
+  console.log(`Processing dimensions (target: ${targetQuality.toUpperCase()}):`);  
   console.log(`  Input: ${trackWidth}x${trackHeight}`);
   console.log(`  Adjusted Input: ${dims.input.width}x${dims.input.height}`);
-  console.log(`  AI Output (2x): ${dims.aiOutput.width}x${dims.aiOutput.height}`);
+  console.log(`  AI Passes: ${dims.passesNeeded} (total ${dims.totalAIScale}x)`);
+  console.log(`  AI Output (${dims.totalAIScale}x): ${dims.aiOutput.width}x${dims.aiOutput.height}`);
   console.log(`  Final Output: ${dims.final.width}x${dims.final.height} (scale: ${dims.additionalScale.toFixed(2)}x)`);
 
   // Set resolution and final dimensions using calculated values
   resolution = dims.input;
   finalDimensions = dims.final;
 
-  // Resize internal AI canvas to AI output size (2x)
+  // Resize internal AI canvas to first pass AI output size (2x of input)
+  const firstPassWidth = dims.input.width * 2;
+  const firstPassHeight = dims.input.height * 2;
   if (internalAICanvas) {
-    internalAICanvas.width = dims.aiOutput.width;
-    internalAICanvas.height = dims.aiOutput.height;
+    internalAICanvas.width = firstPassWidth;
+    internalAICanvas.height = firstPassHeight;
   } else {
-    internalAICanvas = new OffscreenCanvas(dims.aiOutput.width, dims.aiOutput.height);
+    internalAICanvas = new OffscreenCanvas(firstPassWidth, firstPassHeight);
+  }
+
+  // Pre-create WebSR instances for multi-pass (avoids GPU shader re-compilation per frame)
+  let pass1WebSR = new WebSR({
+    network_name: "anime4k/cnn-2x-l",
+    weights,
+    resolution: resolution,
+    gpu: gpu,
+    canvas: internalAICanvas as any
+  });
+
+  // For multi-pass: create a separate canvas + WebSR for pass 2
+  let pass2Canvas: OffscreenCanvas | null = null;
+  let pass2WebSR: WebSR | null = null;
+  if (dims.passesNeeded > 1) {
+    const pass2Width = firstPassWidth * 2;
+    const pass2Height = firstPassHeight * 2;
+    pass2Canvas = new OffscreenCanvas(pass2Width, pass2Height);
+    pass2WebSR = new WebSR({
+      network_name: "anime4k/cnn-2x-l",
+      weights,
+      resolution: { width: firstPassWidth, height: firstPassHeight },
+      gpu: gpu,
+      canvas: pass2Canvas as any
+    });
+    console.log(`Multi-pass: pass2 canvas ${pass2Width}x${pass2Height}`);
   }
 
   // extract native framerate or default to 30
@@ -547,20 +599,33 @@ async function initRecording(
       resizeHeight: resolution.height
     });
 
-    // AI upscaling (2x) - renders to internalAICanvas (NOT visible on UI)
-    websr.render(bitmap);
+    // === Multi-pass AI upscaling ===
+    // Pass 1: AI upscale 2x (input → internalAICanvas)
+    pass1WebSR.render(bitmap);
+    bitmap.close(); // Free bitmap memory
 
-    // Apply post-AI scaling to reach minimum 1080p
-    // Draw AI output from INTERNAL canvas (not the visible one)
+    let sourceCanvas: OffscreenCanvas = internalAICanvas;
+
+    // Pass 2: Additional AI pass if needed (uses pre-created WebSR instance)
+    if (dims.passesNeeded > 1 && pass2WebSR && pass2Canvas) {
+      const prevPassBitmap = await createImageBitmap(internalAICanvas);
+      pass2WebSR.render(prevPassBitmap as any);
+      prevPassBitmap.close();
+      sourceCanvas = pass2Canvas;
+    }
+
+    // Apply post-AI scaling to reach target resolution
+    // Draw AI output from source canvas to final output canvas
     if (finalCtx) {
       finalCtx.drawImage(
-        internalAICanvas, // Use internal canvas, not upscaled_canvas!
-        0, 0, internalAICanvas.width, internalAICanvas.height,
+        sourceCanvas,
+        0, 0, sourceCanvas.width, sourceCanvas.height,
         0, 0, finalDimensions.width, finalDimensions.height
       );
 
-      // Apply light sharpening for enhanced detail
-      applySharpen(finalCtx, finalOutputCanvas, 0.4);
+      // Apply sharpening - use lighter sharpening for multi-pass to avoid over-processing
+      const sharpenAmount = dims.passesNeeded > 1 ? 0.25 : 0.4;
+      applySharpen(finalCtx, finalOutputCanvas, sharpenAmount);
     }
 
     // Add frame to output video
@@ -644,7 +709,8 @@ self.onmessage = async function (event: MessageEvent<WorkerRequestMessage>) {
             event.data.outputHandle,
             event.data.width || 0,
             event.data.height || 0,
-            event.data.keepAudio ?? true
+            event.data.keepAudio ?? true,
+            event.data.targetQuality || '2k'
           );
         }
         break;
