@@ -253,19 +253,19 @@ export default function NativeUpscalerPage() {
     return (
         <div className="animate-fade-in" style={{ maxWidth: '1000px', margin: '0 auto', paddingTop: '2rem', paddingBottom: '3rem' }}>
             <div style={{ marginBottom: '2rem', textAlign: 'center' }}>
-                <h1 style={{ fontSize: '2rem', fontWeight: 800, letterSpacing: '-0.03em', background: 'linear-gradient(to right, #6366f1, #a855f7)', WebkitBackgroundClip: 'text', color: 'transparent' }}>
-                    Vidgram Video Upscaler
+                <h1 style={{ fontSize: '2.5rem', fontWeight: 800, letterSpacing: '-0.03em', background: 'linear-gradient(to right, #6366f1, #a855f7)', WebkitBackgroundClip: 'text', color: 'transparent' }}>
+                    AI Video Upscaler Gratis & Lokal
                 </h1>
-                <p style={{ color: 'var(--text-secondary)', marginTop: '0.5rem' }}>
-                    Tingkatkan resolusi video menggunakan kekuatan WebGPU langsung di browser.
+                <p style={{ color: 'var(--text-secondary)', marginTop: '1rem', maxWidth: '800px', margin: '1rem auto 0', lineHeight: 1.6 }}>
+                    Perjelas video buram dan tingkatkan resolusi klip pendek hingga 4K. Proses 100% lokal di browser dengan WebGPU tanpa upload, sehingga sangat hemat kuota, waktu, dan aman. Sangat ringan berjalan di PC/laptop spek pas-pasan!
                 </p>
             </div>
 
             {state === 'init' && (
                 <div className="card" style={{ padding: '4rem', textAlign: 'center', cursor: 'pointer', border: '2px dashed var(--border)' }} onClick={handleFileSelectClick}>
                     <Upload size={48} style={{ margin: '0 auto', color: 'var(--accent)' }} />
-                    <h3 style={{ marginTop: '1.5rem', fontSize: '1.25rem', fontWeight: 700 }}>Pilih Video (.mp4)</h3>
-                    <p style={{ color: 'var(--text-secondary)', marginTop: '0.5rem' }}>Video akan diproses secara lokal 100% tanpa upload.</p>
+                    <h3 style={{ marginTop: '1.5rem', fontSize: '1.25rem', fontWeight: 700 }}>Pilih Klip Video (.mp4)</h3>
+                    <p style={{ color: 'var(--text-secondary)', marginTop: '0.5rem' }}>Pilih video durasi pendek. Diproses 100% secara lokal tanpa upload!</p>
                 </div>
             )}
 

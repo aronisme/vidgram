@@ -108,7 +108,7 @@ export default async function Home() {
             gap: '0.5rem',
             transition: 'all 0.25s ease',
           }}>
-            <Sparkles size={18} /> AI Video Upscaler
+            <Sparkles size={18} /> Perjelas Video Buram
           </Link>
           <Link href="/dashboard/upload" style={{
             background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
@@ -387,8 +387,8 @@ export default async function Home() {
           <div style={{ background: 'var(--gradient-primary)', width: '48px', height: '48px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', boxShadow: '0 4px 12px rgba(99, 102, 241, 0.3)' }}>
             <Sparkles size={24} />
           </div>
-          <h3 style={{ fontSize: '1.25rem', fontWeight: 700 }}>AI Upscaling</h3>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '0.9375rem' }}>Enhance your videos to 1080p and 4K quality using WebGPU power directly in your browser.</p>
+          <h3 style={{ fontSize: '1.25rem', fontWeight: 700 }}>AI Video Upscaler Lokal</h3>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.9375rem' }}>Perjelas klip video ke 2K/4K via browser WebGPU. Tanpa upload, hemat kuota, ringan di PC spek pas-pasan.</p>
         </div>
         <div className="card" style={{ padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <div style={{ background: 'var(--gradient-primary)', width: '48px', height: '48px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', boxShadow: '0 4px 12px rgba(99, 102, 241, 0.3)' }}>
@@ -439,7 +439,7 @@ export default async function Home() {
             Start Creating <Upload size={18} />
           </Link>
           <Link href="/upscaler" className="btn-secondary" style={{ padding: '0.75rem 2rem', textDecoration: 'none' }}>
-            Try AI Upscaler <Sparkles size={18} />
+            Coba AI Upscaler Gratis <Sparkles size={18} />
           </Link>
         </div>
 

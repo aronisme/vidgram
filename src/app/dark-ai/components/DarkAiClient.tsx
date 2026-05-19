@@ -171,7 +171,7 @@ STATUS: SEMUA SISTEM AMAN. EKSEKUSI LOGIKA TANPA BATAS DIAKTIFKAN.`;
         setInput("");
         setSelectedImage(null);
         setIsTyping(true);
-        
+
         // Scroll to bottom immediately after user sends message
         setTimeout(scrollToBottom, 100);
 
@@ -353,10 +353,10 @@ STATUS: SEMUA SISTEM AMAN. EKSEKUSI LOGIKA TANPA BATAS DIAKTIFKAN.`;
                     <ChevronRight size={18} style={{ transform: isSidebarOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.3s' }} />
                 </button>
 
-                <div 
+                <div
                     ref={viewportRef}
                     onScroll={handleScroll}
-                    className="chat-viewport" 
+                    className="chat-viewport"
                     style={{
                         flex: 1,
                         overflowY: 'auto',
@@ -508,7 +508,7 @@ STATUS: SEMUA SISTEM AMAN. EKSEKUSI LOGIKA TANPA BATAS DIAKTIFKAN.`;
 
                 {/* Auto Scroll Button */}
                 {showScrollButton && (
-                    <button 
+                    <button
                         onClick={scrollToBottom}
                         className="glass animate-fade-in"
                         style={{

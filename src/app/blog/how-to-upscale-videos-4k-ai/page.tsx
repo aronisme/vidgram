@@ -4,8 +4,8 @@ import Link from 'next/link';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: "How to Upscale Videos to 4K Using AI - Vidgram Guide",
-  description: "Discover how AI-powered upscaling can breathe new life into your old low-resolution videos. Step-by-step guide using Vidgram's AI tools.",
+  title: "Cara Upscale Video ke 4K Gratis Tanpa Upload - Vidgram",
+  description: "Panduan lengkap cara perjelas video buram dan upscale klip pendek ke 2K/4K secara lokal di PC/Laptop spek pas-pasan menggunakan WebGPU.",
 };
 
 export default function BlogPost() {
@@ -18,7 +18,7 @@ export default function BlogPost() {
       <header style={{ marginBottom: '4rem' }}>
         <div className="badge badge-accent" style={{ marginBottom: '1.5rem' }}>AI Tools</div>
         <h1 style={{ fontSize: 'clamp(2.5rem, 6vw, 3.5rem)', fontWeight: 900, letterSpacing: '-0.04em', lineHeight: 1.1, marginBottom: '2rem' }}>
-          Cara Upscale Video ke 4K Menggunakan AI - Panduan Lengkap
+          Cara Upscale Video Gratis Tanpa Upload (WebGPU Lokal)
         </h1>
         <div style={{ display: 'flex', alignItems: 'center', gap: '2rem', color: 'var(--text-tertiary)', fontSize: '0.9375rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}><Calendar size={18} /> 10 Mei 2026</div>
@@ -47,13 +47,13 @@ export default function BlogPost() {
         </div>
 
         <h2>Langkah demi Langkah Menggunakan Vidgram AI Upscaler</h2>
-        <p>Vidgram menyediakan alat Upscale Video yang berjalan langsung di browser Anda menggunakan teknologi WebGPU. Berikut caranya:</p>
+        <p>Vidgram menyediakan alat <Link href="/upscaler">AI Video Upscaler</Link> yang berjalan 100% lokal di browser Anda menggunakan teknologi WebGPU. Ini berarti video Anda <strong>tidak pernah di-upload ke server</strong>, sehingga sangat aman dan menghemat kuota internet Anda. Sangat cocok untuk pengguna PC atau Laptop dengan spek pas-pasan untuk memproses klip durasi pendek. Berikut caranya:</p>
         
         <ol>
-          <li><strong>Buka Alat Upscaler:</strong> Kunjungi halaman <Link href="/upscaler">AI Video Upscaler</Link> di Vidgram.</li>
-          <li><strong>Unggah Video:</strong> Pilih file video dari perangkat Anda. Kami mendukung format MP4, WebM, dan lainnya.</li>
-          <li><strong>Pilih Model AI:</strong> Pilih model 'Standard' untuk hasil natural atau 'Ultra' untuk detail maksimal.</li>
-          <li><strong>Proses dan Unduh:</strong> Klik tombol 'Start Upscaling'. Setelah selesai, Anda dapat langsung mengunduh hasilnya.</li>
+          <li><strong>Buka Alat Upscaler:</strong> Kunjungi halaman <Link href="/upscaler">Perjelas Video</Link> di Vidgram.</li>
+          <li><strong>Pilih Video:</strong> Pilih file video durasi pendek dari perangkat Anda (MP4). Karena prosesnya lokal, file tidak perlu di-upload.</li>
+          <li><strong>Pilih Kualitas:</strong> Sesuaikan kualitas output (2K/4K) dan gaya visual (Anime, Real Life, 3D).</li>
+          <li><strong>Mulai Upscale:</strong> Klik tombol 'Mulai Upscale'. Proses rendering dilakukan sepenuhnya oleh GPU perangkat keras Anda.</li>
         </ol>
 
         <h2>Tips Mendapatkan Hasil Terbaik</h2>
