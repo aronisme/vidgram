@@ -4,8 +4,8 @@ import { Calendar, User, ArrowRight } from 'lucide-react';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: "Vidgram Blog - Guides, Tips & Product Updates",
-  description: "Learn how to download TikTok videos, upscale video resolution with AI, and optimize your video content for maximum reach.",
+  title: "Vidgram Blog - Panduan, Tips & Pembaruan Produk",
+  description: "Pelajari cara mendownload video TikTok, memperjelas resolusi video dengan AI lokal, dan mengoptimalkan konten video Anda.",
 };
 
 const posts = [
@@ -18,12 +18,20 @@ const posts = [
     category: "Guides"
   },
   {
-    title: "How to Upscale Videos to 4K Using AI - Complete Guide",
+    title: "WebGPU vs Cloud Upscaling: Analisis Performa & Keamanan",
+    slug: "webgpu-vs-cloud-upscaling",
+    excerpt: "Analisis lengkap mengapa memproses video upscaling secara lokal via WebGPU jauh lebih baik, hemat kuota, dan aman privasinya dibanding cloud.",
+    date: "May 20, 2026",
+    author: "Tim Teknikal Vidgram",
+    category: "Edukasi Teknologi"
+  },
+  {
+    title: "Cara Upscale Video Gratis Tanpa Upload (WebGPU Lokal)",
     slug: "how-to-upscale-videos-4k-ai",
-    excerpt: "Discover how AI-powered upscaling can breathe new life into your old low-resolution videos. Step-by-step guide included.",
+    excerpt: "Panduan lengkap perjelas video buram dan upscale klip pendek ke 2K/4K langsung di browser menggunakan laptop spek pas-pasan.",
     date: "May 10, 2026",
-    author: "Vidgram Team",
-    category: "AI Tools"
+    author: "Tim Vidgram",
+    category: "Panduan AI"
   },
   {
     title: "SEO for Video Platforms: How to Rank Your Videos on Google",
@@ -41,7 +49,7 @@ export default function BlogPage() {
       <section style={{ paddingTop: '4rem', paddingBottom: '4rem', textAlign: 'center' }}>
         <h1 style={{ fontSize: '3.5rem', fontWeight: 800, marginBottom: '1rem', letterSpacing: '-0.04em' }}>Vidgram <span style={{ color: 'var(--accent)' }}>Blog</span></h1>
         <p style={{ color: 'var(--text-secondary)', fontSize: '1.25rem', maxWidth: '600px', margin: '0 auto' }}>
-          Expert guides, industry news, and product updates from the Vidgram team.
+          Panduan ahli, berita industri, dan pembaruan produk dari tim Vidgram.
         </p>
       </section>
 

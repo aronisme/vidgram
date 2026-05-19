@@ -385,6 +385,60 @@ export default function NativeUpscalerPage() {
                 </div>
             )}
 
+            {/* SEO Content Section */}
+            <div className="animate-fade-in" style={{ marginTop: '5rem', display: 'flex', flexDirection: 'column', gap: '3rem', borderTop: '1px solid var(--border)', paddingTop: '4rem' }}>
+                <section>
+                    <h2 style={{ fontSize: '1.75rem', fontWeight: 800, marginBottom: '1rem' }}>Mengapa Memilih AI Video Upscaler Lokal?</h2>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
+                        <div className="card" style={{ padding: '1.5rem', background: 'var(--bg-secondary)', border: '1px solid var(--border)' }}>
+                            <h3 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.75rem', color: 'var(--success)' }}>✅ 100% Privasi Terjamin (Tanpa Upload)</h3>
+                            <p style={{ color: 'var(--text-secondary)', fontSize: '0.9375rem', lineHeight: 1.6 }}>Berbeda dengan layanan cloud upscaling, video Anda tidak pernah dikirim ke server. Pemrosesan dilakukan murni di dalam browser Anda menggunakan teknologi WebGPU.</p>
+                        </div>
+                        <div className="card" style={{ padding: '1.5rem', background: 'var(--bg-secondary)', border: '1px solid var(--border)' }}>
+                            <h3 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.75rem', color: 'var(--success)' }}>✅ Hemat Kuota & Kecepatan Instan</h3>
+                            <p style={{ color: 'var(--text-secondary)', fontSize: '0.9375rem', lineHeight: 1.6 }}>Tanpa perlu mengunggah file gigabyte ke internet lalu mengunduhnya kembali. Anda menghemat 100% kuota data dan waktu tunggu transfer file.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <section>
+                    <h2 style={{ fontSize: '1.75rem', fontWeight: 800, marginBottom: '1rem' }}>Persyaratan Sistem (Hardware Requirements)</h2>
+                    <div className="card" style={{ overflow: 'hidden', padding: 0 }}>
+                        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9375rem', textAlign: 'left' }}>
+                            <thead>
+                                <tr style={{ background: 'var(--bg-tertiary)' }}>
+                                    <th style={{ padding: '1rem', borderBottom: '1px solid var(--border)' }}>Spesifikasi</th>
+                                    <th style={{ padding: '1rem', borderBottom: '1px solid var(--border)' }}>Minimum (Laptop Spek Pas-pasan)</th>
+                                    <th style={{ padding: '1rem', borderBottom: '1px solid var(--border)' }}>Rekomendasi (Untuk 4K)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td style={{ padding: '1rem', borderBottom: '1px solid var(--border)', fontWeight: 600 }}>Browser</td>
+                                    <td style={{ padding: '1rem', borderBottom: '1px solid var(--border)', color: 'var(--text-secondary)' }}>Chrome 113+, Edge 113+</td>
+                                    <td style={{ padding: '1rem', borderBottom: '1px solid var(--border)', color: 'var(--text-secondary)' }}>Chrome Versi Terbaru</td>
+                                </tr>
+                                <tr>
+                                    <td style={{ padding: '1rem', borderBottom: '1px solid var(--border)', fontWeight: 600 }}>GPU (Kartu Grafis)</td>
+                                    <td style={{ padding: '1rem', borderBottom: '1px solid var(--border)', color: 'var(--text-secondary)' }}>Intel HD / AMD Radeon terintegrasi</td>
+                                    <td style={{ padding: '1rem', borderBottom: '1px solid var(--border)', color: 'var(--text-secondary)' }}>NVIDIA RTX atau AMD Radeon RX</td>
+                                </tr>
+                                <tr>
+                                    <td style={{ padding: '1rem', borderBottom: '1px solid var(--border)', fontWeight: 600 }}>RAM</td>
+                                    <td style={{ padding: '1rem', borderBottom: '1px solid var(--border)', color: 'var(--text-secondary)' }}>8 GB</td>
+                                    <td style={{ padding: '1rem', borderBottom: '1px solid var(--border)', color: 'var(--text-secondary)' }}>16 GB ke atas</td>
+                                </tr>
+                                <tr>
+                                    <td style={{ padding: '1rem', borderBottom: '1px solid var(--border)', fontWeight: 600 }}>Durasi Ideal</td>
+                                    <td style={{ padding: '1rem', borderBottom: '1px solid var(--border)', color: 'var(--text-secondary)' }}>Klip pendek (&lt; 30 detik)</td>
+                                    <td style={{ padding: '1rem', borderBottom: '1px solid var(--border)', color: 'var(--text-secondary)' }}>Video panjang (&gt; 1 menit)</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+
             {/* Hidden inputs for functionality */}
             <input 
                 type="file" 
