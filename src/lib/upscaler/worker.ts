@@ -320,7 +320,9 @@ async function initRecording(
   width: number,
   height: number,
   keepAudio: boolean = true,
-  targetQuality: '2k' | '4k' = '2k'
+  targetQuality: '2k' | '4k' = '2k',
+  networkSize: 'small' | 'medium' | 'large' = 'large',
+  contentType: 'rl' | 'an' | '3d' = 'rl'
 ): Promise<void> {
 
   // Network weights mapping for bulk processing
@@ -348,8 +350,8 @@ async function initRecording(
     'large': "anime4k/cnn-2x-l",
   };
 
-  // Network switching handled by UI via switchNetwork function
-
+  const selectedWeights = weightMap[networkSize][contentType];
+  const selectedNetworkName = networkNameMap[networkSize];
 
   // MediaBunny handles streaming from the blob for large files
   const source = new BlobSource(file);
@@ -414,8 +416,8 @@ async function initRecording(
 
   // Pre-create WebSR instances for multi-pass (avoids GPU shader re-compilation per frame)
   let pass1WebSR = new WebSR({
-    network_name: "anime4k/cnn-2x-l",
-    weights,
+    network_name: selectedNetworkName as any,
+    weights: selectedWeights,
     resolution: resolution,
     gpu: gpu,
     canvas: internalAICanvas as any
@@ -429,8 +431,8 @@ async function initRecording(
     const pass2Height = firstPassHeight * 2;
     pass2Canvas = new OffscreenCanvas(pass2Width, pass2Height);
     pass2WebSR = new WebSR({
-      network_name: "anime4k/cnn-2x-l",
-      weights,
+      network_name: selectedNetworkName as any,
+      weights: selectedWeights,
       resolution: { width: firstPassWidth, height: firstPassHeight },
       gpu: gpu,
       canvas: pass2Canvas as any
@@ -710,7 +712,9 @@ self.onmessage = async function (event: MessageEvent<WorkerRequestMessage>) {
             event.data.width || 0,
             event.data.height || 0,
             event.data.keepAudio ?? true,
-            event.data.targetQuality || '2k'
+            event.data.targetQuality || '2k',
+            event.data.networkSize || 'large',
+            event.data.contentType || 'rl'
           );
         }
         break;

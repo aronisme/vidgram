@@ -202,7 +202,9 @@ export default function NativeUpscalerPage() {
                 width: videoRef.current.videoWidth,
                 height: videoRef.current.videoHeight,
                 targetQuality,
-                keepAudio: !removeAudio
+                keepAudio: !removeAudio,
+                networkSize,
+                contentType: contentStyle
             });
         } catch (e: any) {
             setState('error');
