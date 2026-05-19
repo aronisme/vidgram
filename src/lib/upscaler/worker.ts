@@ -138,11 +138,26 @@ async function isSupported(): Promise<void> {
     }
   }
 
+  let safeProfile: any = null;
+  if (hardwareProfile) {
+    safeProfile = {
+      cpu: hardwareProfile.cpu,
+      memory: hardwareProfile.memory,
+      recommended: hardwareProfile.recommended,
+      gpu: {
+        available: hardwareProfile.gpu.available,
+        supportsCompute: hardwareProfile.gpu.supportsCompute,
+        maxBufferSize: hardwareProfile.gpu.maxBufferSize,
+        maxWorkgroupSize: hardwareProfile.gpu.maxWorkgroupSize
+      }
+    };
+  }
+
   postMessage({
     cmd: 'isSupported',
     data: {
       supported: gpu !== false,
-      hardwareProfile: hardwareProfile
+      hardwareProfile: safeProfile
     }
   } as any);
 }
