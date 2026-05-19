@@ -55,8 +55,8 @@ export default function NativeUpscalerPage() {
             case 'isSupported':
                 if (data && typeof data === 'object') {
                     if (!data.supported) {
-                        setState('error');
-                        setErrorMsg("Browser Anda tidak mendukung WebGPU yang dibutuhkan untuk AI Upscaler.");
+                        console.warn("WebGPU not fully supported, relying on fallback.");
+                        setHardwareWarning("WebGPU tidak terdeteksi. Upscaler mungkin berjalan lebih lambat (Mode Kompatibilitas).");
                     } else if (data.hardwareProfile) {
                         const profile = data.hardwareProfile;
                         if (profile.cpu.estimatedSpeed === 'slow' || profile.memory.tier === 'low') {
@@ -64,8 +64,8 @@ export default function NativeUpscalerPage() {
                         }
                     }
                 } else if (!data) {
-                    setState('error');
-                    setErrorMsg("Browser Anda tidak mendukung WebGPU yang dibutuhkan untuk AI Upscaler.");
+                    console.warn("WebGPU not fully supported, relying on fallback.");
+                    setHardwareWarning("WebGPU tidak terdeteksi. Upscaler mungkin berjalan lebih lambat (Mode Kompatibilitas).");
                 }
                 break;
             case 'progress':
@@ -247,7 +247,7 @@ export default function NativeUpscalerPage() {
         <div className="animate-fade-in" style={{ maxWidth: '1000px', margin: '0 auto', paddingTop: '2rem', paddingBottom: '3rem' }}>
             <div style={{ marginBottom: '2rem', textAlign: 'center' }}>
                 <h1 style={{ fontSize: '2rem', fontWeight: 800, letterSpacing: '-0.03em', background: 'linear-gradient(to right, #6366f1, #a855f7)', WebkitBackgroundClip: 'text', color: 'transparent' }}>
-                    AI Video Upscaler (Native)
+                    Vidgram Video Upscaler
                 </h1>
                 <p style={{ color: 'var(--text-secondary)', marginTop: '0.5rem' }}>
                     Tingkatkan resolusi video menggunakan kekuatan WebGPU langsung di browser.
