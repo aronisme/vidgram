@@ -24,6 +24,7 @@ export default function NativeUpscalerPage() {
     const [targetQuality, setTargetQuality] = useState<'2k'|'4k'>('2k');
     const [removeAudio, setRemoveAudio] = useState(false);
     const [hardwareWarning, setHardwareWarning] = useState<string | null>(null);
+    const [isDownloading, setIsDownloading] = useState(false);
 
     const videoRef = useRef<HTMLVideoElement>(null);
     const originalCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -241,6 +242,12 @@ export default function NativeUpscalerPage() {
         }
     };
 
+    const handleDownloadClick = () => {
+        if (isDownloading) return;
+        setIsDownloading(true);
+        // Reset loading state after 3 seconds (enough time for browser to start download)
+        setTimeout(() => setIsDownloading(false), 3000);
+    };
 
 
     return (
@@ -305,8 +312,9 @@ export default function NativeUpscalerPage() {
                                 <CheckCircle size={40} style={{ margin: '0 auto', color: 'var(--success)' }} />
                                 <h3 style={{ marginTop: '1rem', fontSize: '1.25rem', fontWeight: 700, color: 'var(--success)' }}>Selesai!</h3>
                                 <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', marginTop: '1.5rem', flexWrap: 'wrap' }}>
-                                    <a href={downloadUrl} download={downloadName} className="btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none' }}>
-                                        <Download size={18} /> Simpan Video
+                                    <a href={downloadUrl} download={downloadName} onClick={handleDownloadClick} className="btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none', opacity: isDownloading ? 0.7 : 1, pointerEvents: isDownloading ? 'none' : 'auto' }}>
+                                        {isDownloading ? <Loader2 size={18} className="animate-spin" /> : <Download size={18} />}
+                                        {isDownloading ? 'Menyimpan...' : 'Simpan Video'}
                                     </a>
                                     <button onClick={() => { setState('init'); if(fileInputRef.current) fileInputRef.current.value = ''; }} className="btn-secondary" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
                                         <Upload size={18} /> Upscale Video Lain
