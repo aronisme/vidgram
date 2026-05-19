@@ -48,17 +48,16 @@ export default function RootLayout({
         {/* Google Search Console Verification */}
         <meta name="google-site-verification" content="GOOGLE_VERIFICATION_CODE_PLACEHOLDER" />
 
-        {/* Google Analytics - Uncomment and replace ID when ready
-        <script async src="https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID_PLACEHOLDER"></script>
+        {/* Google tag (gtag.js) */}
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-G6CDR4KMKE"></script>
         <script dangerouslySetInnerHTML={{
           __html: `
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
-            gtag('config', 'GA_MEASUREMENT_ID_PLACEHOLDER');
+            gtag('config', 'G-G6CDR4KMKE');
           `
         }} />
-        */}
 
         {/* Microsoft Clarity - Uncomment and replace ID when ready
         <script dangerouslySetInnerHTML={{
