@@ -23,6 +23,7 @@ export default function NativeUpscalerPage() {
     const [contentStyle, setContentStyle] = useState<'rl'|'an'|'3d'>('rl');
     const [targetQuality, setTargetQuality] = useState<'2k'|'4k'>('2k');
     const [removeAudio, setRemoveAudio] = useState(false);
+    const [hardwareWarning, setHardwareWarning] = useState<string | null>(null);
 
     const videoRef = useRef<HTMLVideoElement>(null);
     const originalCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -52,7 +53,17 @@ export default function NativeUpscalerPage() {
         const { cmd, data } = e.data;
         switch (cmd) {
             case 'isSupported':
-                if (!data) {
+                if (data && typeof data === 'object') {
+                    if (!data.supported) {
+                        setState('error');
+                        setErrorMsg("Browser Anda tidak mendukung WebGPU yang dibutuhkan untuk AI Upscaler.");
+                    } else if (data.hardwareProfile) {
+                        const profile = data.hardwareProfile;
+                        if (profile.cpu.estimatedSpeed === 'slow' || profile.memory.tier === 'low') {
+                            setHardwareWarning("Sistem Anda mungkin lambat memproses 4K. Resolusi 2K direkomendasikan.");
+                        }
+                    }
+                } else if (!data) {
                     setState('error');
                     setErrorMsg("Browser Anda tidak mendukung WebGPU yang dibutuhkan untuk AI Upscaler.");
                 }
@@ -333,6 +344,12 @@ export default function NativeUpscalerPage() {
                                     <option value="2k">2K (2560×1440)</option>
                                     <option value="4k">4K (3840×2160)</option>
                                 </select>
+                                {hardwareWarning && targetQuality === '4k' && (
+                                    <div style={{ marginTop: '0.75rem', padding: '0.75rem', background: 'rgba(234, 179, 8, 0.1)', border: '1px solid rgba(234, 179, 8, 0.3)', borderRadius: 'var(--radius-md)', color: '#eab308', fontSize: '0.875rem', display: 'flex', gap: '0.5rem', alignItems: 'flex-start' }}>
+                                        <AlertCircle size={16} style={{ flexShrink: 0, marginTop: '0.125rem' }} />
+                                        <span>{hardwareWarning}</span>
+                                    </div>
+                                )}
                             </div>
 
                             <div style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>

@@ -41,7 +41,7 @@ export interface NetworkData {
 
 // Messages sent FROM worker TO main thread
 export type WorkerResponseMessage =
-  | { cmd: 'isSupported'; data: boolean }
+  | { cmd: 'isSupported'; data: boolean | { supported: boolean; hardwareProfile?: any } }
   | { cmd: 'progress'; data: number }
   | { cmd: 'eta'; data: string }
   | { cmd: 'process' }

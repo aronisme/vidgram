@@ -140,8 +140,11 @@ async function isSupported(): Promise<void> {
 
   postMessage({
     cmd: 'isSupported',
-    data: gpu !== false
-  } satisfies WorkerResponseMessage);
+    data: {
+      supported: gpu !== false,
+      hardwareProfile: hardwareProfile
+    }
+  } as any);
 }
 
 /**
@@ -224,6 +227,10 @@ async function init(config: InitData): Promise<void> {
   if (ctx) {
     ctx.transferFromImageBitmap(finalBitmap);
   }
+
+  // Free memory
+  adjustedBitmap.close();
+  config.bitmap.close();
 }
 
 /**
@@ -233,6 +240,7 @@ async function switchNetwork(name: string, weights: any, bitmap: ImageBitmap): P
   websr.switchNetwork(name as any, weights);
 
   await websr.render(bitmap as any);
+  bitmap.close();
 }
 
 /**
@@ -478,9 +486,19 @@ async function initRecording(
     finalCtx.imageSmoothingQuality = 'high';
   }
 
+  // Dynamic Bitrate Scaling (Phase 3.1)
+  let targetBitrate = 15_000_000; // default 1080p fallback
+  if (targetQuality === '4k') {
+    targetBitrate = 50_000_000; // 50 Mbps for 4K
+  } else if (targetQuality === '2k') {
+    targetBitrate = 25_000_000; // 25 Mbps for 2K
+  }
+  
+  console.log(`Setting encoding bitrate to ${targetBitrate / 1_000_000} Mbps for ${targetQuality}`);
+
   const videoSource = new CanvasSource(finalOutputCanvas, {
     codec: selectedCodec as any,
-    bitrate: 15_000_000,
+    bitrate: targetBitrate,
     keyFrameInterval: 60,
   });
 
@@ -603,7 +621,7 @@ async function initRecording(
 
     // === Multi-pass AI upscaling ===
     // Pass 1: AI upscale 2x (input → internalAICanvas)
-    pass1WebSR.render(bitmap);
+    await pass1WebSR.render(bitmap);
     bitmap.close(); // Free bitmap memory
 
     let sourceCanvas: OffscreenCanvas = internalAICanvas;
@@ -611,7 +629,7 @@ async function initRecording(
     // Pass 2: Additional AI pass if needed (uses pre-created WebSR instance)
     if (dims.passesNeeded > 1 && pass2WebSR && pass2Canvas) {
       const prevPassBitmap = await createImageBitmap(internalAICanvas);
-      pass2WebSR.render(prevPassBitmap as any);
+      await pass2WebSR.render(prevPassBitmap as any);
       prevPassBitmap.close();
       sourceCanvas = pass2Canvas;
     }
