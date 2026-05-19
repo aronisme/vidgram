@@ -48,7 +48,7 @@ export default function RootLayout({
         {/* Google Search Console Verification */}
         <meta name="google-site-verification" content="GOOGLE_VERIFICATION_CODE_PLACEHOLDER" />
 
-        {/* Google Analytics */}
+        {/* Google Analytics - Uncomment and replace ID when ready
         <script async src="https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID_PLACEHOLDER"></script>
         <script dangerouslySetInnerHTML={{
           __html: `
@@ -58,8 +58,9 @@ export default function RootLayout({
             gtag('config', 'GA_MEASUREMENT_ID_PLACEHOLDER');
           `
         }} />
+        */}
 
-        {/* Microsoft Clarity */}
+        {/* Microsoft Clarity - Uncomment and replace ID when ready
         <script dangerouslySetInnerHTML={{
           __html: `
             (function(c,l,a,r,i,t,y){
@@ -69,6 +70,7 @@ export default function RootLayout({
             })(window, document, "clarity", "script", "CLARITY_PROJECT_ID_PLACEHOLDER");
           `
         }} />
+        */}
       </head>
       <body className={outfit.className}>
         <ToastProvider>
