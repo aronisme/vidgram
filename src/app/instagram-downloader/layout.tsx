@@ -15,12 +15,12 @@ export const metadata: Metadata = {
     "vidgram instagram"
   ],
   alternates: {
-    canonical: "https://vidgram.web.id/instagram",
+    canonical: "https://vidgram.web.id/instagram-downloader",
   },
   openGraph: {
     title: "Instagram Downloader - Download Reels, Videos & Photos | Vidgram",
     description: "Download Instagram Reels, videos, and photos in high quality for free. Fast, easy, and secure.",
-    url: "https://vidgram.web.id/instagram",
+    url: "https://vidgram.web.id/instagram-downloader",
     siteName: "Vidgram",
     images: [
       {

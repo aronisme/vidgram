@@ -105,7 +105,7 @@ export default function Navbar() {
                         Discovery
                     </Link>
 
-                    <Link href="/tiktok" style={{
+                    <Link href="/tiktok-downloader" style={{
                         display: 'flex',
                         alignItems: 'center',
                         gap: '0.375rem',
@@ -124,7 +124,7 @@ export default function Navbar() {
                         TikTok Pro
                     </Link>
 
-                    <Link href="/instagram" style={{
+                    <Link href="/instagram-downloader" style={{
                         display: 'flex',
                         alignItems: 'center',
                         gap: '0.375rem',
@@ -143,7 +143,7 @@ export default function Navbar() {
                         Instagram Pro
                     </Link>
 
-                    <Link href="/upscaler" style={{
+                    <Link href="/ai-video-upscaler" style={{
                         display: 'flex',
                         alignItems: 'center',
                         gap: '0.375rem',
@@ -355,15 +355,15 @@ export default function Navbar() {
                             <Search size={18} />
                             Discovery
                         </Link>
-                        <Link href="/tiktok" className="mobile-nav-link" onClick={closeMobileMenu}>
+                        <Link href="/tiktok-downloader" className="mobile-nav-link" onClick={closeMobileMenu}>
                             <Download size={18} />
                             TikTok Downloader
                         </Link>
-                        <Link href="/instagram" className="mobile-nav-link" onClick={closeMobileMenu}>
+                        <Link href="/instagram-downloader" className="mobile-nav-link" onClick={closeMobileMenu}>
                             <Instagram size={18} />
                             Instagram Downloader
                         </Link>
-                        <Link href="/upscaler" className="mobile-nav-link" onClick={closeMobileMenu}>
+                        <Link href="/ai-video-upscaler" className="mobile-nav-link" onClick={closeMobileMenu}>
                             <Sparkles size={18} />
                             Upscaler
                         </Link>

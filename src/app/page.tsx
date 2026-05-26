@@ -26,7 +26,7 @@ export default async function Home() {
       {/* Hero Section */}
       <section className="hero-gradient animate-fade-in" style={{
         borderRadius: 'var(--radius-xl)',
-        padding: '4rem 2rem',
+        padding: 'clamp(3rem, 8vw, 4rem) clamp(1.25rem, 5vw, 2rem)',
         marginTop: '1rem',
         display: 'flex',
         flexDirection: 'column',
@@ -82,7 +82,7 @@ export default async function Home() {
         </div>
 
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', justifyContent: 'center', marginTop: '0.5rem' }}>
-          <Link href="/instagram" className="btn-instagram" style={{
+          <Link href="/instagram-downloader" className="btn-instagram" style={{
             padding: '0.75rem 2rem',
             borderRadius: '9999px',
             fontWeight: 700,
@@ -94,7 +94,7 @@ export default async function Home() {
           }}>
             <Instagram size={18} /> Instagram Downloader
           </Link>
-          <Link href="/upscaler" style={{
+          <Link href="/ai-video-upscaler" style={{
             background: 'rgba(99, 102, 241, 0.1)',
             color: 'var(--accent)',
             padding: '0.75rem 2rem',
@@ -202,12 +202,12 @@ export default async function Home() {
 
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 320px), 1fr))',
           gap: '1.5rem',
         }}>
           {/* Instagram Downloader Card */}
           <div className="card card-instagram" style={{
-            padding: '2.25rem',
+            padding: 'clamp(1.5rem, 5vw, 2.25rem)',
             display: 'flex',
             flexDirection: 'column',
             gap: '1.5rem',
@@ -243,7 +243,7 @@ export default async function Home() {
             </div>
 
             <div style={{ marginTop: 'auto', paddingTop: '0.5rem' }}>
-              <Link href="/instagram" className="btn-primary" style={{
+              <Link href="/instagram-downloader" className="btn-primary" style={{
                 background: 'linear-gradient(135deg, #ee2a7b, #6228d7)',
                 color: 'white',
                 width: '100%',
@@ -258,7 +258,7 @@ export default async function Home() {
 
           {/* TikTok Downloader Card */}
           <div className="card card-tiktok" style={{
-            padding: '2.25rem',
+            padding: 'clamp(1.5rem, 5vw, 2.25rem)',
             display: 'flex',
             flexDirection: 'column',
             gap: '1.5rem',
@@ -294,7 +294,7 @@ export default async function Home() {
             </div>
 
             <div style={{ marginTop: 'auto', paddingTop: '0.5rem' }}>
-              <Link href="/tiktok" className="btn-primary" style={{
+              <Link href="/tiktok-downloader" className="btn-primary" style={{
                 background: 'linear-gradient(135deg, #00f2ea, #00c3bc)',
                 color: 'white',
                 width: '100%',
@@ -313,7 +313,7 @@ export default async function Home() {
       <section className="animate-slide-up" style={{
         background: 'var(--bg-secondary)',
         borderRadius: 'var(--radius-xl)',
-        padding: '3rem 2rem',
+        padding: 'clamp(2rem, 6vw, 3rem) clamp(1.25rem, 5vw, 2rem)',
         border: '1px solid var(--border)',
         display: 'flex',
         flexDirection: 'column',
@@ -330,7 +330,7 @@ export default async function Home() {
 
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))',
           gap: '1rem',
           width: '100%',
           maxWidth: '800px'
@@ -380,7 +380,7 @@ export default async function Home() {
       {/* Features Section */}
       <section style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 240px), 1fr))',
         gap: '1.5rem',
       }} className="stagger-children">
         <div className="card" style={{ padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
@@ -417,7 +417,7 @@ export default async function Home() {
       <section className="animate-slide-up" style={{
         background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(139, 92, 246, 0.04) 100%)',
         borderRadius: 'var(--radius-xl)',
-        padding: '4rem 2rem',
+        padding: 'clamp(3rem, 8vw, 4rem) clamp(1.25rem, 5vw, 2rem)',
         textAlign: 'center',
         border: '1px solid var(--border)',
         display: 'flex',
@@ -438,7 +438,7 @@ export default async function Home() {
           <Link href="/dashboard/upload" className="btn-primary" style={{ padding: '0.75rem 2rem', textDecoration: 'none' }}>
             Start Creating <Upload size={18} />
           </Link>
-          <Link href="/upscaler" className="btn-secondary" style={{ padding: '0.75rem 2rem', textDecoration: 'none' }}>
+          <Link href="/ai-video-upscaler" className="btn-secondary" style={{ padding: '0.75rem 2rem', textDecoration: 'none' }}>
             Coba AI Upscaler Gratis <Sparkles size={18} />
           </Link>
         </div>

@@ -12,6 +12,20 @@ function getProjectUrl() {
     return `${FIRESTORE_BASE}/projects/${projectId}/databases/(default)/documents`;
 }
 
+// Resilient fetch with automatic retries for network robustness
+async function resilientFetch(url: string, options?: RequestInit, retries = 2, delay = 500): Promise<Response> {
+    try {
+        return await fetch(url, options);
+    } catch (e) {
+        if (retries > 0) {
+            console.warn(`[serverVideoService] Fetch failed, retrying in ${delay}ms... (Retries left: ${retries})`);
+            await new Promise((resolve) => setTimeout(resolve, delay));
+            return resilientFetch(url, options, retries - 1, delay * 2);
+        }
+        throw e;
+    }
+}
+
 // Helper to extract value from Firestore REST field
 function extractValue(field: any): any {
     if (!field) return null;
@@ -66,7 +80,7 @@ export const serverVideoService = {
     async getVideos(limitNum = 10): Promise<ServerVideoMetadata[]> {
         try {
             const url = `${getProjectUrl()}:runQuery`;
-            const response = await fetch(url, {
+            const response = await resilientFetch(url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -98,7 +112,7 @@ export const serverVideoService = {
     async getVideoBySlug(slug: string): Promise<ServerVideoMetadata | null> {
         try {
             const url = `${getProjectUrl()}:runQuery`;
-            const response = await fetch(url, {
+            const response = await resilientFetch(url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -135,7 +149,7 @@ export const serverVideoService = {
     async getUserProfile(userId: string): Promise<any> {
         try {
             const url = `${getProjectUrl()}/users/${userId}`;
-            const response = await fetch(url, {
+            const response = await resilientFetch(url, {
                 cache: 'no-store',
             });
 
@@ -162,7 +176,7 @@ export const serverVideoService = {
         // so we read-then-write. For high traffic, consider Cloud Functions instead.
         try {
             const docUrl = `${getProjectUrl()}/videos/${videoId}`;
-            const response = await fetch(docUrl, {
+            const response = await resilientFetch(docUrl, {
                 headers: { 'Content-Type': 'application/json' },
                 cache: 'no-store',
             });
@@ -173,7 +187,7 @@ export const serverVideoService = {
             const currentViews = Number(doc.fields?.views?.integerValue || 0);
 
             // PATCH to update only the views field
-            await fetch(`${docUrl}?updateMask.fieldPaths=views`, {
+            await resilientFetch(`${docUrl}?updateMask.fieldPaths=views`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

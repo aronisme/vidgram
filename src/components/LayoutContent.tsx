@@ -39,9 +39,9 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
                             <div>
                                 <h4 style={{ fontWeight: 700, marginBottom: '1.25rem', fontSize: '1rem' }}>Tools</h4>
                                 <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                                    <li><Link href="/tiktok" className="footer-link">TikTok Downloader Pro</Link></li>
-                                    <li><Link href="/instagram" className="footer-link">Instagram Downloader</Link></li>
-                                    <li><Link href="/upscaler" className="footer-link">AI Video Upscaler</Link></li>
+                                    <li><Link href="/tiktok-downloader" className="footer-link">TikTok Downloader Pro</Link></li>
+                                    <li><Link href="/instagram-downloader" className="footer-link">Instagram Downloader</Link></li>
+                                    <li><Link href="/ai-video-upscaler" className="footer-link">AI Video Upscaler</Link></li>
                                     <li><Link href="/discovery" className="footer-link">Video Discovery</Link></li>
                                 </ul>
                             </div>

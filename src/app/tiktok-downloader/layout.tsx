@@ -5,12 +5,12 @@ export const metadata: Metadata = {
   description: "Download TikTok videos without watermark for free. Fast, easy, and high-quality TikTok video downloader tool. Save TikTok videos instantly in HD quality.",
   keywords: ["TikTok downloader", "download TikTok without watermark", "TikTok video download", "save TikTok videos", "TikTok no watermark", "download tiktok tanpa watermark"],
   alternates: {
-    canonical: "https://vidgram.web.id/tiktok",
+    canonical: "https://vidgram.web.id/tiktok-downloader",
   },
   openGraph: {
     title: "TikTok Downloader - Download Without Watermark | Vidgram",
     description: "Download TikTok videos without watermark for free. Fast, easy, and high-quality.",
-    url: "https://vidgram.web.id/tiktok",
+    url: "https://vidgram.web.id/tiktok-downloader",
     siteName: "Vidgram",
     images: [
       {

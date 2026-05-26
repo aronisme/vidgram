@@ -23,7 +23,7 @@ export default function AboutPage() {
       </section>
 
       {/* Values Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem', marginBottom: '8rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))', gap: '2rem', marginBottom: '8rem' }}>
         <div className="card" style={{ padding: '3rem 2.5rem' }}>
           <div style={{ color: 'var(--accent)', marginBottom: '1.5rem' }}><Zap size={32} /></div>
           <h3 style={{ fontSize: '1.5rem', fontWeight: 800, marginBottom: '1rem' }}>Kecepatan Maksimal</h3>

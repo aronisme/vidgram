@@ -389,7 +389,7 @@ export default function NativeUpscalerPage() {
             <div className="animate-fade-in" style={{ marginTop: '5rem', display: 'flex', flexDirection: 'column', gap: '3rem', borderTop: '1px solid var(--border)', paddingTop: '4rem' }}>
                 <section>
                     <h2 style={{ fontSize: '1.75rem', fontWeight: 800, marginBottom: '1rem' }}>Mengapa Memilih AI Video Upscaler Lokal?</h2>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))', gap: '1.5rem' }}>
                         <div className="card" style={{ padding: '1.5rem', background: 'var(--bg-secondary)', border: '1px solid var(--border)' }}>
                             <h3 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.75rem', color: 'var(--success)' }}>✅ 100% Privasi Terjamin (Tanpa Upload)</h3>
                             <p style={{ color: 'var(--text-secondary)', fontSize: '0.9375rem', lineHeight: 1.6 }}>Berbeda dengan layanan cloud upscaling, video Anda tidak pernah dikirim ke server. Pemrosesan dilakukan murni di dalam browser Anda menggunakan teknologi WebGPU.</p>

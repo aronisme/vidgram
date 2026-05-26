@@ -11,6 +11,20 @@ function getProjectUrl() {
     return `${FIRESTORE_BASE}/projects/${projectId}/databases/(default)/documents`;
 }
 
+// Resilient fetch with automatic retries for network robustness
+async function resilientFetch(url: string, options?: RequestInit, retries = 2, delay = 500): Promise<Response> {
+    try {
+        return await fetch(url, options);
+    } catch (e) {
+        if (retries > 0) {
+            console.warn(`[serverImageService] Fetch failed, retrying in ${delay}ms... (Retries left: ${retries})`);
+            await new Promise((resolve) => setTimeout(resolve, delay));
+            return resilientFetch(url, options, retries - 1, delay * 2);
+        }
+        throw e;
+    }
+}
+
 // Helper to extract value from Firestore REST field
 function extractValue(field: any): any {
     if (!field) return null;
@@ -64,21 +78,14 @@ export const serverImageService = {
     async getPublicImagePosts(limitNum = 10): Promise<ServerImagePostMetadata[]> {
         try {
             const url = `${getProjectUrl()}:runQuery`;
-            const response = await fetch(url, {
+            const response = await resilientFetch(url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     structuredQuery: {
                         from: [{ collectionId: 'image_posts' }],
-                        where: {
-                            fieldFilter: {
-                                field: { fieldPath: 'isPrivate' },
-                                op: 'EQUAL',
-                                value: { booleanValue: false },
-                            },
-                        },
                         orderBy: [{ field: { fieldPath: 'createdAt' }, direction: 'DESCENDING' }],
-                        limit: limitNum,
+                        limit: limitNum * 3, // Fetch more to allow client-side filtering of private posts
                     },
                 }),
                 cache: 'no-store',
@@ -90,10 +97,14 @@ export const serverImageService = {
             }
 
             const data = await response.json();
+            if (!Array.isArray(data)) return [];
+
             return data
                 .filter((item: any) => item.document)
                 .map((item: any) => parseDocument(item.document))
-                .filter(Boolean) as ServerImagePostMetadata[];
+                .filter(Boolean)
+                .filter((item: any) => !item.isPrivate)
+                .slice(0, limitNum) as ServerImagePostMetadata[];
         } catch (e) {
             console.error('[serverImageService] getPublicImagePosts failed:', e);
             return [];
@@ -103,7 +114,7 @@ export const serverImageService = {
     async getImagePostBySlug(slug: string): Promise<ServerImagePostMetadata | null> {
         try {
             const url = `${getProjectUrl()}:runQuery`;
-            const response = await fetch(url, {
+            const response = await resilientFetch(url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -140,7 +151,7 @@ export const serverImageService = {
     async incrementViews(postId: string): Promise<void> {
         try {
             const docUrl = `${getProjectUrl()}/image_posts/${postId}`;
-            const response = await fetch(docUrl, {
+            const response = await resilientFetch(docUrl, {
                 headers: { 'Content-Type': 'application/json' },
                 cache: 'no-store',
             });
@@ -150,7 +161,7 @@ export const serverImageService = {
             const doc = await response.json();
             const currentViews = Number(doc.fields?.views?.integerValue || 0);
 
-            await fetch(`${docUrl}?updateMask.fieldPaths=views`, {
+            await resilientFetch(`${docUrl}?updateMask.fieldPaths=views`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

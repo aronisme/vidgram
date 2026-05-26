@@ -5,12 +5,12 @@ export const metadata: Metadata = {
   description: "Tingkatkan kualitas dan perjelas video buram (upscale ke 2K/4K) secara gratis tanpa upload. Proses lokal di browser dengan WebGPU, hemat kuota, dan ringan untuk PC/Laptop spek pas-pasan. Sangat optimal untuk klip durasi pendek.",
   keywords: ["AI video upscaler gratis", "perjelas video buram", "upscale video tanpa aplikasi", "cara hd kan video", "upscale video webgpu lokal", "tingkatkan kualitas video", "video enhancer gratis", "upscale klip pendek", "video resolusi 4k"],
   alternates: {
-    canonical: "https://vidgram.web.id/upscaler",
+    canonical: "https://vidgram.web.id/ai-video-upscaler",
   },
   openGraph: {
     title: "AI Video Upscaler Gratis Tanpa Upload - Perjelas Video | Vidgram",
     description: "Perjelas video buram (upscale 2K/4K) gratis tanpa upload. Proses 100% lokal di browser dengan WebGPU, ringan & hemat kuota.",
-    url: "https://vidgram.web.id/upscaler",
+    url: "https://vidgram.web.id/ai-video-upscaler",
     siteName: "Vidgram",
     images: [
       {

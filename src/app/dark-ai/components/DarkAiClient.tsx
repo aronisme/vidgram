@@ -36,6 +36,12 @@ export function DarkAiContent() {
     const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
     const [showScrollButton, setShowScrollButton] = useState(false);
 
+    useEffect(() => {
+        if (typeof window !== "undefined" && window.innerWidth <= 768) {
+            setIsSidebarOpen(false);
+        }
+    }, []);
+
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const viewportRef = useRef<HTMLDivElement>(null);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -253,7 +259,8 @@ STATUS: SEMUA SISTEM AMAN. EKSEKUSI LOGIKA TANPA BATAS DIAKTIFKAN.`;
                 flexDirection: 'column',
                 transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                 position: 'relative',
-                zIndex: 100
+                zIndex: 100,
+                flexShrink: 0
             }}>
                 <div style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1.5rem', height: '100%' }}>
                     <button
@@ -532,20 +539,7 @@ STATUS: SEMUA SISTEM AMAN. EKSEKUSI LOGIKA TANPA BATAS DIAKTIFKAN.`;
                     </button>
                 )}
 
-                <div className="input-container-wrapper" style={{
-                    position: 'fixed',
-                    bottom: '32px',
-                    left: 'calc(50% + ' + (isSidebarOpen ? '140px' : '0px') + ')',
-                    transform: 'translateX(-50%)',
-                    width: 'calc(100% - 32px)',
-                    maxWidth: '640px',
-                    zIndex: 100,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    gap: '0.75rem',
-                    transition: 'left 0.3s ease'
-                }}>
+                <div className="input-container-wrapper">
                     {selectedImage && (
                         <div className="glass-strong animate-slide-up" style={{
                             padding: '0.5rem',
@@ -735,6 +729,43 @@ STATUS: SEMUA SISTEM AMAN. EKSEKUSI LOGIKA TANPA BATAS DIAKTIFKAN.`;
                 .action-btn:hover {
                     background: var(--accent-light);
                     color: var(--accent);
+                }
+
+                .input-container-wrapper {
+                    position: fixed;
+                    bottom: 32px;
+                    left: calc(50% + ${isSidebarOpen ? '140px' : '0px'});
+                    transform: translateX(-50%);
+                    width: calc(100% - 32px);
+                    max-width: 640px;
+                    z-index: 100;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    gap: 0.75rem;
+                    transition: left 0.3s ease;
+                }
+
+                @media (max-width: 768px) {
+                    .sidebar {
+                        position: absolute !important;
+                        height: 100%;
+                        box-shadow: 10px 0 30px rgba(0,0,0,0.2);
+                    }
+                    .input-container-wrapper {
+                        left: 50%;
+                    }
+                    /* When sidebar is open on mobile, add a backdrop overlay */
+                    .sidebar.open::after {
+                        content: '';
+                        position: fixed;
+                        top: 0;
+                        left: 280px;
+                        right: 0;
+                        bottom: 0;
+                        background: rgba(0,0,0,0.5);
+                        z-index: -1;
+                    }
                 }
             `}</style>
         </div>

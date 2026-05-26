@@ -238,7 +238,7 @@ export default function DashboardPage() {
                 </div>
 
                 {posts.length > 0 ? (
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.25rem' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 280px), 1fr))', gap: '1.25rem' }}>
                         {posts.map((post) => {
                             const isImg = post.type === 'image';
                             const previewUrl = isImg ? post.images[0]?.url : post.thumbnailUrl;

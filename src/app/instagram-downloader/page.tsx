@@ -141,7 +141,7 @@ export default function InstagramDownloader() {
   return (
     <div className="animate-fade-in" style={{ paddingBottom: '6rem' }}>
       {/* Hero Section */}
-      <section className="hero-gradient" style={{ borderRadius: 'var(--radius-xl)', padding: '5rem 2rem', textAlign: 'center', marginBottom: '4rem', position: 'relative' }}>
+      <section className="hero-gradient" style={{ borderRadius: 'var(--radius-xl)', padding: 'clamp(3rem, 8vw, 5rem) clamp(1.25rem, 5vw, 2rem)', textAlign: 'center', marginBottom: '4rem', position: 'relative' }}>
         <div style={{ position: 'relative', zIndex: 1 }}>
           <div className="badge badge-accent" style={{ marginBottom: '1.5rem', background: 'rgba(225, 48, 108, 0.15)', color: '#e1306c', border: '1px solid rgba(225, 48, 108, 0.3)' }}>
             <Sparkles size={14} style={{ color: '#e1306c' }} /> Instagram Downloader Pro
@@ -191,14 +191,7 @@ export default function InstagramDownloader() {
                   type="submit"
                   disabled={loading || !url}
                   className="btn-primary"
-                  style={{
-                    minWidth: '180px',
-                    fontSize: '1.125rem',
-                    padding: '0 2.5rem',
-                    fontWeight: 700,
-                    background: 'linear-gradient(135deg, #ee2a7b, #6228d7)',
-                    border: 'none',
-                  }}
+                  style={{ fontSize: '1.125rem', padding: '0 1.5rem', fontWeight: 700, background: 'linear-gradient(135deg, #ee2a7b, #6228d7)', border: 'none' }}
                 >
                   {loading ? <Loader2 className="spinner" style={{ width: '24px', height: '24px' }} /> : 'UNDUH'}
                 </button>
@@ -359,7 +352,7 @@ export default function InstagramDownloader() {
                 {/* Grid of Slide elements */}
                 <h3 style={{ fontSize: '1.25rem', fontWeight: 800, marginBottom: '1.5rem', letterSpacing: '-0.02em' }}>Pilih Media yang Ingin Diunduh:</h3>
                 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '2rem' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 220px), 1fr))', gap: '2rem' }}>
                   {result.mediaList?.map((media, index) => (
                     <div key={media.id} className="card animate-slide-up" style={{ padding: '0', overflow: 'hidden', border: '1px solid var(--border)', position: 'relative', display: 'flex', flexDirection: 'column' }}>
                       
@@ -445,7 +438,7 @@ export default function InstagramDownloader() {
         <div className="animate-fade-in">
           
           {/* Service Feature Badges */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '2.5rem', marginBottom: '8rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))', gap: '2.5rem', marginBottom: '8rem' }}>
             <div className="card" style={{ textAlign: 'center', padding: '3rem 2rem' }}>
               <div className="glass" style={{ width: '72px', height: '72px', borderRadius: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 2rem', color: '#e1306c', background: 'rgba(225, 48, 108, 0.05)' }}>
                 <Sparkles size={36} />
@@ -482,7 +475,7 @@ export default function InstagramDownloader() {
               <p style={{ color: 'var(--text-secondary)', fontSize: '1.125rem' }}>3 langkah mudah untuk menyimpan konten ke perangkat Anda.</p>
             </div>
             
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '2rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 250px), 1fr))', gap: '2rem' }}>
               <div className="card" style={{ padding: '2.5rem', position: 'relative' }}>
                 <div style={{ fontSize: '5rem', fontWeight: 900, color: '#e1306c', opacity: 0.05, position: 'absolute', top: -10, right: 20 }}>1</div>
                 <h4 style={{ fontSize: '1.25rem', fontWeight: 800, marginBottom: '1rem', color: '#e1306c' }}>Salin Link Postingan</h4>
@@ -542,7 +535,7 @@ export default function InstagramDownloader() {
 
           {/* Structured SEO Marketing Description */}
           <section style={{ borderTop: '1px solid var(--border)', paddingTop: '5rem', paddingBottom: '2rem' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '4rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 400px), 1fr))', gap: '4rem' }}>
               <div>
                 <h3 style={{ fontSize: '1.75rem', fontWeight: 800, marginBottom: '1.5rem', color: 'var(--text-primary)' }}>Download Reels Instagram Tanpa Watermark Kualitas HD</h3>
                 <p style={{ color: 'var(--text-secondary)', lineHeight: 1.8, marginBottom: '1.5rem' }}>

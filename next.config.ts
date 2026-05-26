@@ -25,6 +25,25 @@ const nextConfig: NextConfig = {
   compress: true,
   // Powered by header is unnecessary — Vercel adds its own
   poweredByHeader: false,
+  async redirects() {
+    return [
+      {
+        source: '/tiktok',
+        destination: '/tiktok-downloader',
+        permanent: true,
+      },
+      {
+        source: '/instagram',
+        destination: '/instagram-downloader',
+        permanent: true,
+      },
+      {
+        source: '/upscaler',
+        destination: '/ai-video-upscaler',
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default nextConfig;
