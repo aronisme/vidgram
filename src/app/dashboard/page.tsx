@@ -1,13 +1,15 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { videoService } from "@/lib/videoService";
 import { imageService } from "@/lib/imageService";
-import { Play, Users, Video as VideoIcon, Images, Trash2, Edit, X, Save, Image as ImageIcon, Lock, Globe, Loader2 } from "lucide-react";
+import { Play, Users, Video as VideoIcon, Images, Trash2, Edit, X, Save, Image as ImageIcon, Lock, Globe, Loader2, Eye, Heart, Plus, Grid3X3, Film } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/context/ToastContext";
+
+type TabType = "public" | "private" | "video";
 
 export default function DashboardPage() {
     const { user, dbUser, loading } = useAuth();
@@ -15,8 +17,9 @@ export default function DashboardPage() {
     const [posts, setPosts] = useState<any[]>([]);
     const [stats, setStats] = useState({ totalViews: 0, totalLikes: 0, totalVideos: 0, totalImages: 0 });
     const [isLoading, setIsLoading] = useState(true);
+    const [activeTab, setActiveTab] = useState<TabType>("public");
 
-    const POSTS_PER_PAGE = 10;
+    const POSTS_PER_PAGE = 30;
     const [hasMoreVideos, setHasMoreVideos] = useState(true);
     const [hasMoreImages, setHasMoreImages] = useState(true);
     const [lastVideoDate, setLastVideoDate] = useState<any>(null);
@@ -126,6 +129,20 @@ export default function DashboardPage() {
         }
     };
 
+    // Filter posts by tab
+    const filteredPosts = useMemo(() => {
+        switch (activeTab) {
+            case "public":
+                return posts.filter(p => !p.isPrivate);
+            case "private":
+                return posts.filter(p => p.isPrivate);
+            case "video":
+                return posts.filter(p => p.type === "video");
+            default:
+                return posts;
+        }
+    }, [posts, activeTab]);
+
     const handleDelete = async (post: any) => {
         if (!confirm(`Yakin ingin menghapus ${post.title}? Tindakan ini tidak bisa dibatalkan.`)) return;
         try {
@@ -188,120 +205,187 @@ export default function DashboardPage() {
 
     if (!user) return null;
 
+    const tabCounts = {
+        public: posts.filter(p => !p.isPrivate).length,
+        private: posts.filter(p => p.isPrivate).length,
+        video: posts.filter(p => p.type === "video").length,
+    };
+
+    const tabs: { key: TabType; label: string; icon: React.ReactNode }[] = [
+        { key: "public", label: "Publik", icon: <Globe size={16} /> },
+        { key: "private", label: "Privat", icon: <Lock size={16} /> },
+        { key: "video", label: "Video", icon: <Film size={16} /> },
+    ];
+
     return (
-        <div className="animate-fade-in" style={{ paddingTop: '1.5rem', paddingBottom: '2rem', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+        <div className="animate-fade-in" style={{ paddingBottom: '2rem', display: 'flex', flexDirection: 'column' }}>
 
-            {/* Greeting */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
-                <div>
-                    <h1 style={{ fontSize: '1.75rem', fontWeight: 800, letterSpacing: '-0.03em' }}>
-                        Dashboard Anda 👋
-                    </h1>
-                    <p style={{ color: 'var(--text-secondary)', marginTop: '0.25rem', fontSize: '0.9375rem' }}>
-                        Kelola konten, cek performa, dan edit postingan dengan mudah.
-                    </p>
-                </div>
-                <Link href="/dashboard/upload" className="btn-primary" style={{ padding: '0.625rem 1.5rem', fontSize: '0.9375rem' }}>
-                    + Buat Postingan
-                </Link>
-            </div>
+            {/* ══════════════════════════════════════════
+                PROFILE HEADER — Social Media Style
+               ══════════════════════════════════════════ */}
+            <div className="dashboard-profile-header">
+                {/* Background Gradient Accent */}
+                <div className="dashboard-profile-banner" />
 
-            {/* Stats Grid */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }} className="stagger-children">
-                {[
-                    { label: "Total Views", value: stats.totalViews.toLocaleString(), icon: <Play size={20} />, gradient: 'linear-gradient(135deg, #3b82f6, #60a5fa)', shadow: 'rgba(59, 130, 246, 0.3)' },
-                    { label: "Total Videos", value: stats.totalVideos.toLocaleString(), icon: <VideoIcon size={20} />, gradient: 'linear-gradient(135deg, #8b5cf6, #a78bfa)', shadow: 'rgba(139, 92, 246, 0.3)' },
-                    { label: "Total Images", value: stats.totalImages.toLocaleString(), icon: <Images size={20} />, gradient: 'linear-gradient(135deg, #10b981, #34d399)', shadow: 'rgba(16, 185, 129, 0.3)' },
-                    { label: "Subscribers", value: (dbUser?.subscribersCount || 0).toLocaleString(), icon: <Users size={20} />, gradient: 'linear-gradient(135deg, #f59e0b, #fbbf24)', shadow: 'rgba(245, 158, 11, 0.3)' },
-                ].map((stat, i) => (
-                    <div key={i} className="stat-card">
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                            <div style={{
-                                background: stat.gradient, width: '42px', height: '42px', borderRadius: 'var(--radius-md)',
-                                display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', boxShadow: `0 4px 12px ${stat.shadow}`,
-                            }}>
-                                {stat.icon}
-                            </div>
+                <div className="dashboard-profile-info">
+                    {/* Avatar */}
+                    <div className="dashboard-avatar-wrapper">
+                        <img
+                            src={dbUser?.photoURL || "https://api.dicebear.com/7.x/avataaars/svg?seed=fallback"}
+                            alt="Avatar"
+                            className="dashboard-avatar"
+                        />
+                        <Link href="/dashboard/upload" className="dashboard-avatar-upload-btn" title="Buat Postingan">
+                            <Plus size={16} />
+                        </Link>
+                    </div>
+
+                    {/* Name + Bio */}
+                    <div className="dashboard-user-meta">
+                        <h1 className="dashboard-display-name">
+                            {dbUser?.displayName || "User"}
+                        </h1>
+                        {dbUser?.username && (
+                            <p className="dashboard-username">@{dbUser.username}</p>
+                        )}
+                        {dbUser?.bio && (
+                            <p className="dashboard-bio">{dbUser.bio}</p>
+                        )}
+                    </div>
+
+                    {/* Stats Row */}
+                    <div className="dashboard-stats-row">
+                        <div className="dashboard-stat-item">
+                            <span className="dashboard-stat-value">{(stats.totalVideos + stats.totalImages).toLocaleString()}</span>
+                            <span className="dashboard-stat-label">Postingan</span>
                         </div>
-                        <div>
-                            <p style={{ color: 'var(--text-secondary)', fontSize: '0.8125rem', fontWeight: 500 }}>{stat.label}</p>
-                            <h2 style={{ fontSize: '1.75rem', fontWeight: 800, letterSpacing: '-0.02em' }}>{stat.value}</h2>
+                        <div className="dashboard-stat-divider" />
+                        <div className="dashboard-stat-item">
+                            <span className="dashboard-stat-value">{(dbUser?.subscribersCount || 0).toLocaleString()}</span>
+                            <span className="dashboard-stat-label">Subscriber</span>
+                        </div>
+                        <div className="dashboard-stat-divider" />
+                        <div className="dashboard-stat-item">
+                            <span className="dashboard-stat-value">{stats.totalViews.toLocaleString()}</span>
+                            <span className="dashboard-stat-label">Views</span>
+                        </div>
+                        <div className="dashboard-stat-divider" />
+                        <div className="dashboard-stat-item">
+                            <span className="dashboard-stat-value">{stats.totalLikes.toLocaleString()}</span>
+                            <span className="dashboard-stat-label">Likes</span>
                         </div>
                     </div>
+
+                    {/* Action Buttons */}
+                    <div className="dashboard-action-row">
+                        <Link href="/dashboard/profile" className="btn-secondary" style={{ padding: '0.5rem 1.25rem', fontSize: '0.8125rem', borderRadius: 'var(--radius-full)' }}>
+                            <Edit size={14} />
+                            Edit Profile
+                        </Link>
+                        <Link href="/dashboard/upload" className="btn-primary" style={{ padding: '0.5rem 1.25rem', fontSize: '0.8125rem' }}>
+                            <Plus size={14} />
+                            Buat Postingan
+                        </Link>
+                    </div>
+                </div>
+            </div>
+
+            {/* ══════════════════════════════════════════
+                TAB BAR — Instagram/TikTok style
+               ══════════════════════════════════════════ */}
+            <div className="dashboard-tabs-bar">
+                {tabs.map((tab) => (
+                    <button
+                        key={tab.key}
+                        className={`dashboard-tab ${activeTab === tab.key ? "dashboard-tab-active" : ""}`}
+                        onClick={() => setActiveTab(tab.key)}
+                    >
+                        {tab.icon}
+                        <span className="dashboard-tab-label">{tab.label}</span>
+                        <span className="dashboard-tab-count">{tabCounts[tab.key]}</span>
+                    </button>
                 ))}
             </div>
 
-            {/* Content Grid */}
-            <div style={{ display: 'flex', flexDirection: 'column' }}>
-                <div style={{ padding: '0 0 1.5rem 0', borderBottom: '1px solid var(--border)', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <h2 style={{ fontSize: '1.25rem', fontWeight: 700 }}>Semua Postingan Anda</h2>
-                </div>
-
-                {posts.length > 0 ? (
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 280px), 1fr))', gap: '1.25rem' }}>
-                        {posts.map((post) => {
+            {/* ══════════════════════════════════════════
+                CONTENT GRID — 3-column thumbnail grid
+               ══════════════════════════════════════════ */}
+            <div style={{ marginTop: '0.5rem' }}>
+                {filteredPosts.length > 0 ? (
+                    <div className="dashboard-content-grid">
+                        {filteredPosts.map((post) => {
                             const isImg = post.type === 'image';
                             const previewUrl = isImg ? post.images[0]?.url : post.thumbnailUrl;
                             const postLink = isImg ? `/image/${post.slug}` : `/video/${post.slug}`;
-                            const date = new Date(post.createdAt?.toDate?.() || post.createdAt).toLocaleDateString('id-ID', {day: 'numeric', month: 'short', year: 'numeric'});
 
                             return (
-                                <div key={post.id} className="card" style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', padding: 0 }}>
-                                    <Link href={postLink} style={{ position: 'relative', width: '100%', aspectRatio: isImg ? '1' : '16/9', background: 'var(--bg-secondary)', display: 'block' }}>
-                                        <Image src={previewUrl} alt={post.title} fill sizes="(max-width: 768px) 100vw, 300px" style={{ objectFit: 'cover' }} />
-                                        
-                                        {/* Type Badge */}
-                                        <div style={{ position: 'absolute', top: '0.5rem', right: '0.5rem', background: 'rgba(0,0,0,0.6)', color: 'white', padding: '0.25rem 0.5rem', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.25rem', backdropFilter: 'blur(4px)' }}>
-                                            {isImg ? <ImageIcon size={12} /> : <VideoIcon size={12} />}
-                                            {isImg ? "Album" : "Video"}
+                                <div key={post.id} className="dashboard-grid-item">
+                                    <Link href={postLink} className="dashboard-grid-thumb">
+                                        <Image
+                                            src={previewUrl}
+                                            alt={post.title}
+                                            fill
+                                            sizes="(max-width: 640px) 33vw, (max-width: 1024px) 25vw, 20vw"
+                                            style={{ objectFit: 'cover' }}
+                                        />
+
+                                        {/* Hover overlay with stats */}
+                                        <div className="dashboard-grid-overlay">
+                                            <div className="dashboard-grid-overlay-stats">
+                                                <span><Eye size={16} /> {post.views?.toLocaleString() || 0}</span>
+                                                <span><Heart size={16} /> {post.likes?.toLocaleString() || 0}</span>
+                                            </div>
                                         </div>
+
+                                        {/* Type indicator */}
+                                        {!isImg && (
+                                            <div className="dashboard-grid-type-badge">
+                                                <Play size={14} fill="white" />
+                                            </div>
+                                        )}
+
+                                        {/* Multi-image indicator */}
+                                        {isImg && post.images?.length > 1 && (
+                                            <div className="dashboard-grid-multi-badge">
+                                                <Grid3X3 size={14} />
+                                            </div>
+                                        )}
+
+                                        {/* Privacy badge */}
+                                        {post.isPrivate && (
+                                            <div className="dashboard-grid-private-badge">
+                                                <Lock size={12} />
+                                            </div>
+                                        )}
                                     </Link>
-                                    
-                                    <div style={{ padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.75rem', flex: 1 }}>
-                                        <Link href={postLink} style={{ fontWeight: 700, color: 'var(--text-primary)', textDecoration: 'none', fontSize: '1rem', lineHeight: 1.4 }} className="hover:text-[var(--accent)] line-clamp-2">
-                                            {post.title}
-                                        </Link>
-                                        
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>
-                                            <span>{date}</span>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                                <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}><Play size={12} /> {post.views?.toLocaleString() || 0}</span>
-                                            </div>
-                                        </div>
 
-                                        <div style={{ marginTop: 'auto', paddingTop: '1rem', borderTop: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                                            {isImg ? (
-                                                post.isPrivate ? (
-                                                    <span className="badge" style={{ background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444' }}><Lock size={12} style={{marginRight: '4px'}}/> Private</span>
-                                                ) : (
-                                                    <span className="badge badge-success"><Globe size={12} style={{marginRight: '4px'}}/> Public</span>
-                                                )
-                                            ) : (
-                                                <span className="badge badge-success"><Globe size={12} style={{marginRight: '4px'}}/> Public</span>
-                                            )}
-
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                                <button onClick={() => handleEditClick(post)} className="btn-secondary" style={{ padding: '0.375rem', borderRadius: 'var(--radius-sm)' }}>
-                                                    <Edit size={14} />
-                                                </button>
-                                                <button onClick={() => handleDelete(post)} className="btn-secondary" style={{ padding: '0.375rem', borderRadius: 'var(--radius-sm)', color: '#ef4444', borderColor: 'transparent', background: 'rgba(239, 68, 68, 0.1)' }}>
-                                                    <Trash2 size={14} />
-                                                </button>
-                                            </div>
-                                        </div>
+                                    {/* Action buttons — visible on hover */}
+                                    <div className="dashboard-grid-actions">
+                                        <button onClick={() => handleEditClick(post)} className="dashboard-grid-action-btn" title="Edit">
+                                            <Edit size={14} />
+                                        </button>
+                                        <button onClick={() => handleDelete(post)} className="dashboard-grid-action-btn dashboard-grid-action-delete" title="Hapus">
+                                            <Trash2 size={14} />
+                                        </button>
                                     </div>
                                 </div>
                             );
                         })}
                     </div>
                 ) : (
-                    <div className="card" style={{ padding: '4rem 1rem', textAlign: 'center', color: 'var(--text-tertiary)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
-                        <Images size={40} style={{ opacity: 0.5 }} />
-                        <p>Anda belum mengunggah apa pun. Mari mulai berkarya!</p>
+                    <div className="dashboard-empty-state">
+                        {activeTab === "public" && <Globe size={48} style={{ opacity: 0.3 }} />}
+                        {activeTab === "private" && <Lock size={48} style={{ opacity: 0.3 }} />}
+                        {activeTab === "video" && <Film size={48} style={{ opacity: 0.3 }} />}
+                        <p>Belum ada konten {activeTab === "public" ? "publik" : activeTab === "private" ? "privat" : "video"}.</p>
+                        <Link href="/dashboard/upload" className="btn-primary" style={{ marginTop: '0.5rem', padding: '0.5rem 1.5rem', fontSize: '0.875rem' }}>
+                            <Plus size={16} />
+                            Upload Sekarang
+                        </Link>
                     </div>
                 )}
 
-                {(hasMoreVideos || hasMoreImages) && posts.length > 0 && (
+                {(hasMoreVideos || hasMoreImages) && filteredPosts.length > 0 && (
                     <div style={{ padding: '2rem', display: 'flex', justifyContent: 'center' }}>
                         <button
                             onClick={loadMore}
@@ -315,9 +399,9 @@ export default function DashboardPage() {
                 )}
             </div>
 
-            {/* ============================== */}
-            {/*          EDIT MODAL            */}
-            {/* ============================== */}
+            {/* ══════════════════════════════════════════
+                         EDIT MODAL
+               ══════════════════════════════════════════ */}
             {editingPost && (
                 <div style={{
                     position: 'fixed', inset: 0, zIndex: 9999, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)',

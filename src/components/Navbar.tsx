@@ -183,25 +183,6 @@ export default function Navbar() {
 
                     {user ? (
                         <>
-                            <Link href="/dashboard" style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '0.375rem',
-                                textDecoration: 'none',
-                                fontSize: '0.875rem',
-                                padding: '0.5rem 1rem',
-                                borderRadius: '9999px',
-                                fontWeight: 500,
-                                color: 'var(--text-secondary)',
-                                transition: 'all 0.2s ease',
-                            }}
-                                onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--accent-light)'; e.currentTarget.style.color = 'var(--accent)'; }}
-                                onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--text-secondary)'; }}
-                            >
-                                <BarChart3 size={16} />
-                                Dashboard
-                            </Link>
-
                             <Link href="/dashboard/upload" style={{
                                 background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
                                 color: 'white',
@@ -293,6 +274,23 @@ export default function Navbar() {
                                             <UserIcon size={16} />
                                             My Profile
                                         </Link>
+                                        <Link href="/dashboard" onClick={() => setShowDropdown(false)} style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '0.5rem',
+                                            padding: '0.75rem 1rem',
+                                            color: 'var(--text-primary)',
+                                            textDecoration: 'none',
+                                            fontSize: '0.875rem',
+                                            fontWeight: 500,
+                                            transition: 'background 0.15s ease',
+                                        }}
+                                            onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--accent-light)')}
+                                            onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+                                        >
+                                            <BarChart3 size={16} />
+                                            Dashboard
+                                        </Link>
                                         <button onClick={() => { signOut(); setShowDropdown(false); }} style={{
                                             display: 'flex',
                                             alignItems: 'center',
@@ -374,10 +372,6 @@ export default function Navbar() {
 
                         {user ? (
                             <>
-                                <Link href="/dashboard" className="mobile-nav-link" onClick={closeMobileMenu}>
-                                    <BarChart3 size={18} />
-                                    Dashboard
-                                </Link>
                                 <Link href="/dashboard/upload" className="mobile-nav-link" onClick={closeMobileMenu}>
                                     <Upload size={18} />
                                     Upload Video
@@ -409,6 +403,10 @@ export default function Navbar() {
                                 <Link href="/dashboard/profile" className="mobile-nav-link" onClick={closeMobileMenu}>
                                     <UserIcon size={18} />
                                     My Profile
+                                </Link>
+                                <Link href="/dashboard" className="mobile-nav-link" onClick={closeMobileMenu}>
+                                    <BarChart3 size={18} />
+                                    Dashboard
                                 </Link>
                                 <button
                                     onClick={() => { signOut(); closeMobileMenu(); }}

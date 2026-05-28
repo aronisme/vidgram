@@ -79,6 +79,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             await signInWithPopup(auth, googleProvider);
             addToast("Successfully signed in!", "success");
         } catch (error: any) {
+            // Silently ignore benign popup errors (user closed popup or double-clicked sign-in)
+            const benignCodes = ["auth/cancelled-popup-request", "auth/popup-closed-by-user"];
+            if (benignCodes.includes(error?.code)) return;
+
             console.error("Error signing in with Google", error);
             addToast(error.message || "Failed to sign in. Please try again.", "error");
         }
