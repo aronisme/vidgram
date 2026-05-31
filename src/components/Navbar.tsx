@@ -3,12 +3,13 @@
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { BarChart3, Upload, Search, LogIn, LogOut, User as UserIcon, Menu, X, Sparkles, Download, Bot, Instagram } from "lucide-react";
+import { BarChart3, Upload, Search, LogIn, LogOut, User as UserIcon, Menu, X, Sparkles, Download, Bot, Instagram, Wrench } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 
 export default function Navbar() {
     const { user, dbUser, signInWithGoogle, signOut } = useAuth();
     const [showDropdown, setShowDropdown] = useState(false);
+    const [showTools, setShowTools] = useState(false);
     const [showMobileMenu, setShowMobileMenu] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
     const mobileMenuRef = useRef<HTMLDivElement>(null);
@@ -180,6 +181,32 @@ export default function Navbar() {
                         <Bot size={16} />
                         Dark Ai
                     </Link>
+
+                    {/* Tools Dropdown */}
+                    <div style={{ position: 'relative' }} onMouseEnter={() => setShowTools(true)} onMouseLeave={() => setShowTools(false)}>
+                        <button style={{
+                            display: 'flex', alignItems: 'center', gap: '0.375rem', fontSize: '0.875rem', padding: '0.5rem 1rem', borderRadius: '9999px',
+                            fontWeight: 500, color: 'var(--text-secondary)', background: 'transparent', border: 'none', cursor: 'pointer', transition: 'all 0.2s ease'
+                        }}
+                            onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--accent-light)'; e.currentTarget.style.color = 'var(--accent)'; }}
+                            onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--text-secondary)'; }}
+                        >
+                            <Wrench size={16} />
+                            Tools
+                        </button>
+                        {showTools && (
+                            <div style={{
+                                position: 'absolute', top: '100%', left: 0, marginTop: '0.5rem', width: '200px', background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: '16px', boxShadow: '0 8px 30px rgba(0,0,0,0.15)', display: 'flex', flexDirection: 'column', overflow: 'hidden', zIndex: 60, animation: 'slideDown 0.2s ease-out'
+                            }}>
+                                <Link href="/tools/smart-keywords" onClick={() => setShowTools(false)} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 1rem', color: 'var(--text-primary)', textDecoration: 'none', fontSize: '0.875rem', fontWeight: 500, transition: 'background 0.15s ease' }}
+                                    onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--accent-light)')}
+                                    onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+                                >
+                                    Smart Keywords Ext
+                                </Link>
+                            </div>
+                        )}
+                    </div>
 
                     {user ? (
                         <>
@@ -368,6 +395,13 @@ export default function Navbar() {
                         <Link href="/dark-ai" className="mobile-nav-link" onClick={closeMobileMenu}>
                             <Bot size={18} />
                             Dark Ai
+                        </Link>
+
+                        <div style={{ padding: '0.75rem 1rem 0.25rem', fontWeight: 700, fontSize: '0.8125rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                            🛠️ Tools
+                        </div>
+                        <Link href="/tools/smart-keywords" className="mobile-nav-link" style={{ paddingLeft: '1.5rem' }} onClick={closeMobileMenu}>
+                            Smart Keywords Ext
                         </Link>
 
                         {user ? (
