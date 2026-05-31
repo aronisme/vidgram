@@ -1,13 +1,54 @@
+"use client";
+
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { CheckCircle, Download, LayoutDashboard, Cloud, Zap, Target } from 'lucide-react';
-import type { Metadata } from 'next';
-
-export const metadata: Metadata = {
-  title: 'Smart Keywords Extension - Adobe Stock Auto Fill',
-  description: 'Berhenti membuang waktu 10 menit untuk mengisi metadata. Biar AI yang memikirkan judul, keyword, hingga mencegah upload ganda.',
-};
+import { db } from '@/lib/firebase';
+import { doc, getDoc, setDoc, updateDoc, increment } from 'firebase/firestore';
 
 export default function SmartKeywordsPage() {
+  const [downloads, setDownloads] = useState<number | null>(null);
+
+  useEffect(() => {
+    const fetchDownloads = async () => {
+      try {
+        if (typeof window !== "undefined" && db) {
+          const statsRef = doc(db, "statistics", "smart-keywords");
+          const docSnap = await getDoc(statsRef);
+          if (docSnap.exists()) {
+            setDownloads(docSnap.data().downloads || 0);
+          }
+        }
+      } catch (err) {
+        console.warn("Gagal membaca statistik download:", err);
+      }
+    };
+    fetchDownloads();
+  }, []);
+
+  const handleDownloadClick = async () => {
+    try {
+      if (typeof window !== "undefined" && db) {
+        const statsRef = doc(db, "statistics", "smart-keywords");
+        const docSnap = await getDoc(statsRef);
+        if (docSnap.exists()) {
+          await updateDoc(statsRef, {
+            downloads: increment(1),
+            lastDownloadedAt: new Date().toISOString()
+          });
+          setDownloads(prev => (prev !== null ? prev + 1 : 1));
+        } else {
+          await setDoc(statsRef, {
+            downloads: 1,
+            lastDownloadedAt: new Date().toISOString()
+          });
+          setDownloads(1);
+        }
+      }
+    } catch (err) {
+      console.warn("Gagal memperbarui statistik download:", err);
+    }
+  };
   return (
     <main style={{ paddingBottom: '100px' }}>
       {/* Hero Section */}
@@ -21,11 +62,13 @@ export default function SmartKeywordsPage() {
             Biar AI yang memikirkan metadata, kategori, hingga mencegah upload ganda. Smart Keywords mengisi form Adobe Stock Anda secara otomatis hanya dalam 3 detik.
           </p>
           <div style={{ display: 'flex', gap: '15px', justifyContent: 'center', alignItems: 'center', flexWrap: 'wrap' }}>
-            <Link href="/downloads/Smart_keywords_ext_v2.7.29.zip" style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'var(--accent)', color: 'white', padding: '16px 32px', borderRadius: '50px', fontSize: '1.1rem', fontWeight: 700, textDecoration: 'none', boxShadow: '0 10px 25px rgba(139,92,246,0.4)', transition: 'transform 0.2s' }}>
+            <Link href="/downloads/Smart_keywords_ext_v2.7.29.zip" onClick={handleDownloadClick} style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'var(--accent)', color: 'white', padding: '16px 32px', borderRadius: '50px', fontSize: '1.1rem', fontWeight: 700, textDecoration: 'none', boxShadow: '0 10px 25px rgba(139,92,246,0.4)', transition: 'transform 0.2s' }}>
               <Download size={24} /> Download Ekstensi (v2.7.29)
             </Link>
           </div>
-          <p style={{ marginTop: '15px', fontSize: '0.9rem', color: 'var(--text-tertiary)' }}>⭐⭐⭐⭐⭐ Digunakan oleh ratusan kontributor cerdas.</p>
+          <p style={{ marginTop: '15px', fontSize: '0.95rem', color: 'var(--text-secondary)', fontWeight: 500 }}>
+            ⭐⭐⭐⭐⭐ {downloads !== null ? `Telah di-download sebanyak ${downloads.toLocaleString('id-ID')} kali!` : 'Digunakan oleh ratusan kontributor cerdas.'}
+          </p>
         </div>
       </section>
 
@@ -112,7 +155,7 @@ export default function SmartKeywordsPage() {
             <li style={{ display: 'flex', gap: '10px', marginBottom: '15px' }}><CheckCircle color="var(--accent)" /> Bisa dipakai di 2 perangkat berbeda</li>
             <li style={{ display: 'flex', gap: '10px' }}><CheckCircle color="var(--accent)" /> Kecepatan prioritas Gemini 2.5 Flash & Llama 4</li>
           </ul>
-          <Link href="/downloads/Smart_keywords_ext_v2.7.29.zip" style={{ display: 'inline-block', background: 'white', color: 'black', padding: '14px 28px', borderRadius: '50px', fontSize: '1.1rem', fontWeight: 700, textDecoration: 'none', transition: 'transform 0.2s' }}>
+          <Link href="/downloads/Smart_keywords_ext_v2.7.29.zip" onClick={handleDownloadClick} style={{ display: 'inline-block', background: 'white', color: 'black', padding: '14px 28px', borderRadius: '50px', fontSize: '1.1rem', fontWeight: 700, textDecoration: 'none', transition: 'transform 0.2s' }}>
             Mulai Sekarang!
           </Link>
         </div>
