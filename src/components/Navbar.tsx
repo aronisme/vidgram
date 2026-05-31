@@ -196,14 +196,18 @@ export default function Navbar() {
                         </button>
                         {showTools && (
                             <div style={{
-                                position: 'absolute', top: '100%', left: 0, marginTop: '0.5rem', width: '200px', background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: '16px', boxShadow: '0 8px 30px rgba(0,0,0,0.15)', display: 'flex', flexDirection: 'column', overflow: 'hidden', zIndex: 60, animation: 'slideDown 0.2s ease-out'
+                                position: 'absolute', top: '100%', left: 0, paddingTop: '0.5rem', zIndex: 60, animation: 'slideDown 0.2s ease-out'
                             }}>
-                                <Link href="/tools/smart-keywords" onClick={() => setShowTools(false)} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 1rem', color: 'var(--text-primary)', textDecoration: 'none', fontSize: '0.875rem', fontWeight: 500, transition: 'background 0.15s ease' }}
-                                    onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--accent-light)')}
-                                    onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
-                                >
-                                    Smart Keywords Ext
-                                </Link>
+                                <div style={{
+                                    width: '200px', background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: '16px', boxShadow: '0 8px 30px rgba(0,0,0,0.15)', display: 'flex', flexDirection: 'column', overflow: 'hidden'
+                                }}>
+                                    <Link href="/tools/smart-keywords" onClick={() => setShowTools(false)} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 1rem', color: 'var(--text-primary)', textDecoration: 'none', fontSize: '0.875rem', fontWeight: 500, transition: 'background 0.15s ease' }}
+                                        onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--accent-light)')}
+                                        onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+                                    >
+                                        Smart Keywords Ext
+                                    </Link>
+                                </div>
                             </div>
                         )}
                     </div>

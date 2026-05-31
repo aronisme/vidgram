@@ -55,6 +55,9 @@ export default function SmartKeywordsPage() {
       <section style={{ position: 'relative', overflow: 'hidden', paddingTop: '100px', paddingBottom: '80px', textAlign: 'center' }}>
         <div style={{ position: 'absolute', top: '-10%', left: '50%', transform: 'translateX(-50%)', width: '800px', height: '400px', background: 'radial-gradient(circle, rgba(139,92,246,0.15) 0%, rgba(0,0,0,0) 70%)', zIndex: -1 }}></div>
         <div className="container">
+          <div style={{ display: 'inline-block', background: 'rgba(139,92,246,0.15)', color: 'var(--accent)', padding: '8px 16px', borderRadius: '50px', fontSize: '0.875rem', fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase', marginBottom: '24px', border: '1px solid rgba(139,92,246,0.3)' }}>
+            Khusus Untuk Adobe Stock Contributor
+          </div>
           <h1 style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)', fontWeight: 800, marginBottom: '20px', lineHeight: 1.2, background: 'linear-gradient(135deg, #a78bfa, #c4b5fd, #8b5cf6)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
             Berhenti Membuang Waktu 10 Menit<br />Hanya Untuk Isi Judul & Keyword
           </h1>
@@ -153,7 +156,7 @@ export default function SmartKeywordsPage() {
             <li style={{ display: 'flex', gap: '10px', marginBottom: '15px' }}><CheckCircle color="var(--accent)" /> Load Balancing 3 Ronde (Anti-Timeout)</li>
             <li style={{ display: 'flex', gap: '10px', marginBottom: '15px' }}><CheckCircle color="var(--accent)" /> Tanpa perlu pakai Kartu Kredit</li>
             <li style={{ display: 'flex', gap: '10px', marginBottom: '15px' }}><CheckCircle color="var(--accent)" /> Bisa dipakai di 2 perangkat berbeda</li>
-            <li style={{ display: 'flex', gap: '10px' }}><CheckCircle color="var(--accent)" /> Kecepatan prioritas Gemini 2.5 Flash & Llama 4</li>
+            <li style={{ display: 'flex', gap: '10px' }}><CheckCircle color="var(--accent)" /> Kecepatan prioritas Gemini 2.5 Flash, Llama 4, & Mistral AI</li>
           </ul>
           <Link href="/downloads/Smart_keywords_ext_v2.7.29.zip" onClick={handleDownloadClick} style={{ display: 'inline-block', background: 'white', color: 'black', padding: '14px 28px', borderRadius: '50px', fontSize: '1.1rem', fontWeight: 700, textDecoration: 'none', transition: 'transform 0.2s' }}>
             Mulai Sekarang!
