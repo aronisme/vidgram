@@ -55,8 +55,15 @@ export default function SmartKeywordsPage() {
       <section style={{ position: 'relative', overflow: 'hidden', paddingTop: '100px', paddingBottom: '80px', textAlign: 'center' }}>
         <div style={{ position: 'absolute', top: '-10%', left: '50%', transform: 'translateX(-50%)', width: '800px', height: '400px', background: 'radial-gradient(circle, rgba(139,92,246,0.15) 0%, rgba(0,0,0,0) 70%)', zIndex: -1 }}></div>
         <div className="container">
-          <h1 style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)', fontWeight: 800, marginBottom: '20px', lineHeight: 1.2, background: 'linear-gradient(135deg, #a78bfa, #c4b5fd, #8b5cf6)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-            Berhenti Membuang<br />Hanya Untuk Isi Judul & Keyword Adobe Stock.
+          <h1 style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)', fontWeight: 800, marginBottom: '20px', lineHeight: 1.2, letterSpacing: '-0.03em', maxWidth: '700px', margin: '0 auto 20px' }}>
+            Berhenti Membuang<br />Hanya Untuk Isi Judul & Keyword{' '}
+            <span style={{
+              background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+              color: 'transparent',
+            }}>Adobe Stock.</span>
           </h1>
           <p style={{ fontSize: '1.1rem', color: 'var(--text-secondary)', maxWidth: '700px', margin: '0 auto 40px', lineHeight: 1.6 }}>
             Biar AI yang memikirkan metadata, kategori, hingga mencegah upload ganda. Smart Keywords mengisi form Adobe Stock Anda secara otomatis hanya dalam 3 detik.
