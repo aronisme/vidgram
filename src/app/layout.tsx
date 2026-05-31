@@ -48,6 +48,9 @@ export default function RootLayout({
         {/* Google Search Console Verification */}
         <meta name="google-site-verification" content="GOOGLE_VERIFICATION_CODE_PLACEHOLDER" />
 
+        {/* Bing Webmaster Tools Verification */}
+        <meta name="msvalidate.01" content="AEE6BD53D9CCFD7C8FEF7BD59915EF6" />
+
         {/* Google tag (gtag.js) */}
         <script async src="https://www.googletagmanager.com/gtag/js?id=G-G6CDR4KMKE"></script>
         <script dangerouslySetInnerHTML={{
