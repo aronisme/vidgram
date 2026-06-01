@@ -207,6 +207,12 @@ export default function Navbar() {
                                     >
                                         Smart Keywords Ext
                                     </Link>
+                                    <Link href="/tools/flow-downloader" onClick={() => setShowTools(false)} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 1rem', color: 'var(--text-primary)', textDecoration: 'none', fontSize: '0.875rem', fontWeight: 500, transition: 'background 0.15s ease' }}
+                                        onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--accent-light)')}
+                                        onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+                                    >
+                                        Flow Downloader
+                                    </Link>
                                 </div>
                             </div>
                         )}
@@ -406,6 +412,9 @@ export default function Navbar() {
                         </div>
                         <Link href="/tools/smart-keywords" className="mobile-nav-link" style={{ paddingLeft: '1.5rem' }} onClick={closeMobileMenu}>
                             Smart Keywords Ext
+                        </Link>
+                        <Link href="/tools/flow-downloader" className="mobile-nav-link" style={{ paddingLeft: '1.5rem' }} onClick={closeMobileMenu}>
+                            Flow Downloader
                         </Link>
 
                         {user ? (

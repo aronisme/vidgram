@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { CheckCircle, Download, LayoutDashboard, Cloud, Zap, Target } from 'lucide-react';
+import { CheckCircle, Download, LayoutDashboard, Cloud, Zap, Target, ChevronRight } from 'lucide-react';
 import { db } from '@/lib/firebase';
 import { doc, getDoc, setDoc, updateDoc, increment } from 'firebase/firestore';
 
@@ -55,8 +55,16 @@ export default function SmartKeywordsPage() {
       <section style={{ position: 'relative', overflow: 'hidden', paddingTop: '100px', paddingBottom: '80px', textAlign: 'center' }}>
         <div style={{ position: 'absolute', top: '-10%', left: '50%', transform: 'translateX(-50%)', width: '800px', height: '400px', background: 'radial-gradient(circle, rgba(139,92,246,0.15) 0%, rgba(0,0,0,0) 70%)', zIndex: -1 }}></div>
         <div className="container">
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '24px' }}>
+            <span style={{ background: 'rgba(59,130,246,0.1)', color: '#60a5fa', padding: '6px 16px', borderRadius: '50px', fontSize: '0.875rem', fontWeight: 600, border: '1px solid rgba(59,130,246,0.2)', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+               <img src="https://upload.wikimedia.org/wikipedia/commons/e/e1/Google_Chrome_icon_%28February_2022%29.svg" alt="Chrome" width={16} height={16}/> 
+               <img src="https://upload.wikimedia.org/wikipedia/commons/9/98/Microsoft_Edge_logo_%282019%29.svg" alt="Edge" width={16} height={16}/> 
+               Ekstensi Chrome & Edge
+            </span>
+          </div>
+          
           <h1 style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)', fontWeight: 800, marginBottom: '20px', lineHeight: 1.2, letterSpacing: '-0.03em', maxWidth: '700px', margin: '0 auto 20px' }}>
-            Berhenti Membuang<br />Hanya Untuk Isi Judul & Keyword{' '}
+            Berhenti Membuang Waktu<br />Hanya Untuk Isi Judul & Keyword{' '}
             <span style={{
               background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
               WebkitBackgroundClip: 'text',
@@ -66,7 +74,7 @@ export default function SmartKeywordsPage() {
             }}>Adobe Stock.</span>
           </h1>
           <p style={{ fontSize: '1.1rem', color: 'var(--text-secondary)', maxWidth: '700px', margin: '0 auto 40px', lineHeight: 1.6 }}>
-            Biar AI yang memikirkan metadata, kategori, hingga mencegah upload ganda. Smart Keywords mengisi form Adobe Stock Anda secara otomatis hanya dalam 3 detik.
+            Memperkenalkan <strong style={{ color: 'var(--text-primary)', fontWeight: 700 }}>Smart Keyword for Adobe Stock Contributor</strong>. Biar AI yang memikirkan metadata, kategori, hingga mencegah upload ganda. Ekstensi ini mengisi form Anda secara otomatis hanya dalam 3 detik.
           </p>
           <div style={{ display: 'flex', gap: '15px', justifyContent: 'center', alignItems: 'center', flexWrap: 'wrap' }}>
             <Link href="/downloads/Smart_keywords_ext_v2.7.29.zip" onClick={handleDownloadClick} style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'var(--accent)', color: 'white', padding: '16px 32px', borderRadius: '50px', fontSize: '1.1rem', fontWeight: 700, textDecoration: 'none', boxShadow: '0 10px 25px rgba(139,92,246,0.4)', transition: 'transform 0.2s' }}>
@@ -165,6 +173,25 @@ export default function SmartKeywordsPage() {
           <Link href="/downloads/Smart_keywords_ext_v2.7.29.zip" onClick={handleDownloadClick} style={{ display: 'inline-block', background: 'white', color: 'black', padding: '14px 28px', borderRadius: '50px', fontSize: '1.1rem', fontWeight: 700, textDecoration: 'none', transition: 'transform 0.2s' }}>
             Mulai Sekarang!
           </Link>
+        </div>
+      </section>
+
+      {/* FAQ Section */}
+      <section className="container" style={{ marginTop: '100px' }}>
+        <h2 style={{ textAlign: 'center', fontSize: '2rem', fontWeight: 700, marginBottom: '40px' }}>Pertanyaan yang Sering Diajukan (FAQ)</h2>
+        <div style={{ maxWidth: '800px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '15px' }}>
+          <details style={{ background: 'var(--bg-secondary)', padding: '20px', borderRadius: '16px', border: '1px solid var(--border)', cursor: 'pointer' }}>
+            <summary style={{ fontSize: '1.1rem', fontWeight: 600, outline: 'none' }}>Apakah ekstensi ini gratis?</summary>
+            <p style={{ marginTop: '15px', color: 'var(--text-secondary)', lineHeight: 1.6 }}>Ya, Anda bisa menggunakan ekstensi ini secara gratis jika menggunakan API Key Anda sendiri (misalnya dari Google Gemini). Kami juga menyediakan layanan Sewa API dengan harga sangat terjangkau jika Anda tidak repot mendaftar API sendiri.</p>
+          </details>
+          <details style={{ background: 'var(--bg-secondary)', padding: '20px', borderRadius: '16px', border: '1px solid var(--border)', cursor: 'pointer' }}>
+            <summary style={{ fontSize: '1.1rem', fontWeight: 600, outline: 'none' }}>Bagaimana cara kerja fitur Anti-Duplikasi?</summary>
+            <p style={{ marginTop: '15px', color: 'var(--text-secondary)', lineHeight: 1.6 }}>Ekstensi ini dilengkapi dengan fitur sinkronisasi cloud yang mengingat semua file yang pernah Anda upload dengan sukses. Jika sistem mendeteksi nama atau hash file yang sama, file tersebut akan ditandai agar tidak terjadi penolakan ganda dari Adobe Stock.</p>
+          </details>
+          <details style={{ background: 'var(--bg-secondary)', padding: '20px', borderRadius: '16px', border: '1px solid var(--border)', cursor: 'pointer' }}>
+            <summary style={{ fontSize: '1.1rem', fontWeight: 600, outline: 'none' }}>Apakah keyword yang dihasilkan cukup bagus untuk SEO?</summary>
+            <p style={{ marginTop: '15px', color: 'var(--text-secondary)', lineHeight: 1.6 }}>Tentu! AI kami dilatih khusus untuk menganalisis gambar menggunakan strategi Layered SEO (Subject, Action, Context, Style) sehingga menghasilkan keyword dengan "buyer intent" (niat pembeli) yang tinggi, bukan sekadar kata-kata acak.</p>
+          </details>
         </div>
       </section>
 
