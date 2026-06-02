@@ -100,8 +100,8 @@ export default function SmartKeywordsPage() {
           
           <div style={{ background: 'var(--bg-secondary)', padding: '30px', borderRadius: '20px', border: '1px solid var(--border)' }}>
             <Cloud size={32} color="var(--accent)" style={{ marginBottom: '20px' }} />
-            <h3 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '10px' }}>Anti-Duplikasi (Sync)</h3>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: 1.6 }}>Melacak histori upload secara real-time antar device/tim. Selamat tinggal peringatan <i>&quot;File already exists&quot;</i>!</p>
+            <h3 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '10px' }}>Team Sync & Smart Hashing</h3>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: 1.6 }}>Berbagi 1 database antar banyak akun (Team Pool). Fitur <i>Partial Hashing</i> memindai video Gigabytes dalam milidetik tanpa membebani RAM browser!</p>
           </div>
           
           <div style={{ background: 'var(--bg-secondary)', padding: '30px', borderRadius: '20px', border: '1px solid var(--border)' }}>
@@ -143,9 +143,9 @@ export default function SmartKeywordsPage() {
                 <td style={{ padding: '20px 15px', color: 'var(--green)', fontWeight: 600 }}><CheckCircle size={16} style={{ display: 'inline', marginBottom: '-3px' }}/> Terpilih otomatis oleh AI</td>
               </tr>
               <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                <td style={{ padding: '20px 15px', fontWeight: 500 }}>Cek Duplikat</td>
+                <td style={{ padding: '20px 15px', fontWeight: 500 }}>Cek Duplikat & Multi-Akun</td>
                 <td style={{ padding: '20px 15px', color: 'var(--text-secondary)' }}>Buka folder / ingat-ingat</td>
-                <td style={{ padding: '20px 15px', color: 'var(--green)', fontWeight: 600 }}><CheckCircle size={16} style={{ display: 'inline', marginBottom: '-3px' }}/> Deteksi instan saat upload</td>
+                <td style={{ padding: '20px 15px', color: 'var(--green)', fontWeight: 600 }}><CheckCircle size={16} style={{ display: 'inline', marginBottom: '-3px' }}/> Deteksi instan (Sinkronasi Cloud Antar-Tim)</td>
               </tr>
               <tr>
                 <td style={{ padding: '20px 15px', fontWeight: 500 }}>Kualitas Keyword</td>
@@ -186,7 +186,7 @@ export default function SmartKeywordsPage() {
           </details>
           <details style={{ background: 'var(--bg-secondary)', padding: '20px', borderRadius: '16px', border: '1px solid var(--border)', cursor: 'pointer' }}>
             <summary style={{ fontSize: '1.1rem', fontWeight: 600, outline: 'none' }}>Bagaimana cara kerja fitur Anti-Duplikasi?</summary>
-            <p style={{ marginTop: '15px', color: 'var(--text-secondary)', lineHeight: 1.6 }}>Ekstensi ini dilengkapi dengan fitur sinkronisasi cloud yang mengingat semua file yang pernah Anda upload dengan sukses. Jika sistem mendeteksi nama atau hash file yang sama, file tersebut akan ditandai agar tidak terjadi penolakan ganda dari Adobe Stock.</p>
+            <p style={{ marginTop: '15px', color: 'var(--text-secondary)', lineHeight: 1.6 }}>Ekstensi ini menggunakan teknologi <b>Partial Hashing</b> yang membaca potongan kecil dari file (awal, tengah, akhir) sehingga prosesnya instan dan sangat ringan (0% RAM), bahkan untuk video berukuran besar. Histori upload disimpan di cloud, dan jika Anda punya banyak akun Adobe, cukup masukkan "Email Tim" yang sama di pengaturan untuk saling berbagi database secara real-time!</p>
           </details>
           <details style={{ background: 'var(--bg-secondary)', padding: '20px', borderRadius: '16px', border: '1px solid var(--border)', cursor: 'pointer' }}>
             <summary style={{ fontSize: '1.1rem', fontWeight: 600, outline: 'none' }}>Apakah keyword yang dihasilkan cukup bagus untuk SEO?</summary>
