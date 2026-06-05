@@ -62,6 +62,9 @@ export default function RootLayout({
           `
         }} />
 
+        {/* Google AdSense */}
+        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4495395893631932" crossOrigin="anonymous"></script>
+
         {/* Microsoft Clarity - Uncomment and replace ID when ready
         <script dangerouslySetInnerHTML={{
           __html: `
