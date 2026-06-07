@@ -46,7 +46,7 @@ export default function RootLayout({
     <html lang="en">
       <head>
         {/* Google Search Console Verification */}
-        <meta name="google-site-verification" content="GOOGLE_VERIFICATION_CODE_PLACEHOLDER" />
+        <meta name="google-site-verification" content="CVocrLirD4GCYFssJ_6As5G54ScSL5oB_bC2nMM419s" />
 
         {/* Bing Webmaster Tools Verification */}
         <meta name="msvalidate.01" content="AEE6BD53D9CCFD7C8FEF7BD599155EF6" />
