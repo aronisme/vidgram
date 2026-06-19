@@ -77,7 +77,7 @@ export default function SmartKeywordsPage() {
             Memperkenalkan <strong style={{ color: 'var(--text-primary)', fontWeight: 700 }}>Smart Keyword for Adobe Stock Contributor</strong>. Biar AI yang memikirkan metadata, kategori, hingga mencegah upload ganda. Ekstensi ini mengisi form Anda secara otomatis hanya dalam 3 detik.
           </p>
           <div style={{ display: 'flex', gap: '15px', justifyContent: 'center', alignItems: 'center', flexWrap: 'wrap' }}>
-            <Link href="/downloads/Smart_keywords_ext_v2.7.29.zip" onClick={handleDownloadClick} style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'var(--accent)', color: 'white', padding: '16px 32px', borderRadius: '50px', fontSize: '1.1rem', fontWeight: 700, textDecoration: 'none', boxShadow: '0 10px 25px rgba(139,92,246,0.4)', transition: 'transform 0.2s' }}>
+            <Link href="https://chromewebstore.google.com/detail/jcmlbmjbeihjpakneiokafpicoffnkge?utm_source=item-share-cb" target="_blank" rel="noopener noreferrer" onClick={handleDownloadClick} style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'var(--accent)', color: 'white', padding: '16px 32px', borderRadius: '50px', fontSize: '1.1rem', fontWeight: 700, textDecoration: 'none', boxShadow: '0 10px 25px rgba(139,92,246,0.4)', transition: 'transform 0.2s' }}>
               <Download size={24} /> Download Ekstensi (v2.7.29)
             </Link>
           </div>
@@ -170,7 +170,7 @@ export default function SmartKeywordsPage() {
             <li style={{ display: 'flex', gap: '10px', marginBottom: '15px' }}><CheckCircle color="var(--accent)" /> Bisa dipakai di 2 perangkat berbeda</li>
             <li style={{ display: 'flex', gap: '10px' }}><CheckCircle color="var(--accent)" /> Kecepatan prioritas Gemini 2.5 Flash, Llama 4, & Mistral AI</li>
           </ul>
-          <Link href="/downloads/Smart_keywords_ext_v2.7.29.zip" onClick={handleDownloadClick} style={{ display: 'inline-block', background: 'white', color: 'black', padding: '14px 28px', borderRadius: '50px', fontSize: '1.1rem', fontWeight: 700, textDecoration: 'none', transition: 'transform 0.2s' }}>
+          <Link href="https://chromewebstore.google.com/detail/jcmlbmjbeihjpakneiokafpicoffnkge?utm_source=item-share-cb" target="_blank" rel="noopener noreferrer" onClick={handleDownloadClick} style={{ display: 'inline-block', background: 'white', color: 'black', padding: '14px 28px', borderRadius: '50px', fontSize: '1.1rem', fontWeight: 700, textDecoration: 'none', transition: 'transform 0.2s' }}>
             Mulai Sekarang!
           </Link>
         </div>
