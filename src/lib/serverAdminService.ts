@@ -1,6 +1,6 @@
 /**
  * Server-side Admin Service for Vidgram
- * Fetches global platform analytics, web users list with per-user uploaded media stats, telegram bot users, and media content list.
+ * Fetches global platform analytics, web users list with per-user uploaded media stats, telegram bot users, and media content list (including private media).
  */
 
 const FIRESTORE_BASE = 'https://firestore.googleapis.com/v1';
@@ -47,11 +47,12 @@ export interface AdminMediaItem {
   description?: string;
   mediaUrl: string;
   thumbnailUrl?: string;
-  userId: string;
-  userDisplayName: string;
+  uploaderId: string;
+  userDisplayName?: string;
   userPhotoURL?: string;
   views: number;
   likes: number;
+  isPrivate: boolean;
   createdAt: string;
   slug: string;
 }
@@ -66,6 +67,7 @@ export interface AdminWebUser {
   videoCount: number;
   imageCount: number;
   totalMediaCount: number;
+  privateMediaCount: number;
   totalViews: number;
   totalLikes: number;
 }
@@ -167,7 +169,7 @@ export const serverAdminService = {
   /**
    * Fetch registered web users along with aggregated media counts
    */
-  async getWebUsers(limitNum = 150, allMedia: AdminMediaItem[] = []): Promise<AdminWebUser[]> {
+  async getWebUsers(limitNum = 200, allMedia: AdminMediaItem[] = []): Promise<AdminWebUser[]> {
     const projectId = getProjectId();
     try {
       const url = `${FIRESTORE_BASE}/projects/${projectId}/databases/(default)/documents/users?pageSize=${limitNum}`;
@@ -178,23 +180,27 @@ export const serverAdminService = {
       const data = await res.json();
       const docs = data.documents || [];
 
-      // Map media by userId
-      const userMediaMap: Record<string, { videoCount: number; imageCount: number; views: number; likes: number }> = {};
+      // Map media by uploaderId
+      const userMediaMap: Record<string, { videoCount: number; imageCount: number; privateCount: number; views: number; likes: number }> = {};
+      
       allMedia.forEach(m => {
-        if (!m.userId) return;
-        if (!userMediaMap[m.userId]) {
-          userMediaMap[m.userId] = { videoCount: 0, imageCount: 0, views: 0, likes: 0 };
+        const uid = m.uploaderId;
+        if (!uid) return;
+        if (!userMediaMap[uid]) {
+          userMediaMap[uid] = { videoCount: 0, imageCount: 0, privateCount: 0, views: 0, likes: 0 };
         }
-        if (m.type === 'video') userMediaMap[m.userId].videoCount += 1;
-        else userMediaMap[m.userId].imageCount += 1;
-        userMediaMap[m.userId].views += (m.views || 0);
-        userMediaMap[m.userId].likes += (m.likes || 0);
+        if (m.type === 'video') userMediaMap[uid].videoCount += 1;
+        else userMediaMap[uid].imageCount += 1;
+        
+        if (m.isPrivate) userMediaMap[uid].privateCount += 1;
+        userMediaMap[uid].views += (m.views || 0);
+        userMediaMap[uid].likes += (m.likes || 0);
       });
 
       return docs.map((doc: any) => {
         const parsed = parseDoc(doc);
         const uid = parsed.id || parsed.uid || '';
-        const stats = userMediaMap[uid] || { videoCount: 0, imageCount: 0, views: 0, likes: 0 };
+        const stats = userMediaMap[uid] || { videoCount: 0, imageCount: 0, privateCount: 0, views: 0, likes: 0 };
 
         return {
           uid,
@@ -206,6 +212,7 @@ export const serverAdminService = {
           videoCount: stats.videoCount,
           imageCount: stats.imageCount,
           totalMediaCount: stats.videoCount + stats.imageCount,
+          privateMediaCount: stats.privateCount,
           totalViews: stats.views,
           totalLikes: stats.likes,
         };
@@ -219,7 +226,7 @@ export const serverAdminService = {
   /**
    * Fetch Telegram bot users
    */
-  async getTelegramUsers(limitNum = 100): Promise<AdminTelegramUser[]> {
+  async getTelegramUsers(limitNum = 150): Promise<AdminTelegramUser[]> {
     const projectId = getProjectId();
     try {
       const url = `${FIRESTORE_BASE}/projects/${projectId}/databases/(default)/documents/statistik?pageSize=${limitNum}`;
@@ -250,7 +257,7 @@ export const serverAdminService = {
   },
 
   /**
-   * Fetch all user-uploaded Media (Videos & Image Posts)
+   * Fetch all user-uploaded Media (Videos & Image Posts, including private ones)
    */
   async getMedia(limitNum = 300): Promise<AdminMediaItem[]> {
     const projectId = getProjectId();
@@ -276,11 +283,12 @@ export const serverAdminService = {
               description: p.description || '',
               mediaUrl: p.videoUrl || p.url || '',
               thumbnailUrl: p.thumbnailUrl || '',
-              userId: p.userId || '',
+              uploaderId: p.uploaderId || p.userId || '',
               userDisplayName: p.userDisplayName || p.userName || 'Creator',
               userPhotoURL: p.userPhotoURL || p.userPhoto || '',
               views: Number(p.views || 0),
               likes: Number(p.likes || 0),
+              isPrivate: Boolean(p.isPrivate),
               createdAt: p.createdAt || '',
               slug: p.slug || p.id,
             });
@@ -295,7 +303,13 @@ export const serverAdminService = {
         imageDocs.forEach((doc: any) => {
           const p = parseDoc(doc);
           if (p) {
-            const firstImg = Array.isArray(p.images) ? p.images[0] : (p.imageUrl || p.url || '');
+            let firstImg = '';
+            if (Array.isArray(p.images) && p.images.length > 0) {
+              firstImg = typeof p.images[0] === 'string' ? p.images[0] : (p.images[0]?.url || '');
+            } else {
+              firstImg = p.imageUrl || p.url || '';
+            }
+
             mediaItems.push({
               id: p.id,
               type: 'image',
@@ -303,11 +317,12 @@ export const serverAdminService = {
               description: p.description || '',
               mediaUrl: firstImg,
               thumbnailUrl: firstImg,
-              userId: p.userId || '',
+              uploaderId: p.uploaderId || p.userId || '',
               userDisplayName: p.userDisplayName || p.userName || 'Creator',
               userPhotoURL: p.userPhotoURL || p.userPhoto || '',
               views: Number(p.views || 0),
               likes: Number(p.likes || 0),
+              isPrivate: Boolean(p.isPrivate),
               createdAt: p.createdAt || '',
               slug: p.slug || p.id,
             });

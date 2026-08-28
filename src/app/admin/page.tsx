@@ -30,7 +30,10 @@ import {
   FolderOpen,
   X,
   User as UserIcon,
-  Filter
+  Filter,
+  ArrowUpDown,
+  Unlock,
+  Check
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -43,13 +46,17 @@ export default function AdminDashboardPage() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [data, setData] = useState<any>(null);
-  const [activeTab, setActiveTab] = useState<'overview' | 'media' | 'webUsers' | 'telegramUsers' | 'system'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'webUsers' | 'media' | 'telegramUsers' | 'system'>('webUsers');
   const [searchQuery, setSearchQuery] = useState('');
   const [mediaTypeFilter, setMediaTypeFilter] = useState<'all' | 'video' | 'image'>('all');
   const [selectedUserFilter, setSelectedUserFilter] = useState<string>('all');
   
+  // User Sorting Option
+  const [userSortBy, setUserSortBy] = useState<'media_desc' | 'views_desc' | 'registered_desc' | 'name_asc' | 'subscribers_desc'>('media_desc');
+
   // Selected user modal for media exploration
   const [selectedUserModal, setSelectedUserModal] = useState<any | null>(null);
+  const [modalMediaFilter, setModalMediaFilter] = useState<'all' | 'video' | 'image' | 'private' | 'public'>('all');
 
   const isAdmin = user && user.uid === ADMIN_UID;
 
@@ -145,12 +152,23 @@ export default function AdminDashboardPage() {
     totalRequests: 0,
   };
 
-  const webUsers: any[] = data?.webUsers || [];
+  const rawWebUsers: any[] = data?.webUsers || [];
   const telegramUsers: any[] = data?.telegramUsers || [];
   const mediaItems: any[] = data?.media || [];
 
-  // Filtered lists
-  const filteredWebUsers = webUsers.filter(u => 
+  // Sort and filter web users
+  const sortedWebUsers = [...rawWebUsers].sort((a, b) => {
+    if (userSortBy === 'media_desc') return (b.totalMediaCount || 0) - (a.totalMediaCount || 0);
+    if (userSortBy === 'views_desc') return (b.totalViews || 0) - (a.totalViews || 0);
+    if (userSortBy === 'subscribers_desc') return (b.subscribersCount || 0) - (a.subscribersCount || 0);
+    if (userSortBy === 'name_asc') return (a.displayName || '').localeCompare(b.displayName || '');
+    if (userSortBy === 'registered_desc') {
+      return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
+    }
+    return 0;
+  });
+
+  const filteredWebUsers = sortedWebUsers.filter(u => 
     u.displayName?.toLowerCase().includes(searchQuery.toLowerCase()) || 
     u.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     u.uid?.includes(searchQuery)
@@ -164,16 +182,25 @@ export default function AdminDashboardPage() {
 
   const filteredMedia = mediaItems.filter(m => {
     const matchSearch = m.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                        m.uploaderId?.includes(searchQuery) ||
                         m.userDisplayName?.toLowerCase().includes(searchQuery.toLowerCase());
     const matchType = mediaTypeFilter === 'all' || m.type === mediaTypeFilter;
-    const matchUser = selectedUserFilter === 'all' || m.userId === selectedUserFilter;
+    const matchUser = selectedUserFilter === 'all' || m.uploaderId === selectedUserFilter;
     return matchSearch && matchType && matchUser;
   });
 
   // Media of the selected user for modal
-  const selectedUserMedia = selectedUserModal 
-    ? mediaItems.filter(m => m.userId === selectedUserModal.uid)
+  const userAllMedia = selectedUserModal 
+    ? mediaItems.filter(m => m.uploaderId === selectedUserModal.uid)
     : [];
+
+  const userFilteredMedia = userAllMedia.filter(m => {
+    if (modalMediaFilter === 'video') return m.type === 'video';
+    if (modalMediaFilter === 'image') return m.type === 'image';
+    if (modalMediaFilter === 'private') return m.isPrivate === true;
+    if (modalMediaFilter === 'public') return !m.isPrivate;
+    return true;
+  });
 
   return (
     <div className="container animate-fade-in" style={{ paddingBottom: '4rem' }}>
@@ -259,7 +286,7 @@ export default function AdminDashboardPage() {
         <div className="card" style={{ padding: '1.5rem', borderRadius: 'var(--radius-lg)', background: 'var(--glass)', border: '1px solid var(--border)' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
             <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Unduhan TikTok</span>
-            <div style={{ width: '38px', height: '38px', borderRadius: '10px', background: 'rgba(168, 85, 247, 0.12)', color: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ width: '38px', height: '38px', borderRadius: '10px', background: 'rgba(16, 185, 129, 0.12)', color: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <Download size={18} />
             </div>
           </div>
@@ -296,9 +323,9 @@ export default function AdminDashboardPage() {
       {/* Navigation Tabs */}
       <div style={{ display: 'flex', gap: '0.5rem', borderBottom: '1px solid var(--border)', marginBottom: '2rem', overflowX: 'auto' }}>
         {[
-          { id: 'overview', label: '📊 Ringkasan & Platform', count: null },
-          { id: 'webUsers', label: '👥 Pengguna & Media per User', count: webUsers.length },
+          { id: 'webUsers', label: '👥 Pengguna & Media per User', count: rawWebUsers.length },
           { id: 'media', label: '🎬 Semua Media Terunggah', count: mediaItems.length },
+          { id: 'overview', label: '📊 Ringkasan & Platform', count: null },
           { id: 'telegramUsers', label: '🤖 Pengguna Telegram Bot', count: telegramUsers.length },
           { id: 'system', label: '⚙️ Sistem & Integrasi', count: null },
         ].map((tab) => (
@@ -331,20 +358,14 @@ export default function AdminDashboardPage() {
         ))}
       </div>
 
-      {/* Search & Filter Controls */}
-      {(activeTab === 'webUsers' || activeTab === 'telegramUsers' || activeTab === 'media') && (
+      {/* Search & Sort Controls for Web Users Tab */}
+      {activeTab === 'webUsers' && (
         <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', marginBottom: '1.5rem' }}>
           <div style={{ position: 'relative', width: '100%', maxWidth: '380px' }}>
             <Search size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-tertiary)' }} />
             <input
               type="text"
-              placeholder={
-                activeTab === 'webUsers' 
-                  ? "Cari nama, email, atau UID user..." 
-                  : activeTab === 'media'
-                  ? "Cari judul konten atau nama uploader..."
-                  : "Cari username atau ID telegram..."
-              }
+              placeholder="Cari nama, email, atau UID user..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               style={{
@@ -360,52 +381,329 @@ export default function AdminDashboardPage() {
             />
           </div>
 
-          {activeTab === 'media' && (
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', alignItems: 'center' }}>
-              {/* Type filter */}
-              {[
-                { id: 'all', label: 'Semua Tipe' },
-                { id: 'video', label: '🎥 Video Saja' },
-                { id: 'image', label: '📸 Foto Saja' },
-              ].map((f) => (
-                <button
-                  key={f.id}
-                  onClick={() => setMediaTypeFilter(f.id as any)}
-                  className={mediaTypeFilter === f.id ? 'btn-primary' : 'btn-secondary'}
-                  style={{ padding: '0.45rem 0.9rem', borderRadius: '9999px', fontSize: '0.8125rem', fontWeight: 600 }}
-                >
-                  {f.label}
-                </button>
-              ))}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <span style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 600 }}>
+              <ArrowUpDown size={14} /> Urutkan:
+            </span>
+            <select
+              value={userSortBy}
+              onChange={(e) => setUserSortBy(e.target.value as any)}
+              style={{
+                padding: '0.6rem 1rem',
+                borderRadius: '9999px',
+                border: '1px solid var(--border)',
+                background: 'var(--bg-secondary)',
+                color: 'var(--text-primary)',
+                fontSize: '0.875rem',
+                fontWeight: 700,
+                outline: 'none',
+                cursor: 'pointer',
+              }}
+            >
+              <option value="media_desc">🌟 Media Terbanyak</option>
+              <option value="views_desc">👁️ Views Terbanyak</option>
+              <option value="registered_desc">🆕 Terdaftar Terbaru</option>
+              <option value="name_asc">🔤 Nama (A - Z)</option>
+              <option value="subscribers_desc">👥 Subscribers Terbanyak</option>
+            </select>
+          </div>
+        </div>
+      )}
 
-              {/* User filter dropdown */}
-              <select
-                value={selectedUserFilter}
-                onChange={(e) => setSelectedUserFilter(e.target.value)}
-                style={{
-                  padding: '0.45rem 0.9rem',
-                  borderRadius: '9999px',
-                  border: '1px solid var(--border)',
-                  background: 'var(--bg-secondary)',
-                  color: 'var(--text-primary)',
-                  fontSize: '0.8125rem',
-                  fontWeight: 600,
-                  outline: 'none',
-                }}
+      {/* Search & Filter for All Media Tab */}
+      {activeTab === 'media' && (
+        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', marginBottom: '1.5rem' }}>
+          <div style={{ position: 'relative', width: '100%', maxWidth: '380px' }}>
+            <Search size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-tertiary)' }} />
+            <input
+              type="text"
+              placeholder="Cari judul konten atau uploader..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              style={{
+                width: '100%',
+                padding: '0.75rem 1rem 0.75rem 2.75rem',
+                borderRadius: '9999px',
+                border: '1px solid var(--border)',
+                background: 'var(--bg-secondary)',
+                color: 'var(--text-primary)',
+                outline: 'none',
+                fontSize: '0.875rem',
+              }}
+            />
+          </div>
+
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', alignItems: 'center' }}>
+            {[
+              { id: 'all', label: 'Semua Tipe' },
+              { id: 'video', label: '🎥 Video Saja' },
+              { id: 'image', label: '📸 Foto Saja' },
+            ].map((f) => (
+              <button
+                key={f.id}
+                onClick={() => setMediaTypeFilter(f.id as any)}
+                className={mediaTypeFilter === f.id ? 'btn-primary' : 'btn-secondary'}
+                style={{ padding: '0.45rem 0.9rem', borderRadius: '9999px', fontSize: '0.8125rem', fontWeight: 600 }}
               >
-                <option value="all">👤 Semua Uploader</option>
-                {webUsers.filter(u => u.totalMediaCount > 0).map(u => (
-                  <option key={u.uid} value={u.uid}>
-                    {u.displayName} ({u.totalMediaCount} media)
-                  </option>
-                ))}
-              </select>
+                {f.label}
+              </button>
+            ))}
+
+            <select
+              value={selectedUserFilter}
+              onChange={(e) => setSelectedUserFilter(e.target.value)}
+              style={{
+                padding: '0.45rem 0.9rem',
+                borderRadius: '9999px',
+                border: '1px solid var(--border)',
+                background: 'var(--bg-secondary)',
+                color: 'var(--text-primary)',
+                fontSize: '0.8125rem',
+                fontWeight: 600,
+                outline: 'none',
+              }}
+            >
+              <option value="all">👤 Semua Uploader</option>
+              {rawWebUsers.filter(u => u.totalMediaCount > 0).map(u => (
+                <option key={u.uid} value={u.uid}>
+                  {u.displayName} ({u.totalMediaCount} media)
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+      )}
+
+      {/* Search for Telegram Users Tab */}
+      {activeTab === 'telegramUsers' && (
+        <div style={{ marginBottom: '1.5rem', position: 'relative', maxWidth: '380px' }}>
+          <Search size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-tertiary)' }} />
+          <input
+            type="text"
+            placeholder="Cari username atau ID telegram..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            style={{
+              width: '100%',
+              padding: '0.75rem 1rem 0.75rem 2.75rem',
+              borderRadius: '9999px',
+              border: '1px solid var(--border)',
+              background: 'var(--bg-secondary)',
+              color: 'var(--text-primary)',
+              outline: 'none',
+              fontSize: '0.875rem',
+            }}
+          />
+        </div>
+      )}
+
+      {/* TAB 1: PENGGUNA & MEDIA PER USER */}
+      {activeTab === 'webUsers' && (
+        <div className="card" style={{ borderRadius: 'var(--radius-xl)', overflow: 'hidden', padding: 0 }}>
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.9rem' }}>
+              <thead>
+                <tr style={{ background: 'var(--bg-secondary)', borderBottom: '1px solid var(--border)' }}>
+                  <th style={{ padding: '1rem 1.5rem', fontWeight: 700 }}>Pengguna</th>
+                  <th style={{ padding: '1rem 1.5rem', fontWeight: 700 }}>Email</th>
+                  <th style={{ padding: '1rem 1.5rem', fontWeight: 700 }}>Media Terupload</th>
+                  <th style={{ padding: '1rem 1.5rem', fontWeight: 700 }}>Total Views</th>
+                  <th style={{ padding: '1rem 1.5rem', fontWeight: 700 }}>Tanggal Daftar</th>
+                  <th style={{ padding: '1rem 1.5rem', fontWeight: 700, textAlign: 'center' }}>Aksi Media & Profil</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredWebUsers.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
+                      Tidak ada data pengguna yang cocok dengan pencarian.
+                    </td>
+                  </tr>
+                ) : (
+                  filteredWebUsers.map((u, i) => (
+                    <tr 
+                      key={u.uid || i} 
+                      style={{ 
+                        borderBottom: '1px solid var(--border)',
+                        background: u.totalMediaCount > 0 ? 'rgba(99, 102, 241, 0.02)' : 'transparent',
+                        transition: 'background 0.15s ease'
+                      }}
+                    >
+                      <td style={{ padding: '1rem 1.5rem' }}>
+                        <button
+                          onClick={() => { setSelectedUserModal(u); setModalMediaFilter('all'); }}
+                          style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', background: 'transparent', border: 'none', cursor: 'pointer', textAlign: 'left', padding: 0 }}
+                        >
+                          <img
+                            src={u.photoURL || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(u.displayName || 'U')}`}
+                            alt={u.displayName}
+                            style={{ width: '38px', height: '38px', borderRadius: '50%', objectFit: 'cover', border: u.totalMediaCount > 0 ? '2px solid var(--accent)' : '1px solid var(--border)' }}
+                          />
+                          <div>
+                            <span style={{ fontWeight: 700, color: u.totalMediaCount > 0 ? 'var(--accent)' : 'var(--text-primary)', display: 'block', fontSize: '0.95rem' }}>
+                              {u.displayName}
+                            </span>
+                            <span style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', fontFamily: 'monospace' }}>
+                              UID: {u.uid?.slice(0, 10)}...
+                            </span>
+                          </div>
+                        </button>
+                      </td>
+                      <td style={{ padding: '1rem 1.5rem', color: 'var(--text-secondary)' }}>{u.email}</td>
+                      <td style={{ padding: '1rem 1.5rem' }}>
+                        {u.totalMediaCount > 0 ? (
+                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', alignItems: 'center' }}>
+                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', background: 'rgba(99, 102, 241, 0.12)', color: 'var(--accent)', padding: '4px 10px', borderRadius: '50px', fontSize: '0.8rem', fontWeight: 800 }}>
+                              <Film size={13} /> {u.videoCount} Video
+                            </span>
+                            {u.imageCount > 0 && (
+                              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', background: 'rgba(236, 72, 153, 0.12)', color: '#ec4899', padding: '4px 10px', borderRadius: '50px', fontSize: '0.8rem', fontWeight: 800 }}>
+                                <ImageIcon size={13} /> {u.imageCount} Foto
+                              </span>
+                            )}
+                            {u.privateMediaCount > 0 && (
+                              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', background: 'rgba(245, 158, 11, 0.12)', color: '#f59e0b', padding: '2px 8px', borderRadius: '50px', fontSize: '0.75rem', fontWeight: 700 }}>
+                                <Lock size={10} /> {u.privateMediaCount} Private
+                              </span>
+                            )}
+                          </div>
+                        ) : (
+                          <span style={{ color: 'var(--text-tertiary)', fontSize: '0.8rem' }}>0 Upload</span>
+                        )}
+                      </td>
+                      <td style={{ padding: '1rem 1.5rem', fontWeight: 800 }}>
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', color: u.totalViews > 0 ? 'var(--text-primary)' : 'var(--text-tertiary)' }}>
+                          <Eye size={14} color="var(--text-tertiary)" /> {(u.totalViews || 0).toLocaleString()}
+                        </span>
+                      </td>
+                      <td style={{ padding: '1rem 1.5rem', color: 'var(--text-secondary)' }}>
+                        {u.createdAt ? new Date(u.createdAt).toLocaleDateString('id-ID', { year: 'numeric', month: 'short', day: 'numeric' }) : '-'}
+                      </td>
+                      <td style={{ padding: '1rem 1.5rem', textAlign: 'center' }}>
+                        <button
+                          onClick={() => { setSelectedUserModal(u); setModalMediaFilter('all'); }}
+                          className={u.totalMediaCount > 0 ? "btn-primary" : "btn-secondary"}
+                          style={{ padding: '0.45rem 1rem', borderRadius: '8px', fontSize: '0.8rem', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                        >
+                          <FolderOpen size={14} /> Lihat Media & Profil ({u.totalMediaCount})
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* TAB 2: SEMUA MEDIA TERUNGGAH */}
+      {activeTab === 'media' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          {filteredMedia.length === 0 ? (
+            <div className="card" style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
+              Tidak ada konten video atau gambar yang cocok dengan filter pencarian.
+            </div>
+          ) : (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem' }}>
+              {filteredMedia.map((item) => {
+                const uploaderUser = rawWebUsers.find(u => u.uid === item.uploaderId);
+                const uploaderName = uploaderUser?.displayName || item.userDisplayName || 'Vidgram Creator';
+                const uploaderAvatar = uploaderUser?.photoURL || item.userPhotoURL;
+
+                return (
+                  <div key={item.id} className="card" style={{ borderRadius: 'var(--radius-lg)', overflow: 'hidden', padding: 0, display: 'flex', flexDirection: 'column', border: '1px solid var(--border)' }}>
+                    
+                    {/* Thumbnail */}
+                    <div style={{ position: 'relative', width: '100%', height: '180px', background: 'var(--bg-tertiary)' }}>
+                      {item.thumbnailUrl || item.mediaUrl ? (
+                        <img
+                          src={item.thumbnailUrl || item.mediaUrl}
+                          alt={item.title}
+                          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        />
+                      ) : (
+                        <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-tertiary)' }}>
+                          <Film size={36} />
+                        </div>
+                      )}
+                      
+                      {/* Badge Video / Image */}
+                      <div style={{ position: 'absolute', top: '10px', left: '10px', background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)', color: 'white', padding: '4px 10px', borderRadius: '50px', fontSize: '0.75rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        {item.type === 'video' ? <Play size={12} fill="white" /> : <ImageIcon size={12} />}
+                        {item.type === 'video' ? 'Video' : 'Foto'}
+                      </div>
+
+                      {/* Badge Private vs Public */}
+                      {item.isPrivate ? (
+                        <div style={{ position: 'absolute', top: '10px', right: '10px', background: 'rgba(245, 158, 11, 0.9)', color: 'black', padding: '3px 8px', borderRadius: '50px', fontSize: '0.7rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '3px' }}>
+                          <Lock size={10} /> Private
+                        </div>
+                      ) : (
+                        <div style={{ position: 'absolute', top: '10px', right: '10px', background: 'rgba(16, 185, 129, 0.8)', color: 'white', padding: '3px 8px', borderRadius: '50px', fontSize: '0.7rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '3px' }}>
+                          <Globe size={10} /> Publik
+                        </div>
+                      )}
+
+                      {/* Views Badge */}
+                      <div style={{ position: 'absolute', bottom: '10px', right: '10px', background: 'rgba(0,0,0,0.7)', color: 'white', padding: '3px 8px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <Eye size={12} /> {item.views}
+                      </div>
+                    </div>
+
+                    {/* Body Content */}
+                    <div style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', flex: 1, justifyContent: 'space-between' }}>
+                      <div>
+                        <h4 style={{ fontSize: '1rem', fontWeight: 700, marginBottom: '0.5rem', lineHeight: 1.4, overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
+                          {item.title}
+                        </h4>
+                        
+                        {/* Uploader info */}
+                        <button
+                          onClick={() => {
+                            if (uploaderUser) {
+                              setSelectedUserModal(uploaderUser);
+                              setModalMediaFilter('all');
+                            }
+                          }}
+                          style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, textAlign: 'left' }}
+                        >
+                          <img
+                            src={uploaderAvatar || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(uploaderName)}`}
+                            alt={uploaderName}
+                            style={{ width: '24px', height: '24px', borderRadius: '50%', objectFit: 'cover' }}
+                          />
+                          <span style={{ fontSize: '0.8rem', color: 'var(--accent)', fontWeight: 700, textDecoration: 'underline' }}>
+                            {uploaderName}
+                          </span>
+                        </button>
+                      </div>
+
+                      {/* Footer Actions */}
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid var(--border)', paddingTop: '0.75rem', marginTop: '0.5rem' }}>
+                        <span style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>
+                          {item.createdAt ? new Date(item.createdAt).toLocaleDateString('id-ID', { month: 'short', day: 'numeric', year: 'numeric' }) : '-'}
+                        </span>
+                        <Link
+                          href={item.type === 'video' ? `/video/${item.slug || item.id}` : `/image/${item.slug || item.id}`}
+                          target="_blank"
+                          className="btn-secondary"
+                          style={{ padding: '0.35rem 0.75rem', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '4px', textDecoration: 'none' }}
+                        >
+                          Buka Konten <ExternalLink size={12} />
+                        </Link>
+                      </div>
+
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>
       )}
 
-      {/* TAB 1: OVERVIEW */}
+      {/* TAB 3: OVERVIEW */}
       {activeTab === 'overview' && (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 450px), 1fr))', gap: '2rem' }}>
           
@@ -472,178 +770,6 @@ export default function AdminDashboardPage() {
             </div>
           </div>
 
-        </div>
-      )}
-
-      {/* TAB 2: PENGGUNA & MEDIA PER USER */}
-      {activeTab === 'webUsers' && (
-        <div className="card" style={{ borderRadius: 'var(--radius-xl)', overflow: 'hidden', padding: 0 }}>
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.9rem' }}>
-              <thead>
-                <tr style={{ background: 'var(--bg-secondary)', borderBottom: '1px solid var(--border)' }}>
-                  <th style={{ padding: '1rem 1.5rem', fontWeight: 700 }}>Pengguna</th>
-                  <th style={{ padding: '1rem 1.5rem', fontWeight: 700 }}>Email</th>
-                  <th style={{ padding: '1rem 1.5rem', fontWeight: 700 }}>Media Terupload</th>
-                  <th style={{ padding: '1rem 1.5rem', fontWeight: 700 }}>Total Views</th>
-                  <th style={{ padding: '1rem 1.5rem', fontWeight: 700 }}>Tanggal Daftar</th>
-                  <th style={{ padding: '1rem 1.5rem', fontWeight: 700, textAlign: 'center' }}>Aksi Media</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredWebUsers.length === 0 ? (
-                  <tr>
-                    <td colSpan={6} style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
-                      Tidak ada data pengguna yang cocok.
-                    </td>
-                  </tr>
-                ) : (
-                  filteredWebUsers.map((u, i) => (
-                    <tr key={u.uid || i} style={{ borderBottom: '1px solid var(--border)' }}>
-                      <td style={{ padding: '1rem 1.5rem' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                          <img
-                            src={u.photoURL || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(u.displayName || 'U')}`}
-                            alt={u.displayName}
-                            style={{ width: '36px', height: '36px', borderRadius: '50%', objectFit: 'cover', border: '1px solid var(--border)' }}
-                          />
-                          <div>
-                            <span style={{ fontWeight: 600, color: 'var(--text-primary)', display: 'block' }}>{u.displayName}</span>
-                            <span style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', fontFamily: 'monospace' }}>UID: {u.uid?.slice(0, 8)}...</span>
-                          </div>
-                        </div>
-                      </td>
-                      <td style={{ padding: '1rem 1.5rem', color: 'var(--text-secondary)' }}>{u.email}</td>
-                      <td style={{ padding: '1rem 1.5rem' }}>
-                        {u.totalMediaCount > 0 ? (
-                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'rgba(99, 102, 241, 0.1)', color: 'var(--accent)', padding: '4px 10px', borderRadius: '50px', fontSize: '0.8rem', fontWeight: 700 }}>
-                            <Film size={12} /> {u.videoCount} Video
-                            <span>•</span>
-                            <ImageIcon size={12} /> {u.imageCount} Foto
-                          </span>
-                        ) : (
-                          <span style={{ color: 'var(--text-tertiary)', fontSize: '0.8rem' }}>Belum ada upload</span>
-                        )}
-                      </td>
-                      <td style={{ padding: '1rem 1.5rem', fontWeight: 700 }}>
-                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                          <Eye size={14} color="var(--text-tertiary)" /> {(u.totalViews || 0).toLocaleString()}
-                        </span>
-                      </td>
-                      <td style={{ padding: '1rem 1.5rem', color: 'var(--text-secondary)' }}>
-                        {u.createdAt ? new Date(u.createdAt).toLocaleDateString('id-ID', { year: 'numeric', month: 'short', day: 'numeric' }) : '-'}
-                      </td>
-                      <td style={{ padding: '1rem 1.5rem', textAlign: 'center' }}>
-                        {u.totalMediaCount > 0 ? (
-                          <button
-                            onClick={() => setSelectedUserModal(u)}
-                            className="btn-secondary"
-                            style={{ padding: '0.4rem 0.85rem', borderRadius: '8px', fontSize: '0.8rem', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '6px', color: 'var(--accent)', border: '1px solid var(--accent)' }}
-                          >
-                            <FolderOpen size={14} /> Lihat Media ({u.totalMediaCount})
-                          </button>
-                        ) : (
-                          <button
-                            disabled
-                            style={{ padding: '0.4rem 0.85rem', borderRadius: '8px', fontSize: '0.8rem', opacity: 0.4, cursor: 'not-allowed', background: 'transparent', border: '1px solid var(--border)' }}
-                          >
-                            0 Media
-                          </button>
-                        )}
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
-
-      {/* TAB 3: SEMUA MEDIA TERUNGGAH */}
-      {activeTab === 'media' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          {filteredMedia.length === 0 ? (
-            <div className="card" style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
-              Tidak ada konten video atau gambar yang cocok dengan filter pencarian.
-            </div>
-          ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem' }}>
-              {filteredMedia.map((item) => (
-                <div key={item.id} className="card" style={{ borderRadius: 'var(--radius-lg)', overflow: 'hidden', padding: 0, display: 'flex', flexDirection: 'column', border: '1px solid var(--border)' }}>
-                  
-                  {/* Thumbnail */}
-                  <div style={{ position: 'relative', width: '100%', height: '180px', background: 'var(--bg-tertiary)' }}>
-                    {item.thumbnailUrl || item.mediaUrl ? (
-                      <img
-                        src={item.thumbnailUrl || item.mediaUrl}
-                        alt={item.title}
-                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                      />
-                    ) : (
-                      <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-tertiary)' }}>
-                        <Film size={36} />
-                      </div>
-                    )}
-                    
-                    {/* Badge Video / Image */}
-                    <div style={{ position: 'absolute', top: '10px', left: '10px', background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)', color: 'white', padding: '4px 10px', borderRadius: '50px', fontSize: '0.75rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}>
-                      {item.type === 'video' ? <Play size={12} fill="white" /> : <ImageIcon size={12} />}
-                      {item.type === 'video' ? 'Video' : 'Foto'}
-                    </div>
-
-                    {/* Views Badge */}
-                    <div style={{ position: 'absolute', bottom: '10px', right: '10px', background: 'rgba(0,0,0,0.7)', color: 'white', padding: '3px 8px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}>
-                      <Eye size={12} /> {item.views}
-                    </div>
-                  </div>
-
-                  {/* Body Content */}
-                  <div style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', flex: 1, justifyContent: 'space-between' }}>
-                    <div>
-                      <h4 style={{ fontSize: '1rem', fontWeight: 700, marginBottom: '0.5rem', lineHeight: 1.4, overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
-                        {item.title}
-                      </h4>
-                      
-                      {/* Uploader info */}
-                      <button
-                        onClick={() => {
-                          const matchedUser = webUsers.find(u => u.uid === item.userId);
-                          if (matchedUser) setSelectedUserModal(matchedUser);
-                        }}
-                        style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, textAlign: 'left' }}
-                      >
-                        <img
-                          src={item.userPhotoURL || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(item.userDisplayName || 'C')}`}
-                          alt={item.userDisplayName}
-                          style={{ width: '24px', height: '24px', borderRadius: '50%', objectFit: 'cover' }}
-                        />
-                        <span style={{ fontSize: '0.8rem', color: 'var(--accent)', fontWeight: 600, textDecoration: 'underline' }}>
-                          {item.userDisplayName}
-                        </span>
-                      </button>
-                    </div>
-
-                    {/* Footer Actions */}
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid var(--border)', paddingTop: '0.75rem', marginTop: '0.5rem' }}>
-                      <span style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>
-                        {item.createdAt ? new Date(item.createdAt).toLocaleDateString('id-ID', { month: 'short', day: 'numeric', year: 'numeric' }) : '-'}
-                      </span>
-                      <Link
-                        href={item.type === 'video' ? `/video/${item.slug || item.id}` : `/image/${item.slug || item.id}`}
-                        target="_blank"
-                        className="btn-secondary"
-                        style={{ padding: '0.35rem 0.75rem', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '4px', textDecoration: 'none' }}
-                      >
-                        Buka Konten <ExternalLink size={12} />
-                      </Link>
-                    </div>
-
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
         </div>
       )}
 
@@ -743,10 +869,10 @@ export default function AdminDashboardPage() {
         </div>
       )}
 
-      {/* MODAL: DETAIL MEDIA PER USER */}
+      {/* MODAL: DETAIL MEDIA & PROFIL PER USER (MENGAKSES SEMUA MEDIA TERMASUK PRIVATE) */}
       {selectedUserModal && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', backdropFilter: 'blur(8px)' }}>
-          <div className="card animate-scale-up" style={{ width: '100%', maxWidth: '850px', maxHeight: '90vh', overflowY: 'auto', borderRadius: 'var(--radius-xl)', padding: '2rem', border: '1px solid var(--border)' }}>
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', backdropFilter: 'blur(10px)' }}>
+          <div className="card animate-scale-up" style={{ width: '100%', maxWidth: '900px', maxHeight: '90vh', overflowY: 'auto', borderRadius: 'var(--radius-xl)', padding: '2rem', border: '1px solid var(--border)' }}>
             
             {/* Modal Header */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid var(--border)', paddingBottom: '1.25rem', marginBottom: '1.5rem' }}>
@@ -754,53 +880,85 @@ export default function AdminDashboardPage() {
                 <img
                   src={selectedUserModal.photoURL || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(selectedUserModal.displayName || 'U')}`}
                   alt={selectedUserModal.displayName}
-                  style={{ width: '48px', height: '48px', borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--accent)' }}
+                  style={{ width: '56px', height: '56px', borderRadius: '50%', objectFit: 'cover', border: '2.5px solid var(--accent)' }}
                 />
                 <div>
-                  <h3 style={{ fontSize: '1.35rem', fontWeight: 800 }}>Media Milik {selectedUserModal.displayName}</h3>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <h3 style={{ fontSize: '1.4rem', fontWeight: 900 }}>{selectedUserModal.displayName}</h3>
+                    {selectedUserModal.uid === ADMIN_UID && (
+                      <span style={{ fontSize: '0.7rem', background: 'var(--accent)', color: 'white', padding: '2px 8px', borderRadius: '50px', fontWeight: 800 }}>ADMIN</span>
+                    )}
+                  </div>
                   <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
                     {selectedUserModal.email} • UID: <code>{selectedUserModal.uid}</code>
+                  </p>
+                  <p style={{ color: 'var(--text-tertiary)', fontSize: '0.75rem', marginTop: '2px' }}>
+                    Bergabung sejak: {selectedUserModal.createdAt ? new Date(selectedUserModal.createdAt).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' }) : '-'} • {selectedUserModal.subscribersCount} Subscribers
                   </p>
                 </div>
               </div>
 
               <button
                 onClick={() => setSelectedUserModal(null)}
-                style={{ background: 'var(--bg-tertiary)', border: 'none', borderRadius: '50%', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'var(--text-primary)' }}
+                style={{ background: 'var(--bg-tertiary)', border: 'none', borderRadius: '50%', width: '38px', height: '38px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'var(--text-primary)' }}
               >
                 <X size={20} />
               </button>
             </div>
 
-            {/* User Media Summary */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
-              <div style={{ padding: '1rem', background: 'var(--bg-secondary)', borderRadius: '12px', textAlign: 'center' }}>
+            {/* User Media Summary Cards */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
+              <div style={{ padding: '0.85rem', background: 'var(--bg-secondary)', borderRadius: '12px', textAlign: 'center' }}>
                 <span style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', textTransform: 'uppercase', fontWeight: 700 }}>Total Media</span>
-                <p style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--accent)' }}>{selectedUserModal.totalMediaCount}</p>
+                <p style={{ fontSize: '1.5rem', fontWeight: 900, color: 'var(--accent)' }}>{selectedUserModal.totalMediaCount}</p>
               </div>
-              <div style={{ padding: '1rem', background: 'var(--bg-secondary)', borderRadius: '12px', textAlign: 'center' }}>
+              <div style={{ padding: '0.85rem', background: 'var(--bg-secondary)', borderRadius: '12px', textAlign: 'center' }}>
                 <span style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', textTransform: 'uppercase', fontWeight: 700 }}>Video</span>
-                <p style={{ fontSize: '1.5rem', fontWeight: 800, color: '#a855f7' }}>{selectedUserModal.videoCount}</p>
+                <p style={{ fontSize: '1.5rem', fontWeight: 900, color: '#a855f7' }}>{selectedUserModal.videoCount}</p>
               </div>
-              <div style={{ padding: '1rem', background: 'var(--bg-secondary)', borderRadius: '12px', textAlign: 'center' }}>
+              <div style={{ padding: '0.85rem', background: 'var(--bg-secondary)', borderRadius: '12px', textAlign: 'center' }}>
                 <span style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', textTransform: 'uppercase', fontWeight: 700 }}>Foto</span>
-                <p style={{ fontSize: '1.5rem', fontWeight: 800, color: '#ec4899' }}>{selectedUserModal.imageCount}</p>
+                <p style={{ fontSize: '1.5rem', fontWeight: 900, color: '#ec4899' }}>{selectedUserModal.imageCount}</p>
               </div>
-              <div style={{ padding: '1rem', background: 'var(--bg-secondary)', borderRadius: '12px', textAlign: 'center' }}>
+              <div style={{ padding: '0.85rem', background: 'var(--bg-secondary)', borderRadius: '12px', textAlign: 'center' }}>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', textTransform: 'uppercase', fontWeight: 700 }}>🔒 Private</span>
+                <p style={{ fontSize: '1.5rem', fontWeight: 900, color: '#f59e0b' }}>{selectedUserModal.privateMediaCount || 0}</p>
+              </div>
+              <div style={{ padding: '0.85rem', background: 'var(--bg-secondary)', borderRadius: '12px', textAlign: 'center' }}>
                 <span style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', textTransform: 'uppercase', fontWeight: 700 }}>Total Views</span>
-                <p style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--success)' }}>{selectedUserModal.totalViews?.toLocaleString() || 0}</p>
+                <p style={{ fontSize: '1.5rem', fontWeight: 900, color: 'var(--success)' }}>{(selectedUserModal.totalViews || 0).toLocaleString()}</p>
               </div>
             </div>
 
+            {/* Filter Buttons in Modal */}
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1.5rem', borderBottom: '1px solid var(--border)', paddingBottom: '1rem' }}>
+              {[
+                { id: 'all', label: `Semua (${userAllMedia.length})` },
+                { id: 'video', label: `🎥 Video (${selectedUserModal.videoCount})` },
+                { id: 'image', label: `📸 Foto (${selectedUserModal.imageCount})` },
+                { id: 'private', label: `🔒 Private (${selectedUserModal.privateMediaCount || 0})` },
+                { id: 'public', label: `🌐 Publik (${userAllMedia.length - (selectedUserModal.privateMediaCount || 0)})` },
+              ].map(f => (
+                <button
+                  key={f.id}
+                  onClick={() => setModalMediaFilter(f.id as any)}
+                  className={modalMediaFilter === f.id ? "btn-primary" : "btn-secondary"}
+                  style={{ padding: '0.4rem 0.85rem', borderRadius: '9999px', fontSize: '0.8rem', fontWeight: 600 }}
+                >
+                  {f.label}
+                </button>
+              ))}
+            </div>
+
             {/* Media Items Grid */}
-            {selectedUserMedia.length === 0 ? (
-              <p style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-secondary)' }}>
-                Tidak ada media yang ditemukan untuk pengguna ini.
-              </p>
+            {userFilteredMedia.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '3rem 1rem', color: 'var(--text-secondary)' }}>
+                Tidak ada media yang cocok dengan filter yang dipilih.
+              </div>
             ) : (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(230px, 1fr))', gap: '1.25rem' }}>
-                {selectedUserMedia.map((m) => (
-                  <div key={m.id} style={{ background: 'var(--bg-secondary)', borderRadius: '12px', overflow: 'hidden', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column' }}>
+                {userFilteredMedia.map((m) => (
+                  <div key={m.id} style={{ background: 'var(--bg-secondary)', borderRadius: '12px', overflow: 'hidden', border: m.isPrivate ? '1px solid #f59e0b' : '1px solid var(--border)', display: 'flex', flexDirection: 'column' }}>
                     <div style={{ position: 'relative', width: '100%', height: '140px', background: 'var(--bg-tertiary)' }}>
                       {m.thumbnailUrl || m.mediaUrl ? (
                         <img src={m.thumbnailUrl || m.mediaUrl} alt={m.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -809,10 +967,24 @@ export default function AdminDashboardPage() {
                           <Film size={28} color="var(--text-tertiary)" />
                         </div>
                       )}
+                      
+                      {/* Video / Photo Badge */}
                       <div style={{ position: 'absolute', top: '8px', left: '8px', background: 'rgba(0,0,0,0.7)', color: 'white', padding: '2px 8px', borderRadius: '50px', fontSize: '0.7rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}>
                         {m.type === 'video' ? <Play size={10} fill="white" /> : <ImageIcon size={10} />}
                         {m.type === 'video' ? 'Video' : 'Foto'}
                       </div>
+
+                      {/* Private Status Badge */}
+                      {m.isPrivate ? (
+                        <div style={{ position: 'absolute', top: '8px', right: '8px', background: '#f59e0b', color: 'black', padding: '2px 6px', borderRadius: '50px', fontSize: '0.65rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '3px' }}>
+                          <Lock size={9} /> Private
+                        </div>
+                      ) : (
+                        <div style={{ position: 'absolute', top: '8px', right: '8px', background: '#10b981', color: 'white', padding: '2px 6px', borderRadius: '50px', fontSize: '0.65rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '3px' }}>
+                          <Globe size={9} /> Publik
+                        </div>
+                      )}
+
                       <div style={{ position: 'absolute', bottom: '8px', right: '8px', background: 'rgba(0,0,0,0.7)', color: 'white', padding: '2px 6px', borderRadius: '4px', fontSize: '0.7rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '3px' }}>
                         <Eye size={10} /> {m.views}
                       </div>
