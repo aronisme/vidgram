@@ -69,10 +69,17 @@ export default function TikTokDownloader() {
 
   useEffect(() => {
     setMounted(true);
-    // Fetch live statistics from Firestore
-    statsService.getDownloadStats().then(data => {
-      if (data) setStats(data);
-    });
+    // Fetch live statistics from Firestore initially
+    const loadStats = () => {
+      statsService.getDownloadStats().then(data => {
+        if (data) setStats(data);
+      });
+    };
+
+    loadStats();
+    // Live update stats every 5 seconds
+    const interval = setInterval(loadStats, 5000);
+    return () => clearInterval(interval);
   }, []);
 
   const handleDownload = async (e: React.FormEvent) => {

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { telegramService } from '@/lib/telegramService';
 import { getTikTokMedia } from '@/lib/tiktokDownloader';
-import { statsService } from '@/lib/statsService';
+import { serverStatsService } from '@/lib/serverStatsService';
 
 // Helper to format numbers (e.g. 12500 -> 12.5K)
 function formatNumber(num: number): string {
@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
       const chatId = cb.message?.chat?.id;
 
       if (cb.from) {
-        statsService.recordTelegramUser(cb.from).catch(() => {});
+        await serverStatsService.recordTelegramUser(cb.from);
       }
 
       if (data && data.startsWith('dl_audio:')) {
@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
             caption: '🎵 <b>Audio MP3</b> diekstrak via @TiktokDownloader22bot',
             parse_mode: 'HTML',
           });
-          statsService.incrementMetric('mp3').catch(() => {});
+          await serverStatsService.incrementMetric('mp3');
         }
       } else {
         await telegramService.answerCallbackQuery(cb.id);
@@ -68,7 +68,7 @@ export async function POST(request: NextRequest) {
 
     // Record Telegram User stats
     if (message.from) {
-      statsService.recordTelegramUser(message.from).catch(() => {});
+      await serverStatsService.recordTelegramUser(message.from);
     }
 
     // Command: /start
@@ -134,9 +134,8 @@ Jika ada kendala, kunjungi portal kami di <a href="https://www.vidgram.web.id">V
       try {
         const media = await getTikTokMedia(tiktokUrl);
 
-        // Record metrics
-        statsService.incrementMetric('tiktok').catch(() => {});
-        statsService.incrementMetric('total_requests').catch(() => {});
+        // Record metrics atomically
+        await serverStatsService.incrementMetric('tiktok');
 
         // Case A: TikTok Photo Album / Slides
         if (media.is_image && media.images && media.images.length > 0) {
@@ -157,7 +156,7 @@ Jika ada kendala, kunjungi portal kami di <a href="https://www.vidgram.web.id">V
               caption: '🎵 Musik latar TikTok',
               reply_to_message_id: message.message_id,
             });
-            statsService.incrementMetric('mp3').catch(() => {});
+            await serverStatsService.incrementMetric('mp3');
           }
 
           if (statusMsg?.message_id) {
@@ -231,8 +230,7 @@ Jika ada kendala, kunjungi portal kami di <a href="https://www.vidgram.web.id">V
         const igData = await instagramGetUrl(igUrl);
 
         if (igData && igData.results_number > 0) {
-          statsService.incrementMetric('instagram').catch(() => {});
-          statsService.incrementMetric('total_requests').catch(() => {});
+          await serverStatsService.incrementMetric('instagram');
 
           const mediaDetails = igData.media_details;
           const postInfo = igData.post_info;
