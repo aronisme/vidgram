@@ -5,12 +5,13 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
   try {
-    const [overview, webUsers, telegramUsers, media] = await Promise.all([
+    const [overview, telegramUsers, media] = await Promise.all([
       serverAdminService.getOverview(),
-      serverAdminService.getWebUsers(100),
       serverAdminService.getTelegramUsers(100),
-      serverAdminService.getMedia(100),
+      serverAdminService.getMedia(300),
     ]);
+
+    const webUsers = await serverAdminService.getWebUsers(150, media);
 
     return NextResponse.json({
       success: true,

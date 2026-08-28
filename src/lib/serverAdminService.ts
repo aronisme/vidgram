@@ -1,6 +1,6 @@
 /**
  * Server-side Admin Service for Vidgram
- * Fetches global platform analytics, web users list, telegram bot users, and media content list.
+ * Fetches global platform analytics, web users list with per-user uploaded media stats, telegram bot users, and media content list.
  */
 
 const FIRESTORE_BASE = 'https://firestore.googleapis.com/v1';
@@ -40,24 +40,6 @@ function parseDoc(doc: any): any {
   return result;
 }
 
-export interface AdminWebUser {
-  uid: string;
-  displayName: string;
-  email: string;
-  photoURL?: string;
-  subscribersCount: number;
-  createdAt: string;
-}
-
-export interface AdminTelegramUser {
-  userId: string;
-  username: string;
-  firstName: string;
-  joinedAt: string;
-  totalDownloads: number;
-  lastActive?: string;
-}
-
 export interface AdminMediaItem {
   id: string;
   type: 'video' | 'image';
@@ -72,6 +54,29 @@ export interface AdminMediaItem {
   likes: number;
   createdAt: string;
   slug: string;
+}
+
+export interface AdminWebUser {
+  uid: string;
+  displayName: string;
+  email: string;
+  photoURL?: string;
+  subscribersCount: number;
+  createdAt: string;
+  videoCount: number;
+  imageCount: number;
+  totalMediaCount: number;
+  totalViews: number;
+  totalLikes: number;
+}
+
+export interface AdminTelegramUser {
+  userId: string;
+  username: string;
+  firstName: string;
+  joinedAt: string;
+  totalDownloads: number;
+  lastActive?: string;
 }
 
 export interface AdminOverviewStats {
@@ -160,9 +165,9 @@ export const serverAdminService = {
   },
 
   /**
-   * Fetch registered web users
+   * Fetch registered web users along with aggregated media counts
    */
-  async getWebUsers(limitNum = 100): Promise<AdminWebUser[]> {
+  async getWebUsers(limitNum = 150, allMedia: AdminMediaItem[] = []): Promise<AdminWebUser[]> {
     const projectId = getProjectId();
     try {
       const url = `${FIRESTORE_BASE}/projects/${projectId}/databases/(default)/documents/users?pageSize=${limitNum}`;
@@ -173,15 +178,36 @@ export const serverAdminService = {
       const data = await res.json();
       const docs = data.documents || [];
 
+      // Map media by userId
+      const userMediaMap: Record<string, { videoCount: number; imageCount: number; views: number; likes: number }> = {};
+      allMedia.forEach(m => {
+        if (!m.userId) return;
+        if (!userMediaMap[m.userId]) {
+          userMediaMap[m.userId] = { videoCount: 0, imageCount: 0, views: 0, likes: 0 };
+        }
+        if (m.type === 'video') userMediaMap[m.userId].videoCount += 1;
+        else userMediaMap[m.userId].imageCount += 1;
+        userMediaMap[m.userId].views += (m.views || 0);
+        userMediaMap[m.userId].likes += (m.likes || 0);
+      });
+
       return docs.map((doc: any) => {
         const parsed = parseDoc(doc);
+        const uid = parsed.id || parsed.uid || '';
+        const stats = userMediaMap[uid] || { videoCount: 0, imageCount: 0, views: 0, likes: 0 };
+
         return {
-          uid: parsed.id || parsed.uid || '',
+          uid,
           displayName: parsed.displayName || 'Anonim User',
           email: parsed.email || '-',
           photoURL: parsed.photoURL || '',
           subscribersCount: Number(parsed.subscribersCount || 0),
           createdAt: parsed.createdAt || '',
+          videoCount: stats.videoCount,
+          imageCount: stats.imageCount,
+          totalMediaCount: stats.videoCount + stats.imageCount,
+          totalViews: stats.views,
+          totalLikes: stats.likes,
         };
       });
     } catch (e) {
@@ -226,7 +252,7 @@ export const serverAdminService = {
   /**
    * Fetch all user-uploaded Media (Videos & Image Posts)
    */
-  async getMedia(limitNum = 100): Promise<AdminMediaItem[]> {
+  async getMedia(limitNum = 300): Promise<AdminMediaItem[]> {
     const projectId = getProjectId();
     try {
       const [videosRes, imagesRes] = await Promise.all([
