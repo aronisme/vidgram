@@ -207,6 +207,12 @@ export default function Navbar() {
                                     >
                                         Smart Keywords Ext
                                     </Link>
+                                    <Link href="/tools/teepublic-keyword-pro" onClick={() => setShowTools(false)} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 1rem', color: 'var(--text-primary)', textDecoration: 'none', fontSize: '0.875rem', fontWeight: 500, transition: 'background 0.15s ease' }}
+                                        onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--accent-light)')}
+                                        onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+                                    >
+                                        TeePublic Keyword Pro
+                                    </Link>
                                     <Link href="/tools/flow-downloader" onClick={() => setShowTools(false)} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 1rem', color: 'var(--text-primary)', textDecoration: 'none', fontSize: '0.875rem', fontWeight: 500, transition: 'background 0.15s ease' }}
                                         onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--accent-light)')}
                                         onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
@@ -328,6 +334,26 @@ export default function Navbar() {
                                             <BarChart3 size={16} />
                                             Dashboard
                                         </Link>
+                                        {user?.uid === 'uJhx9rqu8QXrhBELW56nclJNRyk2' && (
+                                            <Link href="/admin" onClick={() => setShowDropdown(false)} style={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '0.5rem',
+                                                padding: '0.75rem 1rem',
+                                                color: 'var(--accent)',
+                                                textDecoration: 'none',
+                                                fontSize: '0.875rem',
+                                                fontWeight: 700,
+                                                background: 'rgba(99, 102, 241, 0.08)',
+                                                transition: 'background 0.15s ease',
+                                            }}
+                                                onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--accent-light)')}
+                                                onMouseLeave={(e) => (e.currentTarget.style.background = 'rgba(99, 102, 241, 0.08)')}
+                                            >
+                                                <Sparkles size={16} />
+                                                🛡️ Admin Statistics
+                                            </Link>
+                                        )}
                                         <button onClick={() => { signOut(); setShowDropdown(false); }} style={{
                                             display: 'flex',
                                             alignItems: 'center',
@@ -413,6 +439,9 @@ export default function Navbar() {
                         <Link href="/tools/smart-keywords" className="mobile-nav-link" style={{ paddingLeft: '1.5rem' }} onClick={closeMobileMenu}>
                             Smart Keywords Ext
                         </Link>
+                        <Link href="/tools/teepublic-keyword-pro" className="mobile-nav-link" style={{ paddingLeft: '1.5rem' }} onClick={closeMobileMenu}>
+                            TeePublic Keyword Pro
+                        </Link>
                         <Link href="/tools/flow-downloader" className="mobile-nav-link" style={{ paddingLeft: '1.5rem' }} onClick={closeMobileMenu}>
                             Flow Downloader
                         </Link>
@@ -455,6 +484,12 @@ export default function Navbar() {
                                     <BarChart3 size={18} />
                                     Dashboard
                                 </Link>
+                                {user?.uid === 'uJhx9rqu8QXrhBELW56nclJNRyk2' && (
+                                    <Link href="/admin" className="mobile-nav-link" style={{ color: 'var(--accent)', fontWeight: 700 }} onClick={closeMobileMenu}>
+                                        <Sparkles size={18} />
+                                        🛡️ Admin Statistics
+                                    </Link>
+                                )}
                                 <button
                                     onClick={() => { signOut(); closeMobileMenu(); }}
                                     className="mobile-nav-link mobile-nav-link-danger"

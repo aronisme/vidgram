@@ -42,6 +42,9 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
                                     <li><Link href="/tiktok-downloader" className="footer-link">TikTok Downloader Pro</Link></li>
                                     <li><Link href="/instagram-downloader" className="footer-link">Instagram Downloader</Link></li>
                                     <li><Link href="/ai-video-upscaler" className="footer-link">AI Video Upscaler</Link></li>
+                                    <li><Link href="/tools/teepublic-keyword-pro" className="footer-link">TeePublic Keyword Pro</Link></li>
+                                    <li><Link href="/tools/smart-keywords" className="footer-link">Smart Keywords Adobe</Link></li>
+                                    <li><Link href="/tools/flow-downloader" className="footer-link">Flow Downloader</Link></li>
                                     <li><Link href="/discovery" className="footer-link">Video Discovery</Link></li>
                                 </ul>
                             </div>
