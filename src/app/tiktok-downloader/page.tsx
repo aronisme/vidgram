@@ -57,14 +57,14 @@ export default function TikTokDownloader() {
   const [error, setError] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
 
-  // Live Statistics State
+  // Live Statistics State (Murni Data Real Firestore)
   const [stats, setStats] = useState<PlatformStats>({
-    tiktokDownloads: 168430,
-    instagramDownloads: 112350,
-    mp3Downloads: 72410,
-    totalUsers: 52380,
-    telegramUsers: 14620,
-    totalRequests: 280780,
+    tiktokDownloads: 0,
+    instagramDownloads: 0,
+    mp3Downloads: 0,
+    totalUsers: 0,
+    telegramUsers: 0,
+    totalRequests: 0,
   });
 
   useEffect(() => {

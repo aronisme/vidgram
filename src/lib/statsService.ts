@@ -1,11 +1,5 @@
 import { db } from './firebase';
-import { doc, getDoc, setDoc, increment } from 'firebase/firestore';
-
-const BASELINE_TIKTOK_DOWNLOADS = 168430;
-const BASELINE_IG_DOWNLOADS = 112350;
-const BASELINE_MP3_DOWNLOADS = 72410;
-const BASELINE_TOTAL_USERS = 52380;
-const BASELINE_TELEGRAM_USERS = 14620;
+import { doc, getDoc, setDoc, increment, collection, getDocs } from 'firebase/firestore';
 
 export interface PlatformStats {
   tiktokDownloads: number;
@@ -18,59 +12,73 @@ export interface PlatformStats {
 
 export const statsService = {
   /**
-   * Get all live platform statistics from Firestore
+   * Get 100% Real Live Statistics directly from Firestore (No Fake/Baseline offsets)
    */
   async getDownloadStats(): Promise<PlatformStats> {
     try {
       const statsRef = doc(db, 'statistik', 'platform_stats');
       const snap = await getDoc(statsRef);
 
+      // Also get registered web user count if available
+      let registeredUsersCount = 0;
+      try {
+        const usersSnap = await getDocs(collection(db, 'users'));
+        registeredUsersCount = usersSnap.size;
+      } catch (_) {}
+
       if (snap.exists()) {
         const data = snap.data();
+        const tiktok = Number(data.tiktok || 0);
+        const instagram = Number(data.instagram || 0);
+        const mp3 = Number(data.mp3 || 0);
+        const telegramUsers = Number(data.telegram_users || 0);
+        const totalUsers = (Number(data.total_users || 0) + registeredUsersCount);
+        const totalRequests = Number(data.total_requests || (tiktok + instagram + mp3));
+
         return {
-          tiktokDownloads: BASELINE_TIKTOK_DOWNLOADS + Number(data.tiktok || 0),
-          instagramDownloads: BASELINE_IG_DOWNLOADS + Number(data.instagram || 0),
-          mp3Downloads: BASELINE_MP3_DOWNLOADS + Number(data.mp3 || 0),
-          totalUsers: BASELINE_TOTAL_USERS + Number(data.total_users || 0),
-          telegramUsers: BASELINE_TELEGRAM_USERS + Number(data.telegram_users || 0),
-          totalRequests: BASELINE_TIKTOK_DOWNLOADS + BASELINE_IG_DOWNLOADS + Number(data.total_requests || 0),
+          tiktokDownloads: tiktok,
+          instagramDownloads: instagram,
+          mp3Downloads: mp3,
+          totalUsers: Math.max(totalUsers, telegramUsers),
+          telegramUsers: telegramUsers,
+          totalRequests: totalRequests,
         };
       } else {
-        // Initialize default stats document in Firestore
+        // Initialize real stats document in Firestore
         await setDoc(statsRef, {
           tiktok: 0,
           instagram: 0,
           mp3: 0,
-          total_users: 0,
+          total_users: registeredUsersCount,
           telegram_users: 0,
           total_requests: 0,
           createdAt: new Date()
         }, { merge: true });
 
         return {
-          tiktokDownloads: BASELINE_TIKTOK_DOWNLOADS,
-          instagramDownloads: BASELINE_IG_DOWNLOADS,
-          mp3Downloads: BASELINE_MP3_DOWNLOADS,
-          totalUsers: BASELINE_TOTAL_USERS,
-          telegramUsers: BASELINE_TELEGRAM_USERS,
-          totalRequests: BASELINE_TIKTOK_DOWNLOADS + BASELINE_IG_DOWNLOADS,
+          tiktokDownloads: 0,
+          instagramDownloads: 0,
+          mp3Downloads: 0,
+          totalUsers: registeredUsersCount,
+          telegramUsers: 0,
+          totalRequests: 0,
         };
       }
     } catch (e) {
-      console.warn('[statsService] Failed to fetch stats from Firestore, fallback to baseline:', e);
+      console.warn('[statsService] Failed to fetch real stats from Firestore:', e);
       return {
-        tiktokDownloads: BASELINE_TIKTOK_DOWNLOADS,
-        instagramDownloads: BASELINE_IG_DOWNLOADS,
-        mp3Downloads: BASELINE_MP3_DOWNLOADS,
-        totalUsers: BASELINE_TOTAL_USERS,
-        telegramUsers: BASELINE_TELEGRAM_USERS,
-        totalRequests: BASELINE_TIKTOK_DOWNLOADS + BASELINE_IG_DOWNLOADS,
+        tiktokDownloads: 0,
+        instagramDownloads: 0,
+        mp3Downloads: 0,
+        totalUsers: 0,
+        telegramUsers: 0,
+        totalRequests: 0,
       };
     }
   },
 
   /**
-   * Increment metric count (e.g. 'tiktok', 'instagram', 'mp3', 'total_requests')
+   * Increment metric count in Firestore (e.g. 'tiktok', 'instagram', 'mp3', 'total_requests')
    */
   async incrementMetric(metric: 'tiktok' | 'instagram' | 'mp3' | 'total_requests' | 'total_users' = 'tiktok') {
     try {
@@ -85,7 +93,7 @@ export const statsService = {
   },
 
   /**
-   * Record & track unique Telegram user interaction
+   * Record & track unique Telegram user interaction in Firestore
    */
   async recordTelegramUser(user: { id: number | string; username?: string; first_name?: string }) {
     if (!user || !user.id) return;
@@ -103,7 +111,7 @@ export const statsService = {
           totalDownloads: 1,
         });
 
-        // Increment user counter
+        // Increment real user counter
         const statsRef = doc(db, 'statistik', 'platform_stats');
         await setDoc(statsRef, {
           telegram_users: increment(1),
@@ -118,7 +126,7 @@ export const statsService = {
         }, { merge: true });
       }
     } catch (e) {
-      console.warn('[statsService] Error recording telegram user:', e);
+      console.warn('[statsService] Error recording telegram user in Firestore:', e);
     }
   }
 };
