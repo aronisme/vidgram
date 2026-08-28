@@ -22,8 +22,8 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    const defaultBaseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://vidgram.web.id';
-    const targetWebhookUrl = customUrl || `${defaultBaseUrl}/api/telegram`;
+    const defaultBaseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.vidgram.web.id';
+    const targetWebhookUrl = customUrl || `${defaultBaseUrl.replace('://vidgram.web.id', '://www.vidgram.web.id')}/api/telegram`;
 
     const result = await telegramService.setWebhook(targetWebhookUrl);
     const webhookInfo = await telegramService.getWebhookInfo();
