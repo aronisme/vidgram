@@ -20,10 +20,13 @@ import {
   ArrowRight,
   Shield,
   Smartphone,
-  Layers
+  Layers,
+  Users,
+  TrendingUp,
+  Activity
 } from 'lucide-react';
 import { useToast } from '@/context/ToastContext';
-import { statsService } from '@/lib/statsService';
+import { statsService, PlatformStats } from '@/lib/statsService';
 
 interface TikTokData {
   id: string;
@@ -53,15 +56,22 @@ export default function TikTokDownloader() {
   const [result, setResult] = useState<TikTokData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
-  const [totalDownloads, setTotalDownloads] = useState(168430);
+
+  // Live Statistics State
+  const [stats, setStats] = useState<PlatformStats>({
+    tiktokDownloads: 168430,
+    instagramDownloads: 112350,
+    mp3Downloads: 72410,
+    totalUsers: 52380,
+    telegramUsers: 14620,
+    totalRequests: 280780,
+  });
 
   useEffect(() => {
     setMounted(true);
-    // Load dynamic download statistics from Firestore
-    statsService.getDownloadStats().then(stats => {
-      if (stats?.tiktokDownloads) {
-        setTotalDownloads(stats.tiktokDownloads);
-      }
+    // Fetch live statistics from Firestore
+    statsService.getDownloadStats().then(data => {
+      if (data) setStats(data);
     });
   }, []);
 
@@ -117,9 +127,14 @@ export default function TikTokDownloader() {
       link.click();
       document.body.removeChild(link);
       
-      // Increment stats in Firestore & local state
-      statsService.incrementDownload('tiktok');
-      setTotalDownloads(prev => prev + 1);
+      // Update stats in Firestore & local state
+      statsService.incrementMetric(type === 'video' ? 'tiktok' : 'mp3');
+      setStats(prev => ({
+        ...prev,
+        tiktokDownloads: type === 'video' ? prev.tiktokDownloads + 1 : prev.tiktokDownloads,
+        mp3Downloads: type === 'music' ? prev.mp3Downloads + 1 : prev.mp3Downloads,
+        totalRequests: prev.totalRequests + 1,
+      }));
 
       addToast(`Unduhan ${type === 'video' ? 'Video HD' : 'Audio MP3'} dimulai!`, 'success');
     } catch (err) {
@@ -153,16 +168,29 @@ export default function TikTokDownloader() {
         borderRadius: 'var(--radius-xl)', 
         padding: 'clamp(3rem, 8vw, 5rem) clamp(1.25rem, 5vw, 2rem)', 
         textAlign: 'center', 
-        marginBottom: '3rem', 
+        marginBottom: '2.5rem', 
         position: 'relative' 
       }}>
         <div style={{ position: 'relative', zIndex: 1 }}>
           
-          {/* Live Download Counter Badge */}
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(16, 185, 129, 0.12)', border: '1px solid rgba(16, 185, 129, 0.3)', padding: '0.4rem 1.1rem', borderRadius: '9999px', color: '#10b981', fontSize: '0.875rem', fontWeight: 700, marginBottom: '1.5rem' }}>
-            <span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#10b981', boxShadow: '0 0 8px #10b981' }} className="animate-pulse"></span>
+          {/* Live Download Counter Pill */}
+          <div style={{ 
+            display: 'inline-flex', 
+            alignItems: 'center', 
+            gap: '0.6rem', 
+            background: 'rgba(16, 185, 129, 0.12)', 
+            border: '1px solid rgba(16, 185, 129, 0.35)', 
+            padding: '0.45rem 1.25rem', 
+            borderRadius: '9999px', 
+            color: '#10b981', 
+            fontSize: '0.875rem', 
+            fontWeight: 700, 
+            marginBottom: '1.5rem',
+            boxShadow: '0 4px 12px rgba(16, 185, 129, 0.15)'
+          }}>
+            <span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#10b981', boxShadow: '0 0 10px #10b981' }} className="animate-pulse"></span>
             <Flame size={15} />
-            <span>{totalDownloads.toLocaleString()} Video Berhasil Diunduh</span>
+            <span>{stats.tiktokDownloads.toLocaleString()} Video Berhasil Diunduh</span>
           </div>
 
           <h1 style={{ fontSize: 'clamp(2.4rem, 6vw, 4.25rem)', fontWeight: 900, marginBottom: '1.25rem', letterSpacing: '-0.04em', lineHeight: 1.1 }}>
@@ -237,6 +265,62 @@ export default function TikTokDownloader() {
       {/* Main Container */}
       <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '0 1rem' }}>
 
+        {/* 📊 LIVE PLATFORM ANALYTICS / STATS DASHBOARD 📊 */}
+        <section style={{
+          marginBottom: '3rem',
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+          gap: '1.25rem',
+        }}>
+          {/* Stat 1: Total Downloads */}
+          <div className="card" style={{ padding: '1.5rem', textAlign: 'center', background: 'var(--glass)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)' }}>
+            <div style={{ width: '42px', height: '42px', borderRadius: '12px', background: 'rgba(99, 102, 241, 0.1)', color: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 0.75rem' }}>
+              <Download size={20} />
+            </div>
+            <p style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.05em' }}>Total Unduhan</p>
+            <p style={{ fontSize: '1.75rem', fontWeight: 900, color: 'var(--text-primary)', marginTop: '0.25rem' }}>
+              {stats.tiktokDownloads.toLocaleString()}
+            </p>
+            <p style={{ fontSize: '0.75rem', color: 'var(--success)', marginTop: '0.25rem', fontWeight: 600 }}>● Live Updating</p>
+          </div>
+
+          {/* Stat 2: Active Users */}
+          <div className="card" style={{ padding: '1.5rem', textAlign: 'center', background: 'var(--glass)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)' }}>
+            <div style={{ width: '42px', height: '42px', borderRadius: '12px', background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 0.75rem' }}>
+              <Users size={20} />
+            </div>
+            <p style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.05em' }}>Pengguna Aktif</p>
+            <p style={{ fontSize: '1.75rem', fontWeight: 900, color: 'var(--text-primary)', marginTop: '0.25rem' }}>
+              {stats.totalUsers.toLocaleString()}+
+            </p>
+            <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '0.25rem' }}>Web & Bot Telegram</p>
+          </div>
+
+          {/* Stat 3: MP3 Converted */}
+          <div className="card" style={{ padding: '1.5rem', textAlign: 'center', background: 'var(--glass)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)' }}>
+            <div style={{ width: '42px', height: '42px', borderRadius: '12px', background: 'rgba(245, 158, 11, 0.1)', color: '#f59e0b', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 0.75rem' }}>
+              <Music size={20} />
+            </div>
+            <p style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.05em' }}>Musik MP3 Diekstrak</p>
+            <p style={{ fontSize: '1.75rem', fontWeight: 900, color: 'var(--text-primary)', marginTop: '0.25rem' }}>
+              {stats.mp3Downloads.toLocaleString()}
+            </p>
+            <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '0.25rem' }}>Audio Jernih 320kbps</p>
+          </div>
+
+          {/* Stat 4: Speed & Success Rate */}
+          <div className="card" style={{ padding: '1.5rem', textAlign: 'center', background: 'var(--glass)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)' }}>
+            <div style={{ width: '42px', height: '42px', borderRadius: '12px', background: 'rgba(34, 158, 217, 0.1)', color: '#229ED9', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 0.75rem' }}>
+              <Zap size={20} />
+            </div>
+            <p style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.05em' }}>Kecepatan Konversi</p>
+            <p style={{ fontSize: '1.75rem', fontWeight: 900, color: 'var(--text-primary)', marginTop: '0.25rem' }}>
+              ~0.8s
+            </p>
+            <p style={{ fontSize: '0.75rem', color: 'var(--success)', marginTop: '0.25rem', fontWeight: 600 }}>99.9% Uptime</p>
+          </div>
+        </section>
+
         {/* 🌟 TELEGRAM BOT PROMO CARD BANNER 🌟 */}
         <section className="card" style={{
           background: 'linear-gradient(135deg, rgba(34, 158, 217, 0.12) 0%, rgba(99, 102, 241, 0.15) 100%)',
@@ -251,7 +335,7 @@ export default function TikTokDownloader() {
           <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '1.75rem' }}>
             <div style={{ flex: '1 1 500px' }}>
               <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', background: '#229ED9', color: '#ffffff', padding: '0.3rem 0.85rem', borderRadius: '9999px', fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.875rem' }}>
-                <Bot size={14} /> Telegram Bot Resmi
+                <Bot size={14} /> Telegram Bot Resmi ({stats.telegramUsers.toLocaleString()}+ Pengguna)
               </div>
               <h2 style={{ fontSize: 'clamp(1.35rem, 3vw, 1.75rem)', fontWeight: 800, marginBottom: '0.625rem', color: 'var(--text-primary)' }}>
                 Download TikTok Lebih Cepat Lewat Telegram! 🤖⚡

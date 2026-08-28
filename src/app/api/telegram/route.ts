@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { telegramService } from '@/lib/telegramService';
 import { getTikTokMedia } from '@/lib/tiktokDownloader';
+import { statsService } from '@/lib/statsService';
 
 // Helper to format numbers (e.g. 12500 -> 12.5K)
 function formatNumber(num: number): string {
@@ -31,6 +32,10 @@ export async function POST(request: NextRequest) {
       const data = cb.data as string;
       const chatId = cb.message?.chat?.id;
 
+      if (cb.from) {
+        statsService.recordTelegramUser(cb.from).catch(() => {});
+      }
+
       if (data && data.startsWith('dl_audio:')) {
         const audioUrl = data.replace('dl_audio:', '');
         await telegramService.answerCallbackQuery(cb.id, '🎵 Mengirim file audio MP3...');
@@ -42,6 +47,7 @@ export async function POST(request: NextRequest) {
             caption: '🎵 <b>Audio MP3</b> diekstrak via @TiktokDownloader22bot',
             parse_mode: 'HTML',
           });
+          statsService.incrementMetric('mp3').catch(() => {});
         }
       } else {
         await telegramService.answerCallbackQuery(cb.id);
@@ -59,6 +65,11 @@ export async function POST(request: NextRequest) {
     const chatId = message.chat.id;
     const text = message.text?.trim() || '';
     const firstName = message.from?.first_name || 'Teman';
+
+    // Record Telegram User stats
+    if (message.from) {
+      statsService.recordTelegramUser(message.from).catch(() => {});
+    }
 
     // Command: /start
     if (text === '/start') {
@@ -81,10 +92,10 @@ Kirimkan tautan (link) video TikTok atau Instagram ke bot ini, dan bot akan lang
         reply_markup: {
           inline_keyboard: [
             [
-              { text: '🌐 Kunjungi Website Vidgram', url: 'https://vidgram.web.id' },
+              { text: '🌐 Kunjungi Website Vidgram', url: 'https://www.vidgram.web.id' },
             ],
             [
-              { text: '✨ Coba AI Video Upscaler', url: 'https://vidgram.web.id/ai-video-upscaler' }
+              { text: '✨ Coba AI Video Upscaler', url: 'https://www.vidgram.web.id/ai-video-upscaler' }
             ]
           ]
         }
@@ -103,7 +114,7 @@ Kirimkan tautan (link) video TikTok atau Instagram ke bot ini, dan bot akan lang
 4. Kirim link tersebut ke chat bot ini.
 5. Bot akan langsung membalas dengan file video yang siap diputar atau disimpan ke galeri ponsel Anda.
 
-Jika ada kendala, kunjungi portal kami di <a href="https://vidgram.web.id">Vidgram.web.id</a>.
+Jika ada kendala, kunjungi portal kami di <a href="https://www.vidgram.web.id">Vidgram.web.id</a>.
 `.trim();
 
       await telegramService.sendMessage(chatId, helpText, { parse_mode: 'HTML' });
@@ -122,6 +133,10 @@ Jika ada kendala, kunjungi portal kami di <a href="https://vidgram.web.id">Vidgr
 
       try {
         const media = await getTikTokMedia(tiktokUrl);
+
+        // Record metrics
+        statsService.incrementMetric('tiktok').catch(() => {});
+        statsService.incrementMetric('total_requests').catch(() => {});
 
         // Case A: TikTok Photo Album / Slides
         if (media.is_image && media.images && media.images.length > 0) {
@@ -142,6 +157,7 @@ Jika ada kendala, kunjungi portal kami di <a href="https://vidgram.web.id">Vidgr
               caption: '🎵 Musik latar TikTok',
               reply_to_message_id: message.message_id,
             });
+            statsService.incrementMetric('mp3').catch(() => {});
           }
 
           if (statusMsg?.message_id) {
@@ -168,7 +184,7 @@ Jika ada kendala, kunjungi portal kami di <a href="https://vidgram.web.id">Vidgr
           ]);
         }
         inlineKeyboard.push([
-          { text: '🌐 Buka di Web Vidgram', url: 'https://vidgram.web.id/tiktok-downloader' }
+          { text: '🌐 Buka di Web Vidgram', url: 'https://www.vidgram.web.id/tiktok-downloader' }
         ]);
 
         await telegramService.sendVideo(chatId, media.play, {
@@ -215,6 +231,9 @@ Jika ada kendala, kunjungi portal kami di <a href="https://vidgram.web.id">Vidgr
         const igData = await instagramGetUrl(igUrl);
 
         if (igData && igData.results_number > 0) {
+          statsService.incrementMetric('instagram').catch(() => {});
+          statsService.incrementMetric('total_requests').catch(() => {});
+
           const mediaDetails = igData.media_details;
           const postInfo = igData.post_info;
           const isVideo = mediaDetails[0]?.type === 'video';
@@ -234,7 +253,7 @@ Jika ada kendala, kunjungi portal kami di <a href="https://vidgram.web.id">Vidgr
               parse_mode: 'HTML',
               reply_to_message_id: message.message_id,
               reply_markup: {
-                inline_keyboard: [[{ text: '🌐 Instagram Pro Web', url: 'https://vidgram.web.id/instagram-downloader' }]]
+                inline_keyboard: [[{ text: '🌐 Instagram Pro Web', url: 'https://www.vidgram.web.id/instagram-downloader' }]]
               }
             });
           } else {
