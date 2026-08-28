@@ -1,6 +1,6 @@
 /**
  * Server-side Admin Service for Vidgram
- * Fetches global platform analytics, web users list, telegram bot users, and content statistics.
+ * Fetches global platform analytics, web users list, telegram bot users, and media content list.
  */
 
 const FIRESTORE_BASE = 'https://firestore.googleapis.com/v1';
@@ -56,6 +56,22 @@ export interface AdminTelegramUser {
   joinedAt: string;
   totalDownloads: number;
   lastActive?: string;
+}
+
+export interface AdminMediaItem {
+  id: string;
+  type: 'video' | 'image';
+  title: string;
+  description?: string;
+  mediaUrl: string;
+  thumbnailUrl?: string;
+  userId: string;
+  userDisplayName: string;
+  userPhotoURL?: string;
+  views: number;
+  likes: number;
+  createdAt: string;
+  slug: string;
 }
 
 export interface AdminOverviewStats {
@@ -203,6 +219,84 @@ export const serverAdminService = {
         });
     } catch (e) {
       console.error('[serverAdminService] getTelegramUsers error:', e);
+      return [];
+    }
+  },
+
+  /**
+   * Fetch all user-uploaded Media (Videos & Image Posts)
+   */
+  async getMedia(limitNum = 100): Promise<AdminMediaItem[]> {
+    const projectId = getProjectId();
+    try {
+      const [videosRes, imagesRes] = await Promise.all([
+        fetch(`${FIRESTORE_BASE}/projects/${projectId}/databases/(default)/documents/videos?pageSize=${limitNum}`, { cache: 'no-store' }),
+        fetch(`${FIRESTORE_BASE}/projects/${projectId}/databases/(default)/documents/image_posts?pageSize=${limitNum}`, { cache: 'no-store' }),
+      ]);
+
+      const mediaItems: AdminMediaItem[] = [];
+
+      // Parse Videos
+      if (videosRes.ok) {
+        const videosData = await videosRes.json();
+        const videoDocs = videosData.documents || [];
+        videoDocs.forEach((doc: any) => {
+          const p = parseDoc(doc);
+          if (p) {
+            mediaItems.push({
+              id: p.id,
+              type: 'video',
+              title: p.title || 'Untitled Video',
+              description: p.description || '',
+              mediaUrl: p.videoUrl || p.url || '',
+              thumbnailUrl: p.thumbnailUrl || '',
+              userId: p.userId || '',
+              userDisplayName: p.userDisplayName || p.userName || 'Creator',
+              userPhotoURL: p.userPhotoURL || p.userPhoto || '',
+              views: Number(p.views || 0),
+              likes: Number(p.likes || 0),
+              createdAt: p.createdAt || '',
+              slug: p.slug || p.id,
+            });
+          }
+        });
+      }
+
+      // Parse Image Posts
+      if (imagesRes.ok) {
+        const imagesData = await imagesRes.json();
+        const imageDocs = imagesData.documents || [];
+        imageDocs.forEach((doc: any) => {
+          const p = parseDoc(doc);
+          if (p) {
+            const firstImg = Array.isArray(p.images) ? p.images[0] : (p.imageUrl || p.url || '');
+            mediaItems.push({
+              id: p.id,
+              type: 'image',
+              title: p.title || 'Untitled Photo',
+              description: p.description || '',
+              mediaUrl: firstImg,
+              thumbnailUrl: firstImg,
+              userId: p.userId || '',
+              userDisplayName: p.userDisplayName || p.userName || 'Creator',
+              userPhotoURL: p.userPhotoURL || p.userPhoto || '',
+              views: Number(p.views || 0),
+              likes: Number(p.likes || 0),
+              createdAt: p.createdAt || '',
+              slug: p.slug || p.id,
+            });
+          }
+        });
+      }
+
+      // Sort by newest first
+      return mediaItems.sort((a, b) => {
+        const timeA = new Date(a.createdAt || 0).getTime();
+        const timeB = new Date(b.createdAt || 0).getTime();
+        return timeB - timeA;
+      });
+    } catch (e) {
+      console.error('[serverAdminService] getMedia error:', e);
       return [];
     }
   }

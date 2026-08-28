@@ -22,7 +22,11 @@ import {
   Sparkles,
   Server,
   Zap,
-  Globe
+  Globe,
+  Eye,
+  Heart,
+  Play,
+  Image as ImageIcon
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -35,8 +39,9 @@ export default function AdminDashboardPage() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [data, setData] = useState<any>(null);
-  const [activeTab, setActiveTab] = useState<'overview' | 'webUsers' | 'telegramUsers' | 'system'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'media' | 'webUsers' | 'telegramUsers' | 'system'>('overview');
   const [searchQuery, setSearchQuery] = useState('');
+  const [mediaTypeFilter, setMediaTypeFilter] = useState<'all' | 'video' | 'image'>('all');
 
   const isAdmin = user && user.uid === ADMIN_UID;
 
@@ -134,6 +139,7 @@ export default function AdminDashboardPage() {
 
   const webUsers: any[] = data?.webUsers || [];
   const telegramUsers: any[] = data?.telegramUsers || [];
+  const mediaItems: any[] = data?.media || [];
 
   // Filtered lists
   const filteredWebUsers = webUsers.filter(u => 
@@ -146,6 +152,13 @@ export default function AdminDashboardPage() {
     u.firstName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     u.userId?.includes(searchQuery)
   );
+
+  const filteredMedia = mediaItems.filter(m => {
+    const matchSearch = m.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                        m.userDisplayName?.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchType = mediaTypeFilter === 'all' || m.type === mediaTypeFilter;
+    return matchSearch && matchType;
+  });
 
   return (
     <div className="container animate-fade-in" style={{ paddingBottom: '4rem' }}>
@@ -160,7 +173,7 @@ export default function AdminDashboardPage() {
             Statistik & Manajemen Global Vidgram
           </h1>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem' }}>
-            Monitoring real-time aktivitas pengguna web, interaksi bot Telegram, unduhan, dan database.
+            Monitoring real-time aktivitas pengguna web, media yang diupload kreator, interaksi bot Telegram, dan sistem.
           </p>
         </div>
 
@@ -203,7 +216,19 @@ export default function AdminDashboardPage() {
           <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '0.25rem' }}>Akun Google Terdaftar</p>
         </div>
 
-        {/* KPI 2: Total Telegram Users */}
+        {/* KPI 2: Media Uploaded (Videos + Photos) */}
+        <div className="card" style={{ padding: '1.5rem', borderRadius: 'var(--radius-lg)', background: 'var(--glass)', border: '1px solid var(--border)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
+            <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Media Terunggah</span>
+            <div style={{ width: '38px', height: '38px', borderRadius: '10px', background: 'rgba(168, 85, 247, 0.12)', color: '#a855f7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Film size={18} />
+            </div>
+          </div>
+          <p style={{ fontSize: '2rem', fontWeight: 900, color: 'var(--text-primary)' }}>{(overview.totalHostedVideos + overview.totalHostedImages).toLocaleString()}</p>
+          <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '0.25rem' }}>{overview.totalHostedVideos} Video • {overview.totalHostedImages} Foto</p>
+        </div>
+
+        {/* KPI 3: Total Telegram Users */}
         <div className="card" style={{ padding: '1.5rem', borderRadius: 'var(--radius-lg)', background: 'var(--glass)', border: '1px solid var(--border)' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
             <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>User Telegram Bot</span>
@@ -215,7 +240,7 @@ export default function AdminDashboardPage() {
           <p style={{ fontSize: '0.75rem', color: '#229ED9', marginTop: '0.25rem', fontWeight: 600 }}>@TiktokDownloader22bot</p>
         </div>
 
-        {/* KPI 3: TikTok Downloads */}
+        {/* KPI 4: TikTok Downloads */}
         <div className="card" style={{ padding: '1.5rem', borderRadius: 'var(--radius-lg)', background: 'var(--glass)', border: '1px solid var(--border)' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
             <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Unduhan TikTok</span>
@@ -227,7 +252,7 @@ export default function AdminDashboardPage() {
           <p style={{ fontSize: '0.75rem', color: 'var(--success)', marginTop: '0.25rem', fontWeight: 600 }}>● Terverifikasi Real</p>
         </div>
 
-        {/* KPI 4: MP3 Audio */}
+        {/* KPI 5: MP3 Audio */}
         <div className="card" style={{ padding: '1.5rem', borderRadius: 'var(--radius-lg)', background: 'var(--glass)', border: '1px solid var(--border)' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
             <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Audio MP3</span>
@@ -237,18 +262,6 @@ export default function AdminDashboardPage() {
           </div>
           <p style={{ fontSize: '2rem', fontWeight: 900, color: 'var(--text-primary)' }}>{overview.totalMp3Downloads.toLocaleString()}</p>
           <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '0.25rem' }}>Ekstraksi Musik 320kbps</p>
-        </div>
-
-        {/* KPI 5: Hosted Videos */}
-        <div className="card" style={{ padding: '1.5rem', borderRadius: 'var(--radius-lg)', background: 'var(--glass)', border: '1px solid var(--border)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
-            <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Video Vidgram</span>
-            <div style={{ width: '38px', height: '38px', borderRadius: '10px', background: 'rgba(168, 85, 247, 0.12)', color: '#a855f7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <Film size={18} />
-            </div>
-          </div>
-          <p style={{ fontSize: '2rem', fontWeight: 900, color: 'var(--text-primary)' }}>{overview.totalHostedVideos.toLocaleString()}</p>
-          <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '0.25rem' }}>Cloudinary & Firestore</p>
         </div>
 
         {/* KPI 6: Total Requests */}
@@ -269,6 +282,7 @@ export default function AdminDashboardPage() {
       <div style={{ display: 'flex', gap: '0.5rem', borderBottom: '1px solid var(--border)', marginBottom: '2rem', overflowX: 'auto' }}>
         {[
           { id: 'overview', label: '📊 Ringkasan & Platform', count: null },
+          { id: 'media', label: '🎬 Media Terunggah (Konten)', count: mediaItems.length },
           { id: 'webUsers', label: '👥 Pengguna Web', count: webUsers.length },
           { id: 'telegramUsers', label: '🤖 Pengguna Telegram Bot', count: telegramUsers.length },
           { id: 'system', label: '⚙️ Sistem & Integrasi', count: null },
@@ -302,26 +316,53 @@ export default function AdminDashboardPage() {
         ))}
       </div>
 
-      {/* Search Input for Lists */}
-      {(activeTab === 'webUsers' || activeTab === 'telegramUsers') && (
-        <div style={{ marginBottom: '1.5rem', position: 'relative', maxWidth: '400px' }}>
-          <Search size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-tertiary)' }} />
-          <input
-            type="text"
-            placeholder={activeTab === 'webUsers' ? "Cari nama atau email user..." : "Cari username atau ID telegram..."}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            style={{
-              width: '100%',
-              padding: '0.75rem 1rem 0.75rem 2.75rem',
-              borderRadius: '9999px',
-              border: '1px solid var(--border)',
-              background: 'var(--bg-secondary)',
-              color: 'var(--text-primary)',
-              outline: 'none',
-              fontSize: '0.875rem',
-            }}
-          />
+      {/* Search & Filter Controls */}
+      {(activeTab === 'webUsers' || activeTab === 'telegramUsers' || activeTab === 'media') && (
+        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', marginBottom: '1.5rem' }}>
+          <div style={{ position: 'relative', width: '100%', maxWidth: '380px' }}>
+            <Search size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-tertiary)' }} />
+            <input
+              type="text"
+              placeholder={
+                activeTab === 'webUsers' 
+                  ? "Cari nama atau email user..." 
+                  : activeTab === 'media'
+                  ? "Cari judul konten atau uploader..."
+                  : "Cari username atau ID telegram..."
+              }
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              style={{
+                width: '100%',
+                padding: '0.75rem 1rem 0.75rem 2.75rem',
+                borderRadius: '9999px',
+                border: '1px solid var(--border)',
+                background: 'var(--bg-secondary)',
+                color: 'var(--text-primary)',
+                outline: 'none',
+                fontSize: '0.875rem',
+              }}
+            />
+          </div>
+
+          {activeTab === 'media' && (
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              {[
+                { id: 'all', label: 'Semua Media' },
+                { id: 'video', label: '🎥 Video Saja' },
+                { id: 'image', label: '📸 Foto Saja' },
+              ].map((f) => (
+                <button
+                  key={f.id}
+                  onClick={() => setMediaTypeFilter(f.id as any)}
+                  className={mediaTypeFilter === f.id ? 'btn-primary' : 'btn-secondary'}
+                  style={{ padding: '0.5rem 1rem', borderRadius: '9999px', fontSize: '0.8125rem', fontWeight: 600 }}
+                >
+                  {f.label}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
@@ -395,7 +436,88 @@ export default function AdminDashboardPage() {
         </div>
       )}
 
-      {/* TAB 2: WEB USERS */}
+      {/* TAB 2: MEDIA CONTENT GALLERY */}
+      {activeTab === 'media' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          {filteredMedia.length === 0 ? (
+            <div className="card" style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
+              Tidak ada konten video atau gambar yang cocok dengan pencarian.
+            </div>
+          ) : (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem' }}>
+              {filteredMedia.map((item) => (
+                <div key={item.id} className="card" style={{ borderRadius: 'var(--radius-lg)', overflow: 'hidden', padding: 0, display: 'flex', flexDirection: 'column', border: '1px solid var(--border)' }}>
+                  
+                  {/* Thumbnail */}
+                  <div style={{ position: 'relative', width: '100%', height: '180px', background: 'var(--bg-tertiary)' }}>
+                    {item.thumbnailUrl || item.mediaUrl ? (
+                      <img
+                        src={item.thumbnailUrl || item.mediaUrl}
+                        alt={item.title}
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                      />
+                    ) : (
+                      <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-tertiary)' }}>
+                        <Film size={36} />
+                      </div>
+                    )}
+                    
+                    {/* Badge Video / Image */}
+                    <div style={{ position: 'absolute', top: '10px', left: '10px', background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)', color: 'white', padding: '4px 10px', borderRadius: '50px', fontSize: '0.75rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      {item.type === 'video' ? <Play size={12} fill="white" /> : <ImageIcon size={12} />}
+                      {item.type === 'video' ? 'Video' : 'Foto'}
+                    </div>
+
+                    {/* Views Badge */}
+                    <div style={{ position: 'absolute', bottom: '10px', right: '10px', background: 'rgba(0,0,0,0.7)', color: 'white', padding: '3px 8px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <Eye size={12} /> {item.views}
+                    </div>
+                  </div>
+
+                  {/* Body Content */}
+                  <div style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', flex: 1, justifyContent: 'space-between' }}>
+                    <div>
+                      <h4 style={{ fontSize: '1rem', fontWeight: 700, marginBottom: '0.5rem', lineHeight: 1.4, overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
+                        {item.title}
+                      </h4>
+                      
+                      {/* Uploader info */}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
+                        <img
+                          src={item.userPhotoURL || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(item.userDisplayName || 'C')}`}
+                          alt={item.userDisplayName}
+                          style={{ width: '24px', height: '24px', borderRadius: '50%', objectFit: 'cover' }}
+                        />
+                        <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 500 }}>
+                          {item.userDisplayName}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Footer Actions */}
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid var(--border)', paddingTop: '0.75rem', marginTop: '0.5rem' }}>
+                      <span style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>
+                        {item.createdAt ? new Date(item.createdAt).toLocaleDateString('id-ID', { month: 'short', day: 'numeric', year: 'numeric' }) : '-'}
+                      </span>
+                      <Link
+                        href={item.type === 'video' ? `/video/${item.slug || item.id}` : `/image/${item.slug || item.id}`}
+                        target="_blank"
+                        className="btn-secondary"
+                        style={{ padding: '0.35rem 0.75rem', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '4px', textDecoration: 'none' }}
+                      >
+                        Buka Konten <ExternalLink size={12} />
+                      </Link>
+                    </div>
+
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* TAB 3: WEB USERS */}
       {activeTab === 'webUsers' && (
         <div className="card" style={{ borderRadius: 'var(--radius-xl)', overflow: 'hidden', padding: 0 }}>
           <div style={{ overflowX: 'auto' }}>
@@ -446,7 +568,7 @@ export default function AdminDashboardPage() {
         </div>
       )}
 
-      {/* TAB 3: TELEGRAM BOT USERS */}
+      {/* TAB 4: TELEGRAM BOT USERS */}
       {activeTab === 'telegramUsers' && (
         <div className="card" style={{ borderRadius: 'var(--radius-xl)', overflow: 'hidden', padding: 0 }}>
           <div style={{ overflowX: 'auto' }}>
@@ -495,7 +617,7 @@ export default function AdminDashboardPage() {
         </div>
       )}
 
-      {/* TAB 4: SYSTEM & TOOLS */}
+      {/* TAB 5: SYSTEM & TOOLS */}
       {activeTab === 'system' && (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 450px), 1fr))', gap: '2rem' }}>
           
